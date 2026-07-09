@@ -1,5 +1,1047 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ResponsiveContainer, LabelList
+} from "recharts";
+import { Search, GraduationCap, TrendingDown, Users, Target, Sun, Moon, ListChecks, LayoutDashboard } from "lucide-react";
 
+const PALETTES = {
+  dark: {
+    border: "#2C3040",
+    textDim: "#93908A",
+    accent: "#C1352E",
+    gold: "#C9A24B",
+    cursor: "rgba(255,255,255,0.04)",
+  },
+  light: {
+    border: "#D9D5C8",
+    textDim: "#6B675E",
+    accent: "#B3312C",
+    gold: "#9C7A22",
+    cursor: "rgba(0,0,0,0.04)",
+  },
+};
+
+const DATA_BY_YEAR = {"2025": {"licee": [{"rank": 1, "cod": "4061103134", "nume": "Colegiul Naţional „Gheorghe Lazăr”", "specializari": [{"nume": "Matematică-Informatică", "total": 79, "prag": 9.82, "max": 10.0, "medie": 9.899, "densitatePrag": 79, "densitatePragPct": 100.0, "distributie": [{"media": 10.0, "nr": 6}, {"media": 9.97, "nr": 3}, {"media": 9.95, "nr": 11}, {"media": 9.92, "nr": 9}, {"media": 9.9, "nr": 16}, {"media": 9.87, "nr": 8}, {"media": 9.85, "nr": 23}, {"media": 9.82, "nr": 3}]}, {"nume": "Ştiinţe ale Naturii", "total": 78, "prag": 9.8, "max": 10.0, "medie": 9.865, "densitatePrag": 78, "densitatePragPct": 100.0, "distributie": [{"media": 10.0, "nr": 6}, {"media": 9.97, "nr": 3}, {"media": 9.95, "nr": 4}, {"media": 9.92, "nr": 3}, {"media": 9.9, "nr": 6}, {"media": 9.87, "nr": 9}, {"media": 9.85, "nr": 16}, {"media": 9.82, "nr": 20}, {"media": 9.8, "nr": 11}]}, {"nume": "Ştiinţe Sociale", "total": 52, "prag": 9.65, "max": 10.0, "medie": 9.731, "densitatePrag": 46, "densitatePragPct": 88.5, "distributie": [{"media": 10.0, "nr": 1}, {"media": 9.92, "nr": 1}, {"media": 9.9, "nr": 2}, {"media": 9.87, "nr": 2}, {"media": 9.85, "nr": 1}, {"media": 9.8, "nr": 2}, {"media": 9.77, "nr": 3}, {"media": 9.75, "nr": 4}, {"media": 9.72, "nr": 10}, {"media": 9.7, "nr": 9}, {"media": 9.67, "nr": 13}, {"media": 9.65, "nr": 4}]}, {"nume": "Filologie", "total": 26, "prag": 9.62, "max": 9.95, "medie": 9.702, "densitatePrag": 23, "densitatePragPct": 88.5, "distributie": [{"media": 9.95, "nr": 1}, {"media": 9.92, "nr": 1}, {"media": 9.9, "nr": 1}, {"media": 9.82, "nr": 1}, {"media": 9.77, "nr": 1}, {"media": 9.75, "nr": 2}, {"media": 9.72, "nr": 2}, {"media": 9.7, "nr": 1}, {"media": 9.67, "nr": 2}, {"media": 9.65, "nr": 8}, {"media": 9.62, "nr": 6}]}]}, {"rank": 2, "cod": "4061103541", "nume": "Colegiul Naţional „Sfântul Sava”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 9.82, "max": 10.0, "medie": 9.902, "densitatePrag": 26, "densitatePragPct": 100.0, "distributie": [{"media": 10.0, "nr": 3}, {"media": 9.95, "nr": 7}, {"media": 9.92, "nr": 1}, {"media": 9.9, "nr": 4}, {"media": 9.87, "nr": 2}, {"media": 9.85, "nr": 5}, {"media": 9.82, "nr": 4}]}, {"nume": "Matematică-Informatică", "total": 156, "prag": 9.72, "max": 10.0, "medie": 9.809, "densitatePrag": 145, "densitatePragPct": 92.9, "distributie": [{"media": 10.0, "nr": 4}, {"media": 9.97, "nr": 2}, {"media": 9.95, "nr": 5}, {"media": 9.92, "nr": 7}, {"media": 9.9, "nr": 14}, {"media": 9.87, "nr": 6}, {"media": 9.85, "nr": 11}, {"media": 9.82, "nr": 13}, {"media": 9.8, "nr": 18}, {"media": 9.77, "nr": 25}, {"media": 9.75, "nr": 27}, {"media": 9.72, "nr": 24}]}, {"nume": "Filologie", "total": 26, "prag": 9.6, "max": 10.0, "medie": 9.67, "densitatePrag": 23, "densitatePragPct": 88.5, "distributie": [{"media": 10.0, "nr": 1}, {"media": 9.95, "nr": 1}, {"media": 9.85, "nr": 1}, {"media": 9.8, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.7, "nr": 2}, {"media": 9.67, "nr": 1}, {"media": 9.65, "nr": 2}, {"media": 9.62, "nr": 5}, {"media": 9.6, "nr": 11}]}]}, {"rank": 3, "cod": "4061101851", "nume": "Colegiul Național „Spiru Haret”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 9.75, "max": 10.0, "medie": 9.817, "densitatePrag": 76, "densitatePragPct": 97.4, "distributie": [{"media": 10.0, "nr": 1}, {"media": 9.97, "nr": 1}, {"media": 9.95, "nr": 4}, {"media": 9.92, "nr": 4}, {"media": 9.9, "nr": 2}, {"media": 9.87, "nr": 8}, {"media": 9.85, "nr": 4}, {"media": 9.82, "nr": 9}, {"media": 9.8, "nr": 13}, {"media": 9.77, "nr": 16}, {"media": 9.75, "nr": 16}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.72, "max": 9.97, "medie": 9.789, "densitatePrag": 50, "densitatePragPct": 96.2, "distributie": [{"media": 9.97, "nr": 1}, {"media": 9.95, "nr": 1}, {"media": 9.9, "nr": 4}, {"media": 9.87, "nr": 3}, {"media": 9.82, "nr": 1}, {"media": 9.8, "nr": 10}, {"media": 9.77, "nr": 14}, {"media": 9.75, "nr": 11}, {"media": 9.73, "nr": 1}, {"media": 9.72, "nr": 6}]}, {"nume": "Ştiinţe Sociale", "total": 52, "prag": 9.57, "max": 9.85, "medie": 9.647, "densitatePrag": 49, "densitatePragPct": 94.2, "distributie": [{"media": 9.85, "nr": 2}, {"media": 9.82, "nr": 1}, {"media": 9.77, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 5}, {"media": 9.7, "nr": 4}, {"media": 9.67, "nr": 2}, {"media": 9.65, "nr": 4}, {"media": 9.62, "nr": 11}, {"media": 9.6, "nr": 15}, {"media": 9.57, "nr": 6}]}, {"nume": "Filologie", "total": 26, "prag": 9.52, "max": 9.9, "medie": 9.585, "densitatePrag": 24, "densitatePragPct": 92.3, "distributie": [{"media": 9.9, "nr": 1}, {"media": 9.85, "nr": 1}, {"media": 9.6, "nr": 1}, {"media": 9.57, "nr": 12}, {"media": 9.55, "nr": 10}, {"media": 9.52, "nr": 1}]}]}, {"rank": 4, "cod": "4061101408", "nume": "Colegiul Naţional de Informatică „Tudor Vianu”", "specializari": [{"nume": "Matematică-Informatică", "total": 234, "prag": 9.62, "max": 10.0, "medie": 9.754, "densitatePrag": 179, "densitatePragPct": 76.5, "distributie": [{"media": 10.0, "nr": 11}, {"media": 9.97, "nr": 1}, {"media": 9.95, "nr": 5}, {"media": 9.92, "nr": 6}, {"media": 9.9, "nr": 11}, {"media": 9.87, "nr": 12}, {"media": 9.85, "nr": 9}, {"media": 9.82, "nr": 7}, {"media": 9.8, "nr": 13}, {"media": 9.77, "nr": 18}, {"media": 9.75, "nr": 10}, {"media": 9.72, "nr": 23}, {"media": 9.7, "nr": 33}, {"media": 9.67, "nr": 30}, {"media": 9.65, "nr": 31}, {"media": 9.62, "nr": 14}]}]}, {"rank": 5, "cod": "4061103419", "nume": "Colegiul Naţional „Grigore Moisil”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 9.6, "max": 9.9, "medie": 9.676, "densitatePrag": 24, "densitatePragPct": 92.3, "distributie": [{"media": 9.9, "nr": 1}, {"media": 9.85, "nr": 1}, {"media": 9.8, "nr": 1}, {"media": 9.77, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.7, "nr": 2}, {"media": 9.67, "nr": 6}, {"media": 9.65, "nr": 5}, {"media": 9.62, "nr": 3}, {"media": 9.6, "nr": 5}]}, {"nume": "Matematică-Informatică", "total": 78, "prag": 9.52, "max": 9.97, "medie": 9.648, "densitatePrag": 62, "densitatePragPct": 79.5, "distributie": [{"media": 9.97, "nr": 1}, {"media": 9.92, "nr": 1}, {"media": 9.87, "nr": 1}, {"media": 9.85, "nr": 3}, {"media": 9.82, "nr": 2}, {"media": 9.8, "nr": 1}, {"media": 9.77, "nr": 3}, {"media": 9.75, "nr": 4}, {"media": 9.72, "nr": 6}, {"media": 9.7, "nr": 2}, {"media": 9.67, "nr": 5}, {"media": 9.65, "nr": 6}, {"media": 9.62, "nr": 8}, {"media": 9.6, "nr": 6}, {"media": 9.57, "nr": 14}, {"media": 9.55, "nr": 7}, {"media": 9.52, "nr": 8}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.35, "max": 9.67, "medie": 9.445, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 9.67, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.5, "nr": 2}, {"media": 9.47, "nr": 8}, {"media": 9.45, "nr": 1}, {"media": 9.42, "nr": 3}, {"media": 9.4, "nr": 2}, {"media": 9.37, "nr": 5}, {"media": 9.35, "nr": 2}]}, {"nume": "Filologie", "total": 26, "prag": 9.25, "max": 9.62, "medie": 9.327, "densitatePrag": 24, "densitatePragPct": 92.3, "distributie": [{"media": 9.62, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.42, "nr": 1}, {"media": 9.37, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.32, "nr": 9}, {"media": 9.3, "nr": 3}, {"media": 9.27, "nr": 8}, {"media": 9.25, "nr": 1}]}]}, {"rank": 6, "cod": "4061100217", "nume": "Colegiul Național Bilingv „George Coșbuc”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 9.57, "max": 9.82, "medie": 9.663, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 9.82, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.7, "nr": 7}, {"media": 9.67, "nr": 3}, {"media": 9.65, "nr": 4}, {"media": 9.62, "nr": 4}, {"media": 9.6, "nr": 4}, {"media": 9.57, "nr": 1}]}, {"nume": "Matematică-Informatică", "total": 52, "prag": 9.5, "max": 9.82, "medie": 9.593, "densitatePrag": 45, "densitatePragPct": 86.5, "distributie": [{"media": 9.82, "nr": 2}, {"media": 9.77, "nr": 2}, {"media": 9.72, "nr": 3}, {"media": 9.7, "nr": 3}, {"media": 9.67, "nr": 1}, {"media": 9.65, "nr": 5}, {"media": 9.62, "nr": 1}, {"media": 9.57, "nr": 9}, {"media": 9.55, "nr": 10}, {"media": 9.52, "nr": 11}, {"media": 9.5, "nr": 5}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.47, "max": 9.92, "medie": 9.571, "densitatePrag": 21, "densitatePragPct": 80.8, "distributie": [{"media": 9.92, "nr": 1}, {"media": 9.9, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.7, "nr": 2}, {"media": 9.65, "nr": 1}, {"media": 9.63, "nr": 1}, {"media": 9.62, "nr": 1}, {"media": 9.57, "nr": 2}, {"media": 9.55, "nr": 2}, {"media": 9.52, "nr": 2}, {"media": 9.5, "nr": 3}, {"media": 9.47, "nr": 9}]}, {"nume": "Filologie", "total": 52, "prag": 9.3, "max": 9.57, "medie": 9.395, "densitatePrag": 50, "densitatePragPct": 96.2, "distributie": [{"media": 9.57, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 2}, {"media": 9.45, "nr": 10}, {"media": 9.42, "nr": 5}, {"media": 9.4, "nr": 9}, {"media": 9.37, "nr": 6}, {"media": 9.35, "nr": 7}, {"media": 9.32, "nr": 8}, {"media": 9.3, "nr": 2}]}]}, {"rank": 7, "cod": "4061103012", "nume": "Colegiul Național „Matei Basarab”", "specializari": [{"nume": "Matematică-Informatică", "total": 104, "prag": 9.55, "max": 9.9, "medie": 9.651, "densitatePrag": 94, "densitatePragPct": 90.4, "distributie": [{"media": 9.9, "nr": 1}, {"media": 9.85, "nr": 1}, {"media": 9.82, "nr": 2}, {"media": 9.8, "nr": 3}, {"media": 9.77, "nr": 3}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 4}, {"media": 9.7, "nr": 13}, {"media": 9.67, "nr": 13}, {"media": 9.65, "nr": 12}, {"media": 9.62, "nr": 17}, {"media": 9.6, "nr": 17}, {"media": 9.57, "nr": 14}, {"media": 9.55, "nr": 3}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.55, "max": 9.9, "medie": 9.659, "densitatePrag": 47, "densitatePragPct": 90.4, "distributie": [{"media": 9.9, "nr": 1}, {"media": 9.85, "nr": 1}, {"media": 9.82, "nr": 1}, {"media": 9.8, "nr": 1}, {"media": 9.77, "nr": 1}, {"media": 9.75, "nr": 5}, {"media": 9.73, "nr": 1}, {"media": 9.72, "nr": 2}, {"media": 9.7, "nr": 4}, {"media": 9.67, "nr": 7}, {"media": 9.65, "nr": 5}, {"media": 9.62, "nr": 1}, {"media": 9.6, "nr": 11}, {"media": 9.57, "nr": 9}, {"media": 9.55, "nr": 2}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.47, "max": 9.75, "medie": 9.549, "densitatePrag": 23, "densitatePragPct": 88.5, "distributie": [{"media": 9.75, "nr": 2}, {"media": 9.7, "nr": 1}, {"media": 9.6, "nr": 2}, {"media": 9.57, "nr": 2}, {"media": 9.55, "nr": 3}, {"media": 9.52, "nr": 7}, {"media": 9.51, "nr": 1}, {"media": 9.5, "nr": 6}, {"media": 9.47, "nr": 2}]}, {"nume": "Filologie", "total": 26, "prag": 9.42, "max": 9.7, "medie": 9.472, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 9.7, "nr": 1}, {"media": 9.62, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.5, "nr": 2}, {"media": 9.47, "nr": 6}, {"media": 9.45, "nr": 10}, {"media": 9.42, "nr": 5}]}]}, {"rank": 8, "cod": "4061103306", "nume": "Colegiul Naţional „I.L.Caragiale”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 9.55, "max": 9.8, "medie": 9.62, "densitatePrag": 24, "densitatePragPct": 92.3, "distributie": [{"media": 9.8, "nr": 2}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.7, "nr": 2}, {"media": 9.67, "nr": 1}, {"media": 9.62, "nr": 4}, {"media": 9.6, "nr": 4}, {"media": 9.57, "nr": 3}, {"media": 9.55, "nr": 8}]}, {"nume": "Matematică-Informatică", "total": 130, "prag": 9.47, "max": 10.0, "medie": 9.603, "densitatePrag": 104, "densitatePragPct": 80.0, "distributie": [{"media": 10.0, "nr": 1}, {"media": 9.87, "nr": 1}, {"media": 9.85, "nr": 2}, {"media": 9.82, "nr": 2}, {"media": 9.8, "nr": 3}, {"media": 9.77, "nr": 2}, {"media": 9.76, "nr": 1}, {"media": 9.75, "nr": 4}, {"media": 9.72, "nr": 5}, {"media": 9.7, "nr": 5}, {"media": 9.67, "nr": 7}, {"media": 9.65, "nr": 3}, {"media": 9.62, "nr": 12}, {"media": 9.6, "nr": 21}, {"media": 9.57, "nr": 8}, {"media": 9.55, "nr": 7}, {"media": 9.52, "nr": 24}, {"media": 9.5, "nr": 15}, {"media": 9.47, "nr": 7}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.42, "max": 9.6, "medie": 9.487, "densitatePrag": 26, "densitatePragPct": 100.0, "distributie": [{"media": 9.6, "nr": 1}, {"media": 9.57, "nr": 1}, {"media": 9.55, "nr": 2}, {"media": 9.52, "nr": 4}, {"media": 9.5, "nr": 2}, {"media": 9.47, "nr": 8}, {"media": 9.45, "nr": 6}, {"media": 9.42, "nr": 2}]}, {"nume": "Filologie", "total": 78, "prag": 9.17, "max": 9.75, "medie": 9.375, "densitatePrag": 46, "densitatePragPct": 59.0, "distributie": [{"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.6, "nr": 1}, {"media": 9.57, "nr": 3}, {"media": 9.52, "nr": 2}, {"media": 9.5, "nr": 2}, {"media": 9.48, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 1}, {"media": 9.42, "nr": 6}, {"media": 9.41, "nr": 1}, {"media": 9.4, "nr": 12}, {"media": 9.37, "nr": 8}, {"media": 9.36, "nr": 1}, {"media": 9.35, "nr": 7}, {"media": 9.32, "nr": 10}, {"media": 9.3, "nr": 10}, {"media": 9.27, "nr": 4}, {"media": 9.25, "nr": 1}, {"media": 9.23, "nr": 1}, {"media": 9.22, "nr": 1}, {"media": 9.2, "nr": 2}, {"media": 9.17, "nr": 1}]}]}, {"rank": 9, "cod": "4061101756", "nume": "Colegiul Naţional „Gheorghe Şincai”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.52, "max": 9.82, "medie": 9.596, "densitatePrag": 49, "densitatePragPct": 94.2, "distributie": [{"media": 9.82, "nr": 2}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.7, "nr": 2}, {"media": 9.67, "nr": 3}, {"media": 9.65, "nr": 4}, {"media": 9.62, "nr": 4}, {"media": 9.6, "nr": 6}, {"media": 9.57, "nr": 6}, {"media": 9.55, "nr": 14}, {"media": 9.52, "nr": 9}]}, {"nume": "Matematică-Informatică", "total": 130, "prag": 9.47, "max": 9.95, "medie": 9.565, "densitatePrag": 114, "densitatePragPct": 87.7, "distributie": [{"media": 9.95, "nr": 1}, {"media": 9.82, "nr": 2}, {"media": 9.77, "nr": 2}, {"media": 9.75, "nr": 2}, {"media": 9.72, "nr": 4}, {"media": 9.7, "nr": 5}, {"media": 9.67, "nr": 6}, {"media": 9.65, "nr": 8}, {"media": 9.62, "nr": 1}, {"media": 9.6, "nr": 8}, {"media": 9.57, "nr": 11}, {"media": 9.55, "nr": 9}, {"media": 9.52, "nr": 26}, {"media": 9.5, "nr": 29}, {"media": 9.47, "nr": 16}]}, {"nume": "Filologie", "total": 52, "prag": 9.35, "max": 9.7, "medie": 9.426, "densitatePrag": 49, "densitatePragPct": 94.2, "distributie": [{"media": 9.7, "nr": 1}, {"media": 9.65, "nr": 2}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 4}, {"media": 9.5, "nr": 2}, {"media": 9.47, "nr": 3}, {"media": 9.45, "nr": 6}, {"media": 9.42, "nr": 6}, {"media": 9.4, "nr": 6}, {"media": 9.37, "nr": 8}, {"media": 9.35, "nr": 13}]}]}, {"rank": 10, "cod": "4061101688", "nume": "Colegiul Național „Mihai Viteazul”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.5, "max": 10.0, "medie": 9.641, "densitatePrag": 41, "densitatePragPct": 78.8, "distributie": [{"media": 10.0, "nr": 1}, {"media": 9.97, "nr": 1}, {"media": 9.92, "nr": 1}, {"media": 9.87, "nr": 1}, {"media": 9.82, "nr": 1}, {"media": 9.77, "nr": 2}, {"media": 9.72, "nr": 4}, {"media": 9.7, "nr": 4}, {"media": 9.67, "nr": 3}, {"media": 9.65, "nr": 2}, {"media": 9.62, "nr": 7}, {"media": 9.6, "nr": 7}, {"media": 9.57, "nr": 2}, {"media": 9.55, "nr": 8}, {"media": 9.52, "nr": 7}, {"media": 9.5, "nr": 1}]}, {"nume": "Matematică-Informatică", "total": 208, "prag": 9.4, "max": 9.9, "medie": 9.53, "densitatePrag": 157, "densitatePragPct": 75.5, "distributie": [{"media": 9.9, "nr": 2}, {"media": 9.85, "nr": 1}, {"media": 9.82, "nr": 1}, {"media": 9.8, "nr": 3}, {"media": 9.78, "nr": 1}, {"media": 9.77, "nr": 2}, {"media": 9.75, "nr": 5}, {"media": 9.72, "nr": 3}, {"media": 9.7, "nr": 8}, {"media": 9.67, "nr": 3}, {"media": 9.65, "nr": 8}, {"media": 9.62, "nr": 14}, {"media": 9.6, "nr": 14}, {"media": 9.57, "nr": 11}, {"media": 9.55, "nr": 4}, {"media": 9.52, "nr": 11}, {"media": 9.5, "nr": 17}, {"media": 9.47, "nr": 25}, {"media": 9.45, "nr": 27}, {"media": 9.42, "nr": 22}, {"media": 9.4, "nr": 26}]}]}, {"rank": 11, "cod": "4061102341", "nume": "Colegiul Național „Iulia Hașdeu”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 9.45, "max": 9.82, "medie": 9.523, "densitatePrag": 24, "densitatePragPct": 92.3, "distributie": [{"media": 9.82, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.6, "nr": 1}, {"media": 9.57, "nr": 2}, {"media": 9.55, "nr": 2}, {"media": 9.52, "nr": 2}, {"media": 9.5, "nr": 8}, {"media": 9.47, "nr": 5}, {"media": 9.45, "nr": 4}]}, {"nume": "Matematică-Informatică", "total": 78, "prag": 9.35, "max": 9.82, "medie": 9.464, "densitatePrag": 64, "densitatePragPct": 82.1, "distributie": [{"media": 9.82, "nr": 1}, {"media": 9.8, "nr": 1}, {"media": 9.7, "nr": 2}, {"media": 9.67, "nr": 3}, {"media": 9.65, "nr": 1}, {"media": 9.62, "nr": 1}, {"media": 9.6, "nr": 3}, {"media": 9.57, "nr": 2}, {"media": 9.55, "nr": 3}, {"media": 9.52, "nr": 5}, {"media": 9.5, "nr": 4}, {"media": 9.47, "nr": 6}, {"media": 9.45, "nr": 4}, {"media": 9.42, "nr": 7}, {"media": 9.4, "nr": 10}, {"media": 9.37, "nr": 18}, {"media": 9.35, "nr": 7}]}, {"nume": "Filologie", "total": 104, "prag": 8.6, "max": 9.65, "medie": 9.209, "densitatePrag": 10, "densitatePragPct": 9.6, "distributie": [{"media": 9.65, "nr": 1}, {"media": 9.62, "nr": 1}, {"media": 9.6, "nr": 1}, {"media": 9.52, "nr": 2}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 2}, {"media": 9.45, "nr": 2}, {"media": 9.42, "nr": 2}, {"media": 9.4, "nr": 2}, {"media": 9.37, "nr": 6}, {"media": 9.35, "nr": 2}, {"media": 9.32, "nr": 11}, {"media": 9.3, "nr": 7}, {"media": 9.27, "nr": 17}, {"media": 9.25, "nr": 8}, {"media": 9.22, "nr": 15}, {"media": 9.15, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.07, "nr": 2}, {"media": 9.05, "nr": 2}, {"media": 8.97, "nr": 1}, {"media": 8.92, "nr": 2}, {"media": 8.87, "nr": 2}, {"media": 8.85, "nr": 1}, {"media": 8.82, "nr": 2}, {"media": 8.8, "nr": 1}, {"media": 8.75, "nr": 1}, {"media": 8.72, "nr": 1}, {"media": 8.7, "nr": 1}, {"media": 8.67, "nr": 1}, {"media": 8.65, "nr": 4}, {"media": 8.6, "nr": 1}]}]}, {"rank": 12, "cod": "4061103265", "nume": "Colegiul Naţional „Ion Creangă”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 9.37, "max": 9.67, "medie": 9.446, "densitatePrag": 77, "densitatePragPct": 98.7, "distributie": [{"media": 9.67, "nr": 1}, {"media": 9.57, "nr": 2}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 3}, {"media": 9.5, "nr": 7}, {"media": 9.47, "nr": 16}, {"media": 9.45, "nr": 14}, {"media": 9.42, "nr": 12}, {"media": 9.4, "nr": 13}, {"media": 9.37, "nr": 9}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.35, "max": 9.77, "medie": 9.42, "densitatePrag": 51, "densitatePragPct": 98.1, "distributie": [{"media": 9.77, "nr": 1}, {"media": 9.52, "nr": 2}, {"media": 9.5, "nr": 2}, {"media": 9.47, "nr": 8}, {"media": 9.45, "nr": 6}, {"media": 9.42, "nr": 4}, {"media": 9.4, "nr": 12}, {"media": 9.37, "nr": 8}, {"media": 9.35, "nr": 9}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.27, "max": 9.5, "medie": 9.354, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 3}, {"media": 9.42, "nr": 1}, {"media": 9.37, "nr": 4}, {"media": 9.35, "nr": 2}, {"media": 9.32, "nr": 6}, {"media": 9.3, "nr": 7}, {"media": 9.27, "nr": 1}]}, {"nume": "Filologie", "total": 52, "prag": 9.2, "max": 9.87, "medie": 9.269, "densitatePrag": 46, "densitatePragPct": 88.5, "distributie": [{"media": 9.87, "nr": 1}, {"media": 9.82, "nr": 1}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 2}, {"media": 9.32, "nr": 1}, {"media": 9.27, "nr": 7}, {"media": 9.25, "nr": 8}, {"media": 9.22, "nr": 11}, {"media": 9.21, "nr": 1}, {"media": 9.2, "nr": 18}]}]}, {"rank": 13, "cod": "4061103455", "nume": "Colegiul Național „Cantemir Vodă”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.37, "max": 9.67, "medie": 9.447, "densitatePrag": 49, "densitatePragPct": 94.2, "distributie": [{"media": 9.67, "nr": 1}, {"media": 9.6, "nr": 2}, {"media": 9.57, "nr": 2}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 2}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 5}, {"media": 9.45, "nr": 11}, {"media": 9.42, "nr": 11}, {"media": 9.4, "nr": 11}, {"media": 9.37, "nr": 5}]}, {"nume": "Matematică-Informatică", "total": 130, "prag": 9.35, "max": 9.85, "medie": 9.467, "densitatePrag": 99, "densitatePragPct": 76.2, "distributie": [{"media": 9.85, "nr": 1}, {"media": 9.77, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 2}, {"media": 9.7, "nr": 3}, {"media": 9.67, "nr": 2}, {"media": 9.65, "nr": 6}, {"media": 9.62, "nr": 6}, {"media": 9.6, "nr": 6}, {"media": 9.57, "nr": 3}, {"media": 9.55, "nr": 4}, {"media": 9.52, "nr": 2}, {"media": 9.5, "nr": 3}, {"media": 9.47, "nr": 9}, {"media": 9.45, "nr": 8}, {"media": 9.42, "nr": 14}, {"media": 9.4, "nr": 14}, {"media": 9.37, "nr": 34}, {"media": 9.35, "nr": 11}]}]}, {"rank": 14, "cod": "4061100167", "nume": "Colegiul Naţional „Elena Cuza”", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 9.32, "max": 9.72, "medie": 9.445, "densitatePrag": 47, "densitatePragPct": 90.4, "distributie": [{"media": 9.72, "nr": 1}, {"media": 9.7, "nr": 1}, {"media": 9.65, "nr": 1}, {"media": 9.62, "nr": 1}, {"media": 9.57, "nr": 1}, {"media": 9.52, "nr": 2}, {"media": 9.5, "nr": 5}, {"media": 9.47, "nr": 6}, {"media": 9.45, "nr": 7}, {"media": 9.42, "nr": 6}, {"media": 9.4, "nr": 10}, {"media": 9.37, "nr": 3}, {"media": 9.35, "nr": 6}, {"media": 9.32, "nr": 2}]}, {"nume": "Filologie", "total": 52, "prag": 9.07, "max": 9.42, "medie": 9.181, "densitatePrag": 43, "densitatePragPct": 82.7, "distributie": [{"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 2}, {"media": 9.37, "nr": 1}, {"media": 9.32, "nr": 2}, {"media": 9.3, "nr": 3}, {"media": 9.27, "nr": 1}, {"media": 9.25, "nr": 4}, {"media": 9.22, "nr": 2}, {"media": 9.2, "nr": 4}, {"media": 9.17, "nr": 4}, {"media": 9.15, "nr": 5}, {"media": 9.12, "nr": 8}, {"media": 9.1, "nr": 11}, {"media": 9.07, "nr": 4}]}]}, {"rank": 15, "cod": "4061101774", "nume": "Liceul Teoretic „Nicolae Iorga”", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 9.3, "max": 9.65, "medie": 9.378, "densitatePrag": 49, "densitatePragPct": 94.2, "distributie": [{"media": 9.65, "nr": 1}, {"media": 9.55, "nr": 2}, {"media": 9.47, "nr": 3}, {"media": 9.45, "nr": 4}, {"media": 9.42, "nr": 4}, {"media": 9.4, "nr": 5}, {"media": 9.37, "nr": 6}, {"media": 9.35, "nr": 10}, {"media": 9.32, "nr": 9}, {"media": 9.3, "nr": 8}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.27, "max": 9.65, "medie": 9.341, "densitatePrag": 48, "densitatePragPct": 92.3, "distributie": [{"media": 9.65, "nr": 1}, {"media": 9.6, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 1}, {"media": 9.42, "nr": 2}, {"media": 9.4, "nr": 1}, {"media": 9.37, "nr": 5}, {"media": 9.35, "nr": 5}, {"media": 9.32, "nr": 10}, {"media": 9.3, "nr": 9}, {"media": 9.27, "nr": 14}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.17, "max": 9.3, "medie": 9.211, "densitatePrag": 26, "densitatePragPct": 100.0, "distributie": [{"media": 9.3, "nr": 1}, {"media": 9.27, "nr": 1}, {"media": 9.25, "nr": 5}, {"media": 9.22, "nr": 5}, {"media": 9.2, "nr": 6}, {"media": 9.17, "nr": 8}]}, {"nume": "Filologie", "total": 26, "prag": 9.12, "max": 9.3, "medie": 9.14, "densitatePrag": 26, "densitatePragPct": 100.0, "distributie": [{"media": 9.3, "nr": 1}, {"media": 9.17, "nr": 4}, {"media": 9.15, "nr": 5}, {"media": 9.12, "nr": 16}]}]}, {"rank": 16, "cod": "4061103274", "nume": "Colegiul Naţional „Mihai Eminescu”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.27, "max": 9.75, "medie": 9.367, "densitatePrag": 47, "densitatePragPct": 90.4, "distributie": [{"media": 9.75, "nr": 1}, {"media": 9.65, "nr": 1}, {"media": 9.57, "nr": 1}, {"media": 9.55, "nr": 2}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 5}, {"media": 9.42, "nr": 3}, {"media": 9.4, "nr": 1}, {"media": 9.37, "nr": 3}, {"media": 9.35, "nr": 7}, {"media": 9.32, "nr": 11}, {"media": 9.3, "nr": 7}, {"media": 9.27, "nr": 9}]}, {"nume": "Matematică-Informatică", "total": 104, "prag": 9.25, "max": 9.82, "medie": 9.313, "densitatePrag": 100, "densitatePragPct": 96.2, "distributie": [{"media": 9.82, "nr": 1}, {"media": 9.5, "nr": 3}, {"media": 9.45, "nr": 1}, {"media": 9.42, "nr": 2}, {"media": 9.4, "nr": 3}, {"media": 9.37, "nr": 4}, {"media": 9.35, "nr": 8}, {"media": 9.32, "nr": 22}, {"media": 9.31, "nr": 1}, {"media": 9.3, "nr": 19}, {"media": 9.27, "nr": 23}, {"media": 9.25, "nr": 17}]}, {"nume": "Ştiinţe Sociale", "total": 52, "prag": 9.17, "max": 9.4, "medie": 9.239, "densitatePrag": 49, "densitatePragPct": 94.2, "distributie": [{"media": 9.4, "nr": 3}, {"media": 9.37, "nr": 1}, {"media": 9.3, "nr": 4}, {"media": 9.27, "nr": 4}, {"media": 9.25, "nr": 9}, {"media": 9.22, "nr": 15}, {"media": 9.2, "nr": 11}, {"media": 9.17, "nr": 5}]}, {"nume": "Filologie", "total": 52, "prag": 9.15, "max": 9.4, "medie": 9.177, "densitatePrag": 51, "densitatePragPct": 98.1, "distributie": [{"media": 9.4, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.25, "nr": 3}, {"media": 9.2, "nr": 5}, {"media": 9.17, "nr": 19}, {"media": 9.15, "nr": 23}]}]}, {"rank": 17, "cod": "4061102576", "nume": "Liceul Teoretic „Alexandru Ioan Cuza”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.25, "max": 9.57, "medie": 9.34, "densitatePrag": 46, "densitatePragPct": 88.5, "distributie": [{"media": 9.57, "nr": 2}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.48, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.42, "nr": 2}, {"media": 9.41, "nr": 1}, {"media": 9.4, "nr": 2}, {"media": 9.37, "nr": 3}, {"media": 9.35, "nr": 4}, {"media": 9.32, "nr": 11}, {"media": 9.3, "nr": 9}, {"media": 9.27, "nr": 12}, {"media": 9.25, "nr": 2}]}, {"nume": "Matematică-Informatică", "total": 130, "prag": 9.22, "max": 9.87, "medie": 9.341, "densitatePrag": 107, "densitatePragPct": 82.3, "distributie": [{"media": 9.87, "nr": 1}, {"media": 9.77, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.62, "nr": 3}, {"media": 9.6, "nr": 2}, {"media": 9.57, "nr": 1}, {"media": 9.55, "nr": 5}, {"media": 9.52, "nr": 5}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 2}, {"media": 9.42, "nr": 6}, {"media": 9.4, "nr": 3}, {"media": 9.37, "nr": 4}, {"media": 9.35, "nr": 5}, {"media": 9.32, "nr": 16}, {"media": 9.3, "nr": 17}, {"media": 9.27, "nr": 20}, {"media": 9.25, "nr": 20}, {"media": 9.22, "nr": 16}]}, {"nume": "Ştiinţe Sociale", "total": 52, "prag": 9.12, "max": 9.62, "medie": 9.204, "densitatePrag": 49, "densitatePragPct": 94.2, "distributie": [{"media": 9.62, "nr": 1}, {"media": 9.45, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.32, "nr": 2}, {"media": 9.3, "nr": 1}, {"media": 9.27, "nr": 3}, {"media": 9.25, "nr": 3}, {"media": 9.22, "nr": 2}, {"media": 9.2, "nr": 8}, {"media": 9.17, "nr": 14}, {"media": 9.15, "nr": 12}, {"media": 9.12, "nr": 4}]}]}, {"rank": 18, "cod": "4061102201", "nume": "Colegiul Național „Ion Neculce”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 9.22, "max": 9.55, "medie": 9.277, "densitatePrag": 74, "densitatePragPct": 94.9, "distributie": [{"media": 9.55, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 2}, {"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 3}, {"media": 9.37, "nr": 1}, {"media": 9.35, "nr": 3}, {"media": 9.32, "nr": 6}, {"media": 9.3, "nr": 6}, {"media": 9.27, "nr": 10}, {"media": 9.25, "nr": 18}, {"media": 9.23, "nr": 1}, {"media": 9.22, "nr": 25}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.17, "max": 9.9, "medie": 9.332, "densitatePrag": 40, "densitatePragPct": 76.9, "distributie": [{"media": 9.9, "nr": 2}, {"media": 9.67, "nr": 1}, {"media": 9.65, "nr": 1}, {"media": 9.57, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.5, "nr": 1}, {"media": 9.45, "nr": 3}, {"media": 9.4, "nr": 1}, {"media": 9.37, "nr": 2}, {"media": 9.35, "nr": 2}, {"media": 9.32, "nr": 5}, {"media": 9.3, "nr": 3}, {"media": 9.27, "nr": 1}, {"media": 9.25, "nr": 11}, {"media": 9.22, "nr": 5}, {"media": 9.2, "nr": 10}, {"media": 9.17, "nr": 1}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.12, "max": 9.5, "medie": 9.197, "densitatePrag": 24, "densitatePragPct": 92.3, "distributie": [{"media": 9.5, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.32, "nr": 1}, {"media": 9.27, "nr": 1}, {"media": 9.22, "nr": 2}, {"media": 9.2, "nr": 1}, {"media": 9.17, "nr": 8}, {"media": 9.15, "nr": 10}, {"media": 9.12, "nr": 1}]}, {"nume": "Filologie", "total": 52, "prag": 9.05, "max": 9.6, "medie": 9.129, "densitatePrag": 49, "densitatePragPct": 94.2, "distributie": [{"media": 9.6, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.22, "nr": 1}, {"media": 9.17, "nr": 3}, {"media": 9.15, "nr": 5}, {"media": 9.13, "nr": 1}, {"media": 9.12, "nr": 7}, {"media": 9.1, "nr": 19}, {"media": 9.07, "nr": 11}, {"media": 9.05, "nr": 2}]}]}, {"rank": 19, "cod": "4061101209", "nume": "Liceul Teoretic „Jean Monnet”", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 9.15, "max": 9.65, "medie": 9.272, "densitatePrag": 41, "densitatePragPct": 78.8, "distributie": [{"media": 9.65, "nr": 1}, {"media": 9.62, "nr": 2}, {"media": 9.52, "nr": 1}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 2}, {"media": 9.42, "nr": 2}, {"media": 9.37, "nr": 1}, {"media": 9.35, "nr": 3}, {"media": 9.3, "nr": 1}, {"media": 9.27, "nr": 2}, {"media": 9.25, "nr": 6}, {"media": 9.22, "nr": 5}, {"media": 9.2, "nr": 7}, {"media": 9.17, "nr": 11}, {"media": 9.15, "nr": 6}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.1, "max": 9.67, "medie": 9.156, "densitatePrag": 50, "densitatePragPct": 96.2, "distributie": [{"media": 9.67, "nr": 1}, {"media": 9.37, "nr": 1}, {"media": 9.27, "nr": 2}, {"media": 9.25, "nr": 1}, {"media": 9.2, "nr": 3}, {"media": 9.17, "nr": 7}, {"media": 9.15, "nr": 8}, {"media": 9.12, "nr": 19}, {"media": 9.1, "nr": 10}]}, {"nume": "Ştiinţe Sociale", "total": 52, "prag": 9.02, "max": 9.4, "medie": 9.084, "densitatePrag": 49, "densitatePragPct": 94.2, "distributie": [{"media": 9.4, "nr": 1}, {"media": 9.32, "nr": 1}, {"media": 9.25, "nr": 1}, {"media": 9.22, "nr": 2}, {"media": 9.2, "nr": 2}, {"media": 9.15, "nr": 1}, {"media": 9.1, "nr": 8}, {"media": 9.07, "nr": 11}, {"media": 9.05, "nr": 12}, {"media": 9.02, "nr": 13}]}]}, {"rank": 20, "cod": "4061101887", "nume": "Liceul Teoretic „Ion Barbu”", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 9.1, "max": 9.45, "medie": 9.172, "densitatePrag": 48, "densitatePragPct": 92.3, "distributie": [{"media": 9.45, "nr": 2}, {"media": 9.32, "nr": 2}, {"media": 9.27, "nr": 1}, {"media": 9.25, "nr": 4}, {"media": 9.22, "nr": 3}, {"media": 9.2, "nr": 1}, {"media": 9.17, "nr": 9}, {"media": 9.15, "nr": 10}, {"media": 9.12, "nr": 11}, {"media": 9.1, "nr": 9}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.05, "max": 9.27, "medie": 9.131, "densitatePrag": 50, "densitatePragPct": 96.2, "distributie": [{"media": 9.27, "nr": 2}, {"media": 9.25, "nr": 1}, {"media": 9.22, "nr": 3}, {"media": 9.2, "nr": 8}, {"media": 9.17, "nr": 6}, {"media": 9.15, "nr": 5}, {"media": 9.12, "nr": 2}, {"media": 9.1, "nr": 6}, {"media": 9.07, "nr": 11}, {"media": 9.05, "nr": 8}]}, {"nume": "Ştiinţe Sociale", "total": 78, "prag": 8.92, "max": 9.37, "medie": 8.982, "densitatePrag": 75, "densitatePragPct": 96.2, "distributie": [{"media": 9.37, "nr": 1}, {"media": 9.17, "nr": 2}, {"media": 9.1, "nr": 2}, {"media": 9.07, "nr": 5}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 4}, {"media": 9.0, "nr": 13}, {"media": 8.97, "nr": 13}, {"media": 8.95, "nr": 14}, {"media": 8.92, "nr": 22}]}]}, {"rank": 21, "cod": "4061101385", "nume": "Colegiul German „Goethe”", "specializari": [{"nume": "Teor.real spec.germană", "total": 25, "prag": 9.08, "max": 9.86, "medie": 9.447, "densitatePrag": 5, "densitatePragPct": 20.0, "distributie": [{"media": 9.86, "nr": 1}, {"media": 9.7, "nr": 1}, {"media": 9.68, "nr": 1}, {"media": 9.65, "nr": 1}, {"media": 9.61, "nr": 1}, {"media": 9.6, "nr": 1}, {"media": 9.58, "nr": 1}, {"media": 9.51, "nr": 1}, {"media": 9.5, "nr": 2}, {"media": 9.46, "nr": 1}, {"media": 9.43, "nr": 1}, {"media": 9.41, "nr": 3}, {"media": 9.38, "nr": 3}, {"media": 9.36, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.28, "nr": 2}, {"media": 9.26, "nr": 1}, {"media": 9.11, "nr": 1}, {"media": 9.08, "nr": 1}]}, {"nume": "Teor.uman.spec.germană", "total": 25, "prag": 8.9, "max": 9.68, "medie": 9.177, "densitatePrag": 11, "densitatePragPct": 44.0, "distributie": [{"media": 9.68, "nr": 1}, {"media": 9.6, "nr": 1}, {"media": 9.53, "nr": 1}, {"media": 9.41, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.33, "nr": 1}, {"media": 9.31, "nr": 1}, {"media": 9.26, "nr": 1}, {"media": 9.25, "nr": 2}, {"media": 9.21, "nr": 1}, {"media": 9.2, "nr": 1}, {"media": 9.18, "nr": 1}, {"media": 9.11, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.05, "nr": 1}, {"media": 9.01, "nr": 2}, {"media": 9.0, "nr": 2}, {"media": 8.95, "nr": 1}, {"media": 8.93, "nr": 1}, {"media": 8.91, "nr": 1}, {"media": 8.9, "nr": 2}]}, {"nume": "Matematică-Informatică", "total": 26, "prag": 8.46, "max": 9.58, "medie": 8.771, "densitatePrag": 13, "densitatePragPct": 50.0, "distributie": [{"media": 9.58, "nr": 1}, {"media": 9.41, "nr": 1}, {"media": 9.23, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.0, "nr": 1}, {"media": 8.9, "nr": 1}, {"media": 8.88, "nr": 1}, {"media": 8.86, "nr": 1}, {"media": 8.85, "nr": 1}, {"media": 8.78, "nr": 1}, {"media": 8.76, "nr": 1}, {"media": 8.73, "nr": 1}, {"media": 8.7, "nr": 1}, {"media": 8.66, "nr": 1}, {"media": 8.65, "nr": 1}, {"media": 8.63, "nr": 1}, {"media": 8.61, "nr": 2}, {"media": 8.58, "nr": 2}, {"media": 8.51, "nr": 3}, {"media": 8.48, "nr": 2}, {"media": 8.46, "nr": 1}]}, {"nume": "Filologie", "total": 37, "prag": 3.96, "max": 9.15, "medie": 7.679, "densitatePrag": 1, "densitatePragPct": 2.7, "distributie": [{"media": 9.15, "nr": 1}, {"media": 9.03, "nr": 1}, {"media": 8.75, "nr": 1}, {"media": 8.7, "nr": 1}, {"media": 8.58, "nr": 1}, {"media": 8.56, "nr": 1}, {"media": 8.51, "nr": 1}, {"media": 8.45, "nr": 1}, {"media": 8.38, "nr": 2}, {"media": 8.3, "nr": 1}, {"media": 8.21, "nr": 1}, {"media": 8.2, "nr": 1}, {"media": 8.13, "nr": 1}, {"media": 7.93, "nr": 1}, {"media": 7.91, "nr": 1}, {"media": 7.9, "nr": 2}, {"media": 7.76, "nr": 1}, {"media": 7.73, "nr": 1}, {"media": 7.71, "nr": 1}, {"media": 7.61, "nr": 2}, {"media": 7.53, "nr": 1}, {"media": 7.5, "nr": 1}, {"media": 7.41, "nr": 2}, {"media": 7.31, "nr": 1}, {"media": 7.3, "nr": 1}, {"media": 7.21, "nr": 1}, {"media": 7.06, "nr": 1}, {"media": 7.03, "nr": 1}, {"media": 6.93, "nr": 1}, {"media": 6.83, "nr": 1}, {"media": 6.31, "nr": 1}, {"media": 4.95, "nr": 1}, {"media": 3.96, "nr": 1}]}]}, {"rank": 22, "cod": "4061100158", "nume": "Liceul Teoretic „C.A. Rosetti”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 9.02, "max": 9.42, "medie": 9.114, "densitatePrag": 69, "densitatePragPct": 88.5, "distributie": [{"media": 9.42, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.32, "nr": 2}, {"media": 9.3, "nr": 3}, {"media": 9.27, "nr": 1}, {"media": 9.25, "nr": 1}, {"media": 9.2, "nr": 1}, {"media": 9.17, "nr": 5}, {"media": 9.15, "nr": 9}, {"media": 9.12, "nr": 4}, {"media": 9.1, "nr": 9}, {"media": 9.07, "nr": 18}, {"media": 9.05, "nr": 19}, {"media": 9.02, "nr": 4}]}, {"nume": "Filologie", "total": 26, "prag": 8.97, "max": 9.27, "medie": 9.007, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 9.27, "nr": 1}, {"media": 9.07, "nr": 1}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 3}, {"media": 9.0, "nr": 8}, {"media": 8.97, "nr": 11}]}, {"nume": "Ştiinţe ale Naturii", "total": 78, "prag": 8.97, "max": 9.4, "medie": 9.072, "densitatePrag": 69, "densitatePragPct": 88.5, "distributie": [{"media": 9.4, "nr": 1}, {"media": 9.32, "nr": 1}, {"media": 9.3, "nr": 2}, {"media": 9.27, "nr": 1}, {"media": 9.25, "nr": 2}, {"media": 9.2, "nr": 2}, {"media": 9.17, "nr": 3}, {"media": 9.15, "nr": 3}, {"media": 9.12, "nr": 8}, {"media": 9.1, "nr": 2}, {"media": 9.07, "nr": 10}, {"media": 9.05, "nr": 9}, {"media": 9.02, "nr": 8}, {"media": 9.0, "nr": 17}, {"media": 8.97, "nr": 9}]}]}, {"rank": 23, "cod": "4061103179", "nume": "Colegiul Național „Tudor Vladimirescu”", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 9.02, "max": 9.72, "medie": 9.131, "densitatePrag": 47, "densitatePragPct": 90.4, "distributie": [{"media": 9.72, "nr": 1}, {"media": 9.4, "nr": 2}, {"media": 9.27, "nr": 2}, {"media": 9.22, "nr": 1}, {"media": 9.2, "nr": 5}, {"media": 9.17, "nr": 4}, {"media": 9.15, "nr": 3}, {"media": 9.12, "nr": 4}, {"media": 9.1, "nr": 7}, {"media": 9.07, "nr": 9}, {"media": 9.05, "nr": 10}, {"media": 9.02, "nr": 4}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 8.95, "max": 9.4, "medie": 9.047, "densitatePrag": 45, "densitatePragPct": 86.5, "distributie": [{"media": 9.4, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.32, "nr": 2}, {"media": 9.3, "nr": 1}, {"media": 9.27, "nr": 1}, {"media": 9.2, "nr": 1}, {"media": 9.15, "nr": 1}, {"media": 9.12, "nr": 1}, {"media": 9.1, "nr": 4}, {"media": 9.07, "nr": 2}, {"media": 9.05, "nr": 1}, {"media": 9.02, "nr": 7}, {"media": 9.0, "nr": 10}, {"media": 8.97, "nr": 11}, {"media": 8.95, "nr": 8}]}, {"nume": "Filologie", "total": 26, "prag": 8.87, "max": 9.3, "medie": 8.952, "densitatePrag": 24, "densitatePragPct": 92.3, "distributie": [{"media": 9.3, "nr": 1}, {"media": 9.15, "nr": 1}, {"media": 9.07, "nr": 1}, {"media": 9.02, "nr": 1}, {"media": 9.0, "nr": 1}, {"media": 8.97, "nr": 2}, {"media": 8.95, "nr": 3}, {"media": 8.92, "nr": 6}, {"media": 8.9, "nr": 7}, {"media": 8.87, "nr": 3}]}, {"nume": "Ştiinţe Sociale", "total": 78, "prag": 8.8, "max": 9.4, "medie": 8.899, "densitatePrag": 67, "densitatePragPct": 85.9, "distributie": [{"media": 9.4, "nr": 1}, {"media": 9.22, "nr": 1}, {"media": 9.2, "nr": 1}, {"media": 9.12, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.07, "nr": 3}, {"media": 9.05, "nr": 1}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 1}, {"media": 8.97, "nr": 4}, {"media": 8.95, "nr": 6}, {"media": 8.92, "nr": 4}, {"media": 8.9, "nr": 5}, {"media": 8.87, "nr": 8}, {"media": 8.85, "nr": 10}, {"media": 8.82, "nr": 18}, {"media": 8.8, "nr": 11}]}]}, {"rank": 24, "cod": "4061103075", "nume": "Liceul Teoretic „George Călinescu”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 9.0, "max": 9.2, "medie": 9.077, "densitatePrag": 78, "densitatePragPct": 100.0, "distributie": [{"media": 9.2, "nr": 3}, {"media": 9.17, "nr": 3}, {"media": 9.15, "nr": 7}, {"media": 9.12, "nr": 13}, {"media": 9.1, "nr": 11}, {"media": 9.07, "nr": 5}, {"media": 9.05, "nr": 11}, {"media": 9.02, "nr": 16}, {"media": 9.0, "nr": 9}]}, {"nume": "Filologie", "total": 78, "prag": 8.87, "max": 9.07, "medie": 8.927, "densitatePrag": 78, "densitatePragPct": 100.0, "distributie": [{"media": 9.07, "nr": 2}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 2}, {"media": 8.97, "nr": 10}, {"media": 8.95, "nr": 14}, {"media": 8.92, "nr": 13}, {"media": 8.9, "nr": 13}, {"media": 8.87, "nr": 20}]}]}, {"rank": 25, "cod": "4061101046", "nume": "Colegiul Economic „Virgil Madgearu”", "specializari": [{"nume": "Turism şi alimentaţie", "total": 24, "prag": 8.97, "max": 9.52, "medie": 9.098, "densitatePrag": 21, "densitatePragPct": 87.5, "distributie": [{"media": 9.52, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.17, "nr": 3}, {"media": 9.15, "nr": 2}, {"media": 9.1, "nr": 1}, {"media": 9.07, "nr": 1}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 3}, {"media": 9.0, "nr": 5}, {"media": 8.97, "nr": 4}]}, {"nume": "Economic", "total": 216, "prag": 8.8, "max": 9.65, "medie": 8.968, "densitatePrag": 156, "densitatePragPct": 72.2, "distributie": [{"media": 9.65, "nr": 1}, {"media": 9.62, "nr": 1}, {"media": 9.57, "nr": 1}, {"media": 9.47, "nr": 2}, {"media": 9.4, "nr": 1}, {"media": 9.37, "nr": 1}, {"media": 9.35, "nr": 3}, {"media": 9.32, "nr": 4}, {"media": 9.27, "nr": 1}, {"media": 9.25, "nr": 3}, {"media": 9.22, "nr": 3}, {"media": 9.2, "nr": 1}, {"media": 9.17, "nr": 1}, {"media": 9.15, "nr": 3}, {"media": 9.12, "nr": 5}, {"media": 9.1, "nr": 6}, {"media": 9.07, "nr": 4}, {"media": 9.05, "nr": 8}, {"media": 9.02, "nr": 11}, {"media": 9.0, "nr": 10}, {"media": 8.97, "nr": 14}, {"media": 8.95, "nr": 20}, {"media": 8.92, "nr": 16}, {"media": 8.9, "nr": 20}, {"media": 8.87, "nr": 15}, {"media": 8.85, "nr": 19}, {"media": 8.82, "nr": 30}, {"media": 8.8, "nr": 12}]}]}, {"rank": 26, "cod": "4061100556", "nume": "Colegiul Național „Emil Racoviță”", "specializari": [{"nume": "Matematică-Informatică", "total": 26, "prag": 8.95, "max": 9.15, "medie": 8.999, "densitatePrag": 26, "densitatePragPct": 100.0, "distributie": [{"media": 9.15, "nr": 1}, {"media": 9.1, "nr": 2}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 4}, {"media": 9.0, "nr": 4}, {"media": 8.97, "nr": 5}, {"media": 8.95, "nr": 8}]}, {"nume": "Filologie", "total": 78, "prag": 8.7, "max": 9.17, "medie": 8.795, "densitatePrag": 67, "densitatePragPct": 85.9, "distributie": [{"media": 9.17, "nr": 1}, {"media": 9.12, "nr": 2}, {"media": 9.1, "nr": 1}, {"media": 9.0, "nr": 2}, {"media": 8.95, "nr": 3}, {"media": 8.92, "nr": 2}, {"media": 8.87, "nr": 2}, {"media": 8.85, "nr": 2}, {"media": 8.82, "nr": 10}, {"media": 8.8, "nr": 4}, {"media": 8.77, "nr": 9}, {"media": 8.75, "nr": 15}, {"media": 8.72, "nr": 16}, {"media": 8.7, "nr": 9}]}]}, {"rank": 27, "cod": "4061104022", "nume": "Colegiul Național „Școala Centrală”", "specializari": [{"nume": "Matematică-Informatică", "total": 156, "prag": 8.95, "max": 9.52, "medie": 9.221, "densitatePrag": 24, "densitatePragPct": 15.4, "distributie": [{"media": 9.52, "nr": 1}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 2}, {"media": 9.42, "nr": 1}, {"media": 9.37, "nr": 2}, {"media": 9.35, "nr": 4}, {"media": 9.32, "nr": 11}, {"media": 9.3, "nr": 8}, {"media": 9.27, "nr": 11}, {"media": 9.25, "nr": 17}, {"media": 9.22, "nr": 22}, {"media": 9.2, "nr": 39}, {"media": 9.17, "nr": 12}, {"media": 9.15, "nr": 6}, {"media": 9.12, "nr": 5}, {"media": 9.07, "nr": 3}, {"media": 9.05, "nr": 3}, {"media": 9.02, "nr": 1}, {"media": 9.0, "nr": 2}, {"media": 8.97, "nr": 3}, {"media": 8.95, "nr": 1}]}, {"nume": "Filologie", "total": 130, "prag": 8.75, "max": 9.5, "medie": 9.059, "densitatePrag": 19, "densitatePragPct": 14.6, "distributie": [{"media": 9.5, "nr": 1}, {"media": 9.3, "nr": 3}, {"media": 9.25, "nr": 2}, {"media": 9.22, "nr": 3}, {"media": 9.2, "nr": 2}, {"media": 9.17, "nr": 4}, {"media": 9.15, "nr": 9}, {"media": 9.12, "nr": 11}, {"media": 9.1, "nr": 18}, {"media": 9.07, "nr": 19}, {"media": 9.05, "nr": 19}, {"media": 9.02, "nr": 14}, {"media": 9.0, "nr": 5}, {"media": 8.97, "nr": 1}, {"media": 8.95, "nr": 1}, {"media": 8.92, "nr": 4}, {"media": 8.87, "nr": 1}, {"media": 8.85, "nr": 4}, {"media": 8.82, "nr": 2}, {"media": 8.8, "nr": 3}, {"media": 8.77, "nr": 2}, {"media": 8.75, "nr": 2}]}]}, {"rank": 28, "cod": "4061102454", "nume": "Colegiul Național „Victor Babeș”", "specializari": [{"nume": "Matematică-Informatică", "total": 26, "prag": 8.85, "max": 9.1, "medie": 8.91, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 9.1, "nr": 1}, {"media": 8.97, "nr": 3}, {"media": 8.95, "nr": 2}, {"media": 8.92, "nr": 4}, {"media": 8.9, "nr": 7}, {"media": 8.87, "nr": 6}, {"media": 8.85, "nr": 3}]}, {"nume": "Filologie", "total": 26, "prag": 8.52, "max": 9.1, "medie": 8.63, "densitatePrag": 23, "densitatePragPct": 88.5, "distributie": [{"media": 9.1, "nr": 1}, {"media": 8.95, "nr": 1}, {"media": 8.75, "nr": 1}, {"media": 8.72, "nr": 2}, {"media": 8.65, "nr": 4}, {"media": 8.62, "nr": 2}, {"media": 8.6, "nr": 2}, {"media": 8.57, "nr": 4}, {"media": 8.55, "nr": 5}, {"media": 8.52, "nr": 4}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 8.5, "max": 8.95, "medie": 8.642, "densitatePrag": 19, "densitatePragPct": 73.1, "distributie": [{"media": 8.95, "nr": 1}, {"media": 8.9, "nr": 1}, {"media": 8.87, "nr": 1}, {"media": 8.82, "nr": 2}, {"media": 8.8, "nr": 1}, {"media": 8.72, "nr": 1}, {"media": 8.7, "nr": 1}, {"media": 8.67, "nr": 1}, {"media": 8.65, "nr": 1}, {"media": 8.62, "nr": 3}, {"media": 8.6, "nr": 1}, {"media": 8.57, "nr": 4}, {"media": 8.52, "nr": 3}, {"media": 8.5, "nr": 5}]}, {"nume": "Ştiinţe ale Naturii", "total": 104, "prag": 8.47, "max": 9.35, "medie": 8.677, "densitatePrag": 61, "densitatePragPct": 58.7, "distributie": [{"media": 9.35, "nr": 2}, {"media": 9.2, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.05, "nr": 1}, {"media": 8.97, "nr": 1}, {"media": 8.92, "nr": 2}, {"media": 8.87, "nr": 2}, {"media": 8.85, "nr": 3}, {"media": 8.82, "nr": 5}, {"media": 8.8, "nr": 3}, {"media": 8.77, "nr": 3}, {"media": 8.75, "nr": 7}, {"media": 8.72, "nr": 3}, {"media": 8.7, "nr": 9}, {"media": 8.67, "nr": 8}, {"media": 8.65, "nr": 7}, {"media": 8.62, "nr": 2}, {"media": 8.6, "nr": 7}, {"media": 8.57, "nr": 7}, {"media": 8.55, "nr": 9}, {"media": 8.52, "nr": 5}, {"media": 8.5, "nr": 11}, {"media": 8.47, "nr": 5}]}]}, {"rank": 29, "cod": "4061101557", "nume": "Liceul Teoretic „Ștefan Odobleja”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 8.82, "max": 9.22, "medie": 8.921, "densitatePrag": 24, "densitatePragPct": 92.3, "distributie": [{"media": 9.22, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.02, "nr": 3}, {"media": 8.97, "nr": 1}, {"media": 8.92, "nr": 4}, {"media": 8.9, "nr": 6}, {"media": 8.87, "nr": 5}, {"media": 8.85, "nr": 2}, {"media": 8.82, "nr": 3}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 8.67, "max": 8.9, "medie": 8.748, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 8.9, "nr": 1}, {"media": 8.85, "nr": 1}, {"media": 8.82, "nr": 4}, {"media": 8.77, "nr": 1}, {"media": 8.75, "nr": 6}, {"media": 8.72, "nr": 5}, {"media": 8.7, "nr": 6}, {"media": 8.67, "nr": 2}]}, {"nume": "Matematică-Informatică", "total": 78, "prag": 8.65, "max": 9.4, "medie": 8.828, "densitatePrag": 48, "densitatePragPct": 61.5, "distributie": [{"media": 9.4, "nr": 1}, {"media": 9.37, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.07, "nr": 1}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 1}, {"media": 8.97, "nr": 3}, {"media": 8.95, "nr": 2}, {"media": 8.92, "nr": 3}, {"media": 8.9, "nr": 11}, {"media": 8.87, "nr": 4}, {"media": 8.85, "nr": 4}, {"media": 8.82, "nr": 4}, {"media": 8.8, "nr": 5}, {"media": 8.77, "nr": 2}, {"media": 8.75, "nr": 8}, {"media": 8.72, "nr": 8}, {"media": 8.7, "nr": 7}, {"media": 8.67, "nr": 8}, {"media": 8.65, "nr": 2}]}, {"nume": "Filologie", "total": 26, "prag": 8.62, "max": 9.22, "medie": 8.735, "densitatePrag": 22, "densitatePragPct": 84.6, "distributie": [{"media": 9.22, "nr": 1}, {"media": 9.12, "nr": 1}, {"media": 8.95, "nr": 1}, {"media": 8.85, "nr": 1}, {"media": 8.77, "nr": 2}, {"media": 8.75, "nr": 1}, {"media": 8.72, "nr": 2}, {"media": 8.7, "nr": 3}, {"media": 8.67, "nr": 5}, {"media": 8.65, "nr": 7}, {"media": 8.62, "nr": 2}]}]}, {"rank": 30, "cod": "4061103532", "nume": "Liceul Teoretic Bilingv „Miguel de Cervantes”", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 8.8, "max": 9.85, "medie": 9.154, "densitatePrag": 13, "densitatePragPct": 25.0, "distributie": [{"media": 9.85, "nr": 1}, {"media": 9.8, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.32, "nr": 1}, {"media": 9.3, "nr": 1}, {"media": 9.28, "nr": 1}, {"media": 9.27, "nr": 3}, {"media": 9.25, "nr": 1}, {"media": 9.22, "nr": 5}, {"media": 9.2, "nr": 4}, {"media": 9.17, "nr": 9}, {"media": 9.15, "nr": 6}, {"media": 9.1, "nr": 1}, {"media": 9.05, "nr": 1}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 5}, {"media": 8.97, "nr": 1}, {"media": 8.95, "nr": 1}, {"media": 8.92, "nr": 1}, {"media": 8.85, "nr": 1}, {"media": 8.82, "nr": 3}, {"media": 8.8, "nr": 1}]}, {"nume": "Filologie", "total": 52, "prag": 8.47, "max": 9.75, "medie": 8.97, "densitatePrag": 11, "densitatePragPct": 21.2, "distributie": [{"media": 9.75, "nr": 1}, {"media": 9.65, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.2, "nr": 1}, {"media": 9.17, "nr": 2}, {"media": 9.15, "nr": 1}, {"media": 9.1, "nr": 2}, {"media": 9.07, "nr": 4}, {"media": 9.05, "nr": 7}, {"media": 9.02, "nr": 11}, {"media": 9.0, "nr": 2}, {"media": 8.85, "nr": 1}, {"media": 8.82, "nr": 1}, {"media": 8.8, "nr": 1}, {"media": 8.77, "nr": 1}, {"media": 8.72, "nr": 1}, {"media": 8.7, "nr": 1}, {"media": 8.67, "nr": 1}, {"media": 8.65, "nr": 1}, {"media": 8.62, "nr": 3}, {"media": 8.6, "nr": 1}, {"media": 8.55, "nr": 2}, {"media": 8.52, "nr": 2}, {"media": 8.47, "nr": 1}]}]}], "totalLicee": 99, "totalNerepartizati": 261, "dataExtragere": "2025-08-01", "citywide": {"total": 15812, "distributie": [{"media": 10.0, "nr": 35}, {"media": 9.97, "nr": 13}, {"media": 9.95, "nr": 40}, {"media": 9.92, "nr": 35}, {"media": 9.9, "nr": 69}, {"media": 9.87, "nr": 55}, {"media": 9.86, "nr": 1}, {"media": 9.85, "nr": 84}, {"media": 9.82, "nr": 79}, {"media": 9.8, "nr": 84}, {"media": 9.78, "nr": 1}, {"media": 9.77, "nr": 99}, {"media": 9.76, "nr": 1}, {"media": 9.75, "nr": 103}, {"media": 9.73, "nr": 2}, {"media": 9.72, "nr": 113}, {"media": 9.7, "nr": 119}, {"media": 9.68, "nr": 2}, {"media": 9.67, "nr": 116}, {"media": 9.65, "nr": 132}, {"media": 9.63, "nr": 1}, {"media": 9.62, "nr": 131}, {"media": 9.61, "nr": 1}, {"media": 9.6, "nr": 153}, {"media": 9.58, "nr": 2}, {"media": 9.57, "nr": 134}, {"media": 9.55, "nr": 118}, {"media": 9.53, "nr": 1}, {"media": 9.52, "nr": 150}, {"media": 9.51, "nr": 2}, {"media": 9.5, "nr": 134}, {"media": 9.48, "nr": 2}, {"media": 9.47, "nr": 162}, {"media": 9.46, "nr": 1}, {"media": 9.45, "nr": 150}, {"media": 9.43, "nr": 1}, {"media": 9.42, "nr": 133}, {"media": 9.41, "nr": 7}, {"media": 9.4, "nr": 166}, {"media": 9.38, "nr": 4}, {"media": 9.37, "nr": 155}, {"media": 9.36, "nr": 2}, {"media": 9.35, "nr": 135}, {"media": 9.33, "nr": 1}, {"media": 9.32, "nr": 168}, {"media": 9.31, "nr": 2}, {"media": 9.3, "nr": 141}, {"media": 9.28, "nr": 3}, {"media": 9.27, "nr": 171}, {"media": 9.26, "nr": 2}, {"media": 9.25, "nr": 155}, {"media": 9.23, "nr": 3}, {"media": 9.22, "nr": 155}, {"media": 9.21, "nr": 2}, {"media": 9.2, "nr": 157}, {"media": 9.18, "nr": 1}, {"media": 9.17, "nr": 160}, {"media": 9.15, "nr": 156}, {"media": 9.13, "nr": 1}, {"media": 9.12, "nr": 144}, {"media": 9.11, "nr": 3}, {"media": 9.1, "nr": 164}, {"media": 9.08, "nr": 1}, {"media": 9.07, "nr": 147}, {"media": 9.06, "nr": 1}, {"media": 9.05, "nr": 153}, {"media": 9.03, "nr": 1}, {"media": 9.02, "nr": 142}, {"media": 9.01, "nr": 3}, {"media": 9.0, "nr": 129}, {"media": 8.97, "nr": 135}, {"media": 8.95, "nr": 131}, {"media": 8.93, "nr": 1}, {"media": 8.92, "nr": 139}, {"media": 8.91, "nr": 1}, {"media": 8.9, "nr": 124}, {"media": 8.88, "nr": 1}, {"media": 8.87, "nr": 132}, {"media": 8.86, "nr": 1}, {"media": 8.85, "nr": 105}, {"media": 8.82, "nr": 154}, {"media": 8.8, "nr": 113}, {"media": 8.78, "nr": 1}, {"media": 8.77, "nr": 120}, {"media": 8.76, "nr": 1}, {"media": 8.75, "nr": 146}, {"media": 8.73, "nr": 1}, {"media": 8.72, "nr": 107}, {"media": 8.71, "nr": 1}, {"media": 8.7, "nr": 125}, {"media": 8.68, "nr": 1}, {"media": 8.67, "nr": 124}, {"media": 8.66, "nr": 1}, {"media": 8.65, "nr": 114}, {"media": 8.63, "nr": 1}, {"media": 8.62, "nr": 113}, {"media": 8.61, "nr": 3}, {"media": 8.6, "nr": 121}, {"media": 8.58, "nr": 3}, {"media": 8.57, "nr": 105}, {"media": 8.56, "nr": 1}, {"media": 8.55, "nr": 119}, {"media": 8.53, "nr": 2}, {"media": 8.52, "nr": 129}, {"media": 8.51, "nr": 4}, {"media": 8.5, "nr": 113}, {"media": 8.48, "nr": 2}, {"media": 8.47, "nr": 126}, {"media": 8.46, "nr": 2}, {"media": 8.45, "nr": 116}, {"media": 8.43, "nr": 1}, {"media": 8.42, "nr": 112}, {"media": 8.4, "nr": 97}, {"media": 8.38, "nr": 2}, {"media": 8.37, "nr": 101}, {"media": 8.35, "nr": 102}, {"media": 8.32, "nr": 95}, {"media": 8.31, "nr": 1}, {"media": 8.3, "nr": 92}, {"media": 8.28, "nr": 1}, {"media": 8.27, "nr": 104}, {"media": 8.26, "nr": 2}, {"media": 8.25, "nr": 76}, {"media": 8.22, "nr": 100}, {"media": 8.21, "nr": 2}, {"media": 8.2, "nr": 104}, {"media": 8.18, "nr": 1}, {"media": 8.17, "nr": 103}, {"media": 8.15, "nr": 81}, {"media": 8.13, "nr": 3}, {"media": 8.12, "nr": 89}, {"media": 8.1, "nr": 99}, {"media": 8.07, "nr": 86}, {"media": 8.06, "nr": 1}, {"media": 8.05, "nr": 88}, {"media": 8.02, "nr": 80}, {"media": 8.01, "nr": 1}, {"media": 8.0, "nr": 89}, {"media": 7.97, "nr": 83}, {"media": 7.95, "nr": 89}, {"media": 7.93, "nr": 1}, {"media": 7.92, "nr": 68}, {"media": 7.91, "nr": 1}, {"media": 7.9, "nr": 85}, {"media": 7.87, "nr": 71}, {"media": 7.85, "nr": 75}, {"media": 7.83, "nr": 1}, {"media": 7.82, "nr": 87}, {"media": 7.81, "nr": 1}, {"media": 7.8, "nr": 80}, {"media": 7.77, "nr": 72}, {"media": 7.76, "nr": 1}, {"media": 7.75, "nr": 64}, {"media": 7.73, "nr": 1}, {"media": 7.72, "nr": 59}, {"media": 7.71, "nr": 1}, {"media": 7.7, "nr": 62}, {"media": 7.67, "nr": 73}, {"media": 7.65, "nr": 76}, {"media": 7.62, "nr": 69}, {"media": 7.61, "nr": 2}, {"media": 7.6, "nr": 76}, {"media": 7.58, "nr": 1}, {"media": 7.57, "nr": 68}, {"media": 7.55, "nr": 61}, {"media": 7.53, "nr": 2}, {"media": 7.52, "nr": 58}, {"media": 7.5, "nr": 74}, {"media": 7.47, "nr": 70}, {"media": 7.45, "nr": 55}, {"media": 7.42, "nr": 63}, {"media": 7.41, "nr": 2}, {"media": 7.4, "nr": 70}, {"media": 7.37, "nr": 58}, {"media": 7.35, "nr": 48}, {"media": 7.32, "nr": 49}, {"media": 7.31, "nr": 1}, {"media": 7.3, "nr": 61}, {"media": 7.27, "nr": 72}, {"media": 7.26, "nr": 1}, {"media": 7.25, "nr": 65}, {"media": 7.22, "nr": 67}, {"media": 7.21, "nr": 1}, {"media": 7.2, "nr": 58}, {"media": 7.17, "nr": 66}, {"media": 7.15, "nr": 54}, {"media": 7.12, "nr": 49}, {"media": 7.1, "nr": 60}, {"media": 7.07, "nr": 45}, {"media": 7.06, "nr": 1}, {"media": 7.05, "nr": 55}, {"media": 7.03, "nr": 1}, {"media": 7.02, "nr": 54}, {"media": 7.0, "nr": 59}, {"media": 6.97, "nr": 53}, {"media": 6.95, "nr": 60}, {"media": 6.93, "nr": 2}, {"media": 6.92, "nr": 52}, {"media": 6.9, "nr": 51}, {"media": 6.87, "nr": 55}, {"media": 6.85, "nr": 44}, {"media": 6.83, "nr": 1}, {"media": 6.82, "nr": 41}, {"media": 6.8, "nr": 48}, {"media": 6.77, "nr": 44}, {"media": 6.75, "nr": 48}, {"media": 6.72, "nr": 44}, {"media": 6.7, "nr": 45}, {"media": 6.67, "nr": 62}, {"media": 6.65, "nr": 42}, {"media": 6.62, "nr": 45}, {"media": 6.61, "nr": 1}, {"media": 6.6, "nr": 48}, {"media": 6.57, "nr": 55}, {"media": 6.55, "nr": 47}, {"media": 6.52, "nr": 58}, {"media": 6.5, "nr": 48}, {"media": 6.47, "nr": 35}, {"media": 6.46, "nr": 1}, {"media": 6.45, "nr": 36}, {"media": 6.43, "nr": 1}, {"media": 6.42, "nr": 39}, {"media": 6.4, "nr": 47}, {"media": 6.38, "nr": 1}, {"media": 6.37, "nr": 42}, {"media": 6.35, "nr": 38}, {"media": 6.32, "nr": 34}, {"media": 6.31, "nr": 1}, {"media": 6.3, "nr": 47}, {"media": 6.27, "nr": 44}, {"media": 6.25, "nr": 36}, {"media": 6.22, "nr": 38}, {"media": 6.2, "nr": 41}, {"media": 6.17, "nr": 50}, {"media": 6.16, "nr": 1}, {"media": 6.15, "nr": 41}, {"media": 6.12, "nr": 32}, {"media": 6.1, "nr": 45}, {"media": 6.07, "nr": 29}, {"media": 6.05, "nr": 29}, {"media": 6.02, "nr": 32}, {"media": 6.0, "nr": 32}, {"media": 5.97, "nr": 35}, {"media": 5.95, "nr": 36}, {"media": 5.92, "nr": 25}, {"media": 5.9, "nr": 27}, {"media": 5.87, "nr": 40}, {"media": 5.85, "nr": 37}, {"media": 5.82, "nr": 33}, {"media": 5.8, "nr": 38}, {"media": 5.77, "nr": 29}, {"media": 5.75, "nr": 42}, {"media": 5.72, "nr": 31}, {"media": 5.7, "nr": 29}, {"media": 5.67, "nr": 42}, {"media": 5.65, "nr": 32}, {"media": 5.62, "nr": 33}, {"media": 5.6, "nr": 28}, {"media": 5.57, "nr": 42}, {"media": 5.55, "nr": 26}, {"media": 5.52, "nr": 27}, {"media": 5.5, "nr": 18}, {"media": 5.47, "nr": 20}, {"media": 5.45, "nr": 27}, {"media": 5.42, "nr": 19}, {"media": 5.4, "nr": 25}, {"media": 5.37, "nr": 26}, {"media": 5.35, "nr": 28}, {"media": 5.32, "nr": 16}, {"media": 5.3, "nr": 29}, {"media": 5.27, "nr": 33}, {"media": 5.25, "nr": 31}, {"media": 5.22, "nr": 31}, {"media": 5.2, "nr": 26}, {"media": 5.17, "nr": 29}, {"media": 5.15, "nr": 19}, {"media": 5.12, "nr": 19}, {"media": 5.1, "nr": 23}, {"media": 5.07, "nr": 17}, {"media": 5.05, "nr": 12}, {"media": 5.02, "nr": 13}, {"media": 5.0, "nr": 26}, {"media": 4.97, "nr": 14}, {"media": 4.95, "nr": 21}, {"media": 4.92, "nr": 28}, {"media": 4.9, "nr": 16}, {"media": 4.87, "nr": 16}, {"media": 4.85, "nr": 14}, {"media": 4.82, "nr": 17}, {"media": 4.8, "nr": 19}, {"media": 4.77, "nr": 15}, {"media": 4.75, "nr": 17}, {"media": 4.72, "nr": 7}, {"media": 4.7, "nr": 14}, {"media": 4.67, "nr": 12}, {"media": 4.65, "nr": 18}, {"media": 4.62, "nr": 14}, {"media": 4.6, "nr": 16}, {"media": 4.57, "nr": 10}, {"media": 4.55, "nr": 8}, {"media": 4.52, "nr": 11}, {"media": 4.51, "nr": 1}, {"media": 4.5, "nr": 16}, {"media": 4.47, "nr": 10}, {"media": 4.45, "nr": 10}, {"media": 4.42, "nr": 16}, {"media": 4.4, "nr": 8}, {"media": 4.37, "nr": 15}, {"media": 4.35, "nr": 16}, {"media": 4.32, "nr": 15}, {"media": 4.3, "nr": 11}, {"media": 4.27, "nr": 9}, {"media": 4.25, "nr": 5}, {"media": 4.22, "nr": 13}, {"media": 4.2, "nr": 17}, {"media": 4.17, "nr": 7}, {"media": 4.15, "nr": 13}, {"media": 4.12, "nr": 10}, {"media": 4.1, "nr": 11}, {"media": 4.07, "nr": 5}, {"media": 4.05, "nr": 6}, {"media": 4.02, "nr": 8}, {"media": 4.0, "nr": 6}, {"media": 3.97, "nr": 14}, {"media": 3.96, "nr": 1}, {"media": 3.95, "nr": 5}, {"media": 3.92, "nr": 3}, {"media": 3.9, "nr": 7}, {"media": 3.87, "nr": 9}, {"media": 3.85, "nr": 8}, {"media": 3.82, "nr": 8}, {"media": 3.8, "nr": 9}, {"media": 3.77, "nr": 5}, {"media": 3.75, "nr": 5}, {"media": 3.72, "nr": 3}, {"media": 3.7, "nr": 5}, {"media": 3.67, "nr": 4}, {"media": 3.65, "nr": 4}, {"media": 3.62, "nr": 5}, {"media": 3.6, "nr": 4}, {"media": 3.57, "nr": 5}, {"media": 3.55, "nr": 7}, {"media": 3.52, "nr": 1}, {"media": 3.5, "nr": 1}, {"media": 3.47, "nr": 5}, {"media": 3.45, "nr": 4}, {"media": 3.42, "nr": 3}, {"media": 3.4, "nr": 3}, {"media": 3.37, "nr": 4}, {"media": 3.35, "nr": 4}, {"media": 3.32, "nr": 2}, {"media": 3.3, "nr": 3}, {"media": 3.27, "nr": 7}, {"media": 3.25, "nr": 1}, {"media": 3.22, "nr": 8}, {"media": 3.2, "nr": 1}, {"media": 3.17, "nr": 3}, {"media": 3.15, "nr": 3}, {"media": 3.12, "nr": 1}, {"media": 3.1, "nr": 4}, {"media": 3.07, "nr": 3}, {"media": 3.05, "nr": 3}, {"media": 3.02, "nr": 3}, {"media": 3.0, "nr": 2}, {"media": 2.97, "nr": 1}, {"media": 2.95, "nr": 3}, {"media": 2.92, "nr": 2}, {"media": 2.9, "nr": 3}, {"media": 2.87, "nr": 2}, {"media": 2.85, "nr": 3}, {"media": 2.82, "nr": 1}, {"media": 2.8, "nr": 1}, {"media": 2.77, "nr": 1}, {"media": 2.75, "nr": 2}, {"media": 2.72, "nr": 1}, {"media": 2.7, "nr": 2}, {"media": 2.67, "nr": 1}, {"media": 2.65, "nr": 2}, {"media": 2.55, "nr": 2}, {"media": 2.52, "nr": 1}, {"media": 2.47, "nr": 1}, {"media": 2.45, "nr": 2}, {"media": 2.42, "nr": 1}, {"media": 2.4, "nr": 2}, {"media": 2.37, "nr": 1}, {"media": 2.25, "nr": 2}, {"media": 2.05, "nr": 1}, {"media": 1.85, "nr": 1}]}}, "2024": {"licee": [{"rank": 1, "cod": "Colegiul Naţional „Gheorghe Lazăr”", "nume": "Colegiul Naţional „Gheorghe Lazăr”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 9.85, "max": 10.0, "medie": 9.91, "densitatePrag": 78, "densitatePragPct": 100.0, "distributie": [{"media": 10.0, "nr": 8}, {"media": 9.97, "nr": 8}, {"media": 9.95, "nr": 10}, {"media": 9.92, "nr": 12}, {"media": 9.9, "nr": 10}, {"media": 9.87, "nr": 10}, {"media": 9.85, "nr": 20}]}, {"nume": "Ştiinţe ale Naturii", "total": 78, "prag": 9.8, "max": 10.0, "medie": 9.867, "densitatePrag": 78, "densitatePragPct": 100.0, "distributie": [{"media": 10.0, "nr": 4}, {"media": 9.97, "nr": 1}, {"media": 9.95, "nr": 9}, {"media": 9.92, "nr": 5}, {"media": 9.9, "nr": 10}, {"media": 9.87, "nr": 8}, {"media": 9.85, "nr": 6}, {"media": 9.82, "nr": 22}, {"media": 9.8, "nr": 13}]}, {"nume": "Ştiinţe Sociale", "total": 52, "prag": 9.65, "max": 10.0, "medie": 9.745, "densitatePrag": 42, "densitatePragPct": 80.8, "distributie": [{"media": 10.0, "nr": 1}, {"media": 9.95, "nr": 2}, {"media": 9.92, "nr": 3}, {"media": 9.9, "nr": 2}, {"media": 9.87, "nr": 2}, {"media": 9.85, "nr": 1}, {"media": 9.82, "nr": 1}, {"media": 9.8, "nr": 2}, {"media": 9.77, "nr": 3}, {"media": 9.75, "nr": 3}, {"media": 9.72, "nr": 7}, {"media": 9.7, "nr": 6}, {"media": 9.67, "nr": 7}, {"media": 9.65, "nr": 12}]}, {"nume": "Filologie", "total": 26, "prag": 9.57, "max": 9.85, "medie": 9.637, "densitatePrag": 24, "densitatePragPct": 92.3, "distributie": [{"media": 9.85, "nr": 1}, {"media": 9.82, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.67, "nr": 3}, {"media": 9.65, "nr": 2}, {"media": 9.62, "nr": 4}, {"media": 9.6, "nr": 7}, {"media": 9.57, "nr": 6}]}]}, {"rank": 2, "cod": "Colegiul Naţional „Sfântul Sava”", "nume": "Colegiul Naţional „Sfântul Sava”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.72, "max": 10.0, "medie": 9.836, "densitatePrag": 48, "densitatePragPct": 92.3, "distributie": [{"media": 10.0, "nr": 3}, {"media": 9.97, "nr": 1}, {"media": 9.92, "nr": 5}, {"media": 9.9, "nr": 6}, {"media": 9.87, "nr": 5}, {"media": 9.85, "nr": 6}, {"media": 9.82, "nr": 5}, {"media": 9.8, "nr": 2}, {"media": 9.77, "nr": 7}, {"media": 9.76, "nr": 1}, {"media": 9.75, "nr": 10}, {"media": 9.72, "nr": 1}]}, {"nume": "Matematică-Informatică", "total": 182, "prag": 9.67, "max": 10.0, "medie": 9.799, "densitatePrag": 143, "densitatePragPct": 78.6, "distributie": [{"media": 10.0, "nr": 7}, {"media": 9.97, "nr": 4}, {"media": 9.95, "nr": 10}, {"media": 9.92, "nr": 4}, {"media": 9.9, "nr": 14}, {"media": 9.87, "nr": 8}, {"media": 9.85, "nr": 7}, {"media": 9.82, "nr": 20}, {"media": 9.8, "nr": 16}, {"media": 9.77, "nr": 16}, {"media": 9.75, "nr": 18}, {"media": 9.72, "nr": 24}, {"media": 9.7, "nr": 25}, {"media": 9.67, "nr": 9}]}, {"nume": "Filologie", "total": 26, "prag": 9.52, "max": 9.87, "medie": 9.627, "densitatePrag": 21, "densitatePragPct": 80.8, "distributie": [{"media": 9.87, "nr": 2}, {"media": 9.85, "nr": 1}, {"media": 9.8, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.67, "nr": 1}, {"media": 9.65, "nr": 2}, {"media": 9.62, "nr": 2}, {"media": 9.6, "nr": 4}, {"media": 9.57, "nr": 4}, {"media": 9.55, "nr": 4}, {"media": 9.52, "nr": 4}]}]}, {"rank": 3, "cod": "Colegiul Național „Spiru Haret”", "nume": "Colegiul Național „Spiru Haret”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 9.72, "max": 10.0, "medie": 9.801, "densitatePrag": 75, "densitatePragPct": 96.2, "distributie": [{"media": 10.0, "nr": 1}, {"media": 9.97, "nr": 1}, {"media": 9.95, "nr": 1}, {"media": 9.9, "nr": 5}, {"media": 9.87, "nr": 6}, {"media": 9.85, "nr": 5}, {"media": 9.82, "nr": 11}, {"media": 9.8, "nr": 11}, {"media": 9.77, "nr": 11}, {"media": 9.75, "nr": 20}, {"media": 9.72, "nr": 6}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.67, "max": 9.97, "medie": 9.742, "densitatePrag": 50, "densitatePragPct": 96.2, "distributie": [{"media": 9.97, "nr": 1}, {"media": 9.95, "nr": 1}, {"media": 9.87, "nr": 3}, {"media": 9.8, "nr": 2}, {"media": 9.77, "nr": 6}, {"media": 9.75, "nr": 9}, {"media": 9.72, "nr": 14}, {"media": 9.7, "nr": 9}, {"media": 9.67, "nr": 7}]}, {"nume": "Ştiinţe Sociale", "total": 52, "prag": 9.5, "max": 9.97, "medie": 9.587, "densitatePrag": 48, "densitatePragPct": 92.3, "distributie": [{"media": 9.97, "nr": 1}, {"media": 9.87, "nr": 1}, {"media": 9.85, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.7, "nr": 2}, {"media": 9.67, "nr": 1}, {"media": 9.65, "nr": 2}, {"media": 9.62, "nr": 8}, {"media": 9.6, "nr": 4}, {"media": 9.57, "nr": 3}, {"media": 9.55, "nr": 9}, {"media": 9.52, "nr": 12}, {"media": 9.5, "nr": 7}]}, {"nume": "Filologie", "total": 26, "prag": 9.42, "max": 9.9, "medie": 9.492, "densitatePrag": 24, "densitatePragPct": 92.3, "distributie": [{"media": 9.9, "nr": 1}, {"media": 9.85, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.5, "nr": 2}, {"media": 9.47, "nr": 8}, {"media": 9.45, "nr": 9}, {"media": 9.42, "nr": 4}]}]}, {"rank": 4, "cod": "Colegiul Naţional de Informatică „Tudor Vianu”", "nume": "Colegiul Naţional de Informatică „Tudor Vianu”", "specializari": [{"nume": "Matematică-Informatică", "total": 234, "prag": 9.62, "max": 10.0, "medie": 9.775, "densitatePrag": 164, "densitatePragPct": 70.1, "distributie": [{"media": 10.0, "nr": 5}, {"media": 9.97, "nr": 5}, {"media": 9.95, "nr": 10}, {"media": 9.92, "nr": 9}, {"media": 9.9, "nr": 13}, {"media": 9.87, "nr": 10}, {"media": 9.85, "nr": 18}, {"media": 9.82, "nr": 13}, {"media": 9.8, "nr": 16}, {"media": 9.77, "nr": 19}, {"media": 9.75, "nr": 15}, {"media": 9.72, "nr": 21}, {"media": 9.7, "nr": 30}, {"media": 9.67, "nr": 17}, {"media": 9.65, "nr": 23}, {"media": 9.62, "nr": 10}]}]}, {"rank": 5, "cod": "Colegiul Naţional „Grigore Moisil”", "nume": "Colegiul Naţional „Grigore Moisil”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 9.52, "max": 9.92, "medie": 9.654, "densitatePrag": 63, "densitatePragPct": 80.8, "distributie": [{"media": 9.92, "nr": 2}, {"media": 9.9, "nr": 3}, {"media": 9.87, "nr": 1}, {"media": 9.85, "nr": 3}, {"media": 9.82, "nr": 2}, {"media": 9.8, "nr": 2}, {"media": 9.77, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 3}, {"media": 9.7, "nr": 2}, {"media": 9.67, "nr": 5}, {"media": 9.65, "nr": 8}, {"media": 9.62, "nr": 8}, {"media": 9.6, "nr": 14}, {"media": 9.57, "nr": 9}, {"media": 9.55, "nr": 13}, {"media": 9.52, "nr": 1}]}, {"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 9.5, "max": 9.87, "medie": 9.592, "densitatePrag": 23, "densitatePragPct": 88.5, "distributie": [{"media": 9.87, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.7, "nr": 1}, {"media": 9.67, "nr": 2}, {"media": 9.65, "nr": 1}, {"media": 9.62, "nr": 2}, {"media": 9.57, "nr": 3}, {"media": 9.55, "nr": 6}, {"media": 9.52, "nr": 5}, {"media": 9.5, "nr": 3}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.3, "max": 9.5, "medie": 9.402, "densitatePrag": 26, "densitatePragPct": 100.0, "distributie": [{"media": 9.5, "nr": 3}, {"media": 9.47, "nr": 2}, {"media": 9.45, "nr": 3}, {"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 6}, {"media": 9.37, "nr": 5}, {"media": 9.35, "nr": 3}, {"media": 9.32, "nr": 2}, {"media": 9.3, "nr": 1}]}, {"nume": "Filologie", "total": 26, "prag": 9.17, "max": 9.47, "medie": 9.246, "densitatePrag": 23, "densitatePragPct": 88.5, "distributie": [{"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.37, "nr": 1}, {"media": 9.27, "nr": 5}, {"media": 9.25, "nr": 1}, {"media": 9.22, "nr": 4}, {"media": 9.2, "nr": 6}, {"media": 9.17, "nr": 6}]}]}, {"rank": 6, "cod": "Colegiul Național Bilingv „George Coșbuc”", "nume": "Colegiul Național Bilingv „George Coșbuc”", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 9.52, "max": 9.92, "medie": 9.623, "densitatePrag": 47, "densitatePragPct": 90.4, "distributie": [{"media": 9.92, "nr": 1}, {"media": 9.82, "nr": 1}, {"media": 9.77, "nr": 2}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 3}, {"media": 9.7, "nr": 2}, {"media": 9.68, "nr": 1}, {"media": 9.67, "nr": 2}, {"media": 9.65, "nr": 7}, {"media": 9.62, "nr": 5}, {"media": 9.6, "nr": 7}, {"media": 9.57, "nr": 7}, {"media": 9.55, "nr": 7}, {"media": 9.52, "nr": 6}]}, {"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 9.52, "max": 9.87, "medie": 9.657, "densitatePrag": 21, "densitatePragPct": 80.8, "distributie": [{"media": 9.87, "nr": 1}, {"media": 9.85, "nr": 1}, {"media": 9.8, "nr": 1}, {"media": 9.77, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.67, "nr": 5}, {"media": 9.65, "nr": 2}, {"media": 9.62, "nr": 4}, {"media": 9.6, "nr": 4}, {"media": 9.57, "nr": 3}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 1}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.4, "max": 9.85, "medie": 9.538, "densitatePrag": 20, "densitatePragPct": 76.9, "distributie": [{"media": 9.85, "nr": 1}, {"media": 9.75, "nr": 2}, {"media": 9.67, "nr": 2}, {"media": 9.62, "nr": 1}, {"media": 9.6, "nr": 3}, {"media": 9.57, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.5, "nr": 2}, {"media": 9.47, "nr": 4}, {"media": 9.45, "nr": 5}, {"media": 9.42, "nr": 3}, {"media": 9.4, "nr": 1}]}, {"nume": "Filologie", "total": 52, "prag": 9.22, "max": 9.82, "medie": 9.375, "densitatePrag": 42, "densitatePragPct": 80.8, "distributie": [{"media": 9.82, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.65, "nr": 1}, {"media": 9.6, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 2}, {"media": 9.42, "nr": 3}, {"media": 9.4, "nr": 8}, {"media": 9.37, "nr": 1}, {"media": 9.35, "nr": 6}, {"media": 9.32, "nr": 5}, {"media": 9.3, "nr": 3}, {"media": 9.27, "nr": 7}, {"media": 9.25, "nr": 7}, {"media": 9.22, "nr": 2}]}]}, {"rank": 7, "cod": "Colegiul Naţional „I.L.Caragiale”", "nume": "Colegiul Naţional „I.L.Caragiale”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 9.48, "max": 9.72, "medie": 9.577, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 9.72, "nr": 1}, {"media": 9.67, "nr": 2}, {"media": 9.65, "nr": 2}, {"media": 9.62, "nr": 4}, {"media": 9.6, "nr": 2}, {"media": 9.57, "nr": 6}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.5, "nr": 6}, {"media": 9.48, "nr": 1}]}, {"nume": "Matematică-Informatică", "total": 130, "prag": 9.4, "max": 9.9, "medie": 9.541, "densitatePrag": 99, "densitatePragPct": 76.2, "distributie": [{"media": 9.9, "nr": 3}, {"media": 9.85, "nr": 1}, {"media": 9.8, "nr": 1}, {"media": 9.72, "nr": 3}, {"media": 9.7, "nr": 5}, {"media": 9.67, "nr": 4}, {"media": 9.65, "nr": 6}, {"media": 9.62, "nr": 8}, {"media": 9.6, "nr": 8}, {"media": 9.57, "nr": 7}, {"media": 9.55, "nr": 12}, {"media": 9.52, "nr": 10}, {"media": 9.5, "nr": 19}, {"media": 9.47, "nr": 12}, {"media": 9.45, "nr": 9}, {"media": 9.42, "nr": 11}, {"media": 9.4, "nr": 11}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.3, "max": 9.75, "medie": 9.399, "densitatePrag": 23, "densitatePragPct": 88.5, "distributie": [{"media": 9.75, "nr": 1}, {"media": 9.57, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 3}, {"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 3}, {"media": 9.37, "nr": 1}, {"media": 9.35, "nr": 4}, {"media": 9.32, "nr": 5}, {"media": 9.3, "nr": 4}]}, {"nume": "Filologie", "total": 78, "prag": 8.87, "max": 9.52, "medie": 9.222, "densitatePrag": 8, "densitatePragPct": 10.3, "distributie": [{"media": 9.52, "nr": 1}, {"media": 9.5, "nr": 2}, {"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 3}, {"media": 9.37, "nr": 3}, {"media": 9.35, "nr": 2}, {"media": 9.32, "nr": 2}, {"media": 9.3, "nr": 5}, {"media": 9.27, "nr": 8}, {"media": 9.25, "nr": 6}, {"media": 9.22, "nr": 12}, {"media": 9.2, "nr": 10}, {"media": 9.18, "nr": 1}, {"media": 9.17, "nr": 7}, {"media": 9.15, "nr": 4}, {"media": 9.12, "nr": 2}, {"media": 9.1, "nr": 1}, {"media": 9.02, "nr": 1}, {"media": 9.0, "nr": 2}, {"media": 8.97, "nr": 1}, {"media": 8.93, "nr": 1}, {"media": 8.92, "nr": 1}, {"media": 8.9, "nr": 1}, {"media": 8.87, "nr": 1}]}]}, {"rank": 8, "cod": "Colegiul Naţional „Gheorghe Şincai”", "nume": "Colegiul Naţional „Gheorghe Şincai”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.45, "max": 9.82, "medie": 9.572, "densitatePrag": 45, "densitatePragPct": 86.5, "distributie": [{"media": 9.82, "nr": 1}, {"media": 9.77, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 2}, {"media": 9.7, "nr": 1}, {"media": 9.67, "nr": 1}, {"media": 9.65, "nr": 6}, {"media": 9.62, "nr": 3}, {"media": 9.6, "nr": 5}, {"media": 9.57, "nr": 4}, {"media": 9.55, "nr": 5}, {"media": 9.52, "nr": 8}, {"media": 9.5, "nr": 5}, {"media": 9.47, "nr": 4}, {"media": 9.45, "nr": 5}]}, {"nume": "Matematică-Informatică", "total": 130, "prag": 9.42, "max": 9.92, "medie": 9.585, "densitatePrag": 96, "densitatePragPct": 73.8, "distributie": [{"media": 9.92, "nr": 1}, {"media": 9.9, "nr": 1}, {"media": 9.87, "nr": 1}, {"media": 9.85, "nr": 1}, {"media": 9.82, "nr": 1}, {"media": 9.8, "nr": 4}, {"media": 9.77, "nr": 4}, {"media": 9.75, "nr": 4}, {"media": 9.72, "nr": 2}, {"media": 9.7, "nr": 5}, {"media": 9.67, "nr": 3}, {"media": 9.65, "nr": 7}, {"media": 9.62, "nr": 9}, {"media": 9.6, "nr": 15}, {"media": 9.57, "nr": 10}, {"media": 9.55, "nr": 10}, {"media": 9.52, "nr": 12}, {"media": 9.5, "nr": 19}, {"media": 9.47, "nr": 4}, {"media": 9.45, "nr": 13}, {"media": 9.42, "nr": 4}]}, {"nume": "Filologie", "total": 26, "prag": 9.32, "max": 9.55, "medie": 9.38, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 9.55, "nr": 1}, {"media": 9.42, "nr": 2}, {"media": 9.4, "nr": 8}, {"media": 9.37, "nr": 4}, {"media": 9.35, "nr": 10}, {"media": 9.32, "nr": 1}]}]}, {"rank": 9, "cod": "Colegiul Național „Mihai Viteazul”", "nume": "Colegiul Național „Mihai Viteazul”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.45, "max": 10.0, "medie": 9.602, "densitatePrag": 40, "densitatePragPct": 76.9, "distributie": [{"media": 10.0, "nr": 2}, {"media": 9.9, "nr": 1}, {"media": 9.82, "nr": 2}, {"media": 9.77, "nr": 3}, {"media": 9.72, "nr": 3}, {"media": 9.7, "nr": 1}, {"media": 9.65, "nr": 2}, {"media": 9.62, "nr": 5}, {"media": 9.6, "nr": 3}, {"media": 9.57, "nr": 6}, {"media": 9.55, "nr": 5}, {"media": 9.52, "nr": 5}, {"media": 9.5, "nr": 4}, {"media": 9.47, "nr": 6}, {"media": 9.45, "nr": 4}]}, {"nume": "Matematică-Informatică", "total": 208, "prag": 9.32, "max": 10.0, "medie": 9.517, "densitatePrag": 120, "densitatePragPct": 57.7, "distributie": [{"media": 10.0, "nr": 1}, {"media": 9.92, "nr": 1}, {"media": 9.87, "nr": 1}, {"media": 9.85, "nr": 1}, {"media": 9.82, "nr": 3}, {"media": 9.8, "nr": 4}, {"media": 9.77, "nr": 2}, {"media": 9.75, "nr": 2}, {"media": 9.72, "nr": 2}, {"media": 9.7, "nr": 8}, {"media": 9.67, "nr": 6}, {"media": 9.65, "nr": 6}, {"media": 9.62, "nr": 15}, {"media": 9.6, "nr": 12}, {"media": 9.57, "nr": 13}, {"media": 9.55, "nr": 11}, {"media": 9.52, "nr": 8}, {"media": 9.5, "nr": 16}, {"media": 9.47, "nr": 12}, {"media": 9.46, "nr": 1}, {"media": 9.45, "nr": 9}, {"media": 9.42, "nr": 16}, {"media": 9.4, "nr": 20}, {"media": 9.37, "nr": 14}, {"media": 9.35, "nr": 16}, {"media": 9.32, "nr": 8}]}]}, {"rank": 10, "cod": "Colegiul Național „Matei Basarab”", "nume": "Colegiul Național „Matei Basarab”", "specializari": [{"nume": "Matematică-Informatică", "total": 104, "prag": 9.42, "max": 9.95, "medie": 9.565, "densitatePrag": 80, "densitatePragPct": 76.9, "distributie": [{"media": 9.95, "nr": 1}, {"media": 9.92, "nr": 1}, {"media": 9.8, "nr": 1}, {"media": 9.75, "nr": 3}, {"media": 9.72, "nr": 3}, {"media": 9.7, "nr": 2}, {"media": 9.67, "nr": 7}, {"media": 9.65, "nr": 6}, {"media": 9.62, "nr": 5}, {"media": 9.6, "nr": 11}, {"media": 9.57, "nr": 7}, {"media": 9.55, "nr": 11}, {"media": 9.52, "nr": 9}, {"media": 9.5, "nr": 14}, {"media": 9.47, "nr": 5}, {"media": 9.45, "nr": 13}, {"media": 9.42, "nr": 5}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.42, "max": 9.9, "medie": 9.547, "densitatePrag": 42, "densitatePragPct": 80.8, "distributie": [{"media": 9.9, "nr": 1}, {"media": 9.87, "nr": 2}, {"media": 9.77, "nr": 1}, {"media": 9.72, "nr": 2}, {"media": 9.7, "nr": 1}, {"media": 9.67, "nr": 2}, {"media": 9.65, "nr": 1}, {"media": 9.62, "nr": 4}, {"media": 9.6, "nr": 3}, {"media": 9.57, "nr": 2}, {"media": 9.55, "nr": 4}, {"media": 9.52, "nr": 4}, {"media": 9.5, "nr": 5}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 8}, {"media": 9.42, "nr": 11}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.35, "max": 9.67, "medie": 9.438, "densitatePrag": 22, "densitatePragPct": 84.6, "distributie": [{"media": 9.67, "nr": 1}, {"media": 9.62, "nr": 1}, {"media": 9.57, "nr": 2}, {"media": 9.55, "nr": 3}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 1}, {"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 6}, {"media": 9.37, "nr": 4}, {"media": 9.35, "nr": 6}]}, {"nume": "Filologie", "total": 26, "prag": 9.27, "max": 9.62, "medie": 9.332, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 9.62, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.35, "nr": 2}, {"media": 9.32, "nr": 6}, {"media": 9.3, "nr": 11}, {"media": 9.27, "nr": 3}]}]}, {"rank": 11, "cod": "Colegiul Național „Iulia Hașdeu”", "nume": "Colegiul Național „Iulia Hașdeu”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 9.35, "max": 9.77, "medie": 9.468, "densitatePrag": 22, "densitatePragPct": 84.6, "distributie": [{"media": 9.77, "nr": 2}, {"media": 9.72, "nr": 1}, {"media": 9.67, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 3}, {"media": 9.45, "nr": 3}, {"media": 9.42, "nr": 4}, {"media": 9.4, "nr": 4}, {"media": 9.37, "nr": 3}, {"media": 9.35, "nr": 3}]}, {"nume": "Matematică-Informatică", "total": 104, "prag": 9.27, "max": 9.9, "medie": 9.39, "densitatePrag": 85, "densitatePragPct": 81.7, "distributie": [{"media": 9.9, "nr": 1}, {"media": 9.87, "nr": 1}, {"media": 9.77, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.65, "nr": 4}, {"media": 9.62, "nr": 2}, {"media": 9.6, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 3}, {"media": 9.5, "nr": 4}, {"media": 9.47, "nr": 4}, {"media": 9.45, "nr": 5}, {"media": 9.42, "nr": 7}, {"media": 9.4, "nr": 5}, {"media": 9.37, "nr": 5}, {"media": 9.35, "nr": 6}, {"media": 9.32, "nr": 16}, {"media": 9.3, "nr": 22}, {"media": 9.27, "nr": 15}]}, {"nume": "Filologie", "total": 104, "prag": 7.92, "max": 9.67, "medie": 9.016, "densitatePrag": 5, "densitatePragPct": 4.8, "distributie": [{"media": 9.67, "nr": 1}, {"media": 9.45, "nr": 1}, {"media": 9.42, "nr": 2}, {"media": 9.4, "nr": 3}, {"media": 9.35, "nr": 3}, {"media": 9.32, "nr": 3}, {"media": 9.3, "nr": 1}, {"media": 9.27, "nr": 3}, {"media": 9.25, "nr": 2}, {"media": 9.22, "nr": 7}, {"media": 9.2, "nr": 11}, {"media": 9.17, "nr": 10}, {"media": 9.15, "nr": 9}, {"media": 9.12, "nr": 13}, {"media": 9.1, "nr": 10}, {"media": 8.95, "nr": 1}, {"media": 8.9, "nr": 1}, {"media": 8.87, "nr": 2}, {"media": 8.85, "nr": 1}, {"media": 8.77, "nr": 2}, {"media": 8.72, "nr": 1}, {"media": 8.55, "nr": 1}, {"media": 8.47, "nr": 1}, {"media": 8.45, "nr": 1}, {"media": 8.4, "nr": 2}, {"media": 8.32, "nr": 2}, {"media": 8.27, "nr": 2}, {"media": 8.2, "nr": 1}, {"media": 8.15, "nr": 2}, {"media": 8.05, "nr": 1}, {"media": 8.0, "nr": 1}, {"media": 7.97, "nr": 1}, {"media": 7.95, "nr": 1}, {"media": 7.92, "nr": 1}]}]}, {"rank": 12, "cod": "Colegiul Naţional „Ion Creangă”", "nume": "Colegiul Naţional „Ion Creangă”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 9.3, "max": 9.82, "medie": 9.399, "densitatePrag": 70, "densitatePragPct": 89.7, "distributie": [{"media": 9.82, "nr": 1}, {"media": 9.65, "nr": 2}, {"media": 9.62, "nr": 1}, {"media": 9.6, "nr": 1}, {"media": 9.57, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.5, "nr": 2}, {"media": 9.47, "nr": 4}, {"media": 9.45, "nr": 1}, {"media": 9.42, "nr": 10}, {"media": 9.4, "nr": 8}, {"media": 9.37, "nr": 14}, {"media": 9.35, "nr": 13}, {"media": 9.32, "nr": 15}, {"media": 9.3, "nr": 3}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.25, "max": 9.65, "medie": 9.335, "densitatePrag": 47, "densitatePragPct": 90.4, "distributie": [{"media": 9.65, "nr": 2}, {"media": 9.55, "nr": 1}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 2}, {"media": 9.42, "nr": 2}, {"media": 9.4, "nr": 1}, {"media": 9.37, "nr": 2}, {"media": 9.35, "nr": 2}, {"media": 9.32, "nr": 10}, {"media": 9.3, "nr": 10}, {"media": 9.27, "nr": 16}, {"media": 9.25, "nr": 2}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.17, "max": 9.55, "medie": 9.253, "densitatePrag": 23, "densitatePragPct": 88.5, "distributie": [{"media": 9.55, "nr": 1}, {"media": 9.5, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.32, "nr": 1}, {"media": 9.27, "nr": 2}, {"media": 9.25, "nr": 4}, {"media": 9.22, "nr": 5}, {"media": 9.2, "nr": 2}, {"media": 9.17, "nr": 8}]}, {"nume": "Filologie", "total": 52, "prag": 9.07, "max": 9.55, "medie": 9.15, "densitatePrag": 46, "densitatePragPct": 88.5, "distributie": [{"media": 9.55, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.37, "nr": 2}, {"media": 9.32, "nr": 1}, {"media": 9.3, "nr": 1}, {"media": 9.25, "nr": 1}, {"media": 9.22, "nr": 1}, {"media": 9.2, "nr": 3}, {"media": 9.17, "nr": 1}, {"media": 9.15, "nr": 5}, {"media": 9.12, "nr": 14}, {"media": 9.1, "nr": 12}, {"media": 9.07, "nr": 9}]}]}, {"rank": 13, "cod": "Liceul Teoretic „Alexandru Ioan Cuza”", "nume": "Liceul Teoretic „Alexandru Ioan Cuza”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 9.25, "max": 9.85, "medie": 9.437, "densitatePrag": 19, "densitatePragPct": 73.1, "distributie": [{"media": 9.85, "nr": 1}, {"media": 9.67, "nr": 1}, {"media": 9.6, "nr": 2}, {"media": 9.57, "nr": 1}, {"media": 9.55, "nr": 2}, {"media": 9.45, "nr": 4}, {"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 4}, {"media": 9.37, "nr": 1}, {"media": 9.35, "nr": 4}, {"media": 9.32, "nr": 1}, {"media": 9.3, "nr": 1}, {"media": 9.27, "nr": 1}, {"media": 9.25, "nr": 2}]}, {"nume": "Matematică-Informatică", "total": 130, "prag": 9.1, "max": 9.9, "medie": 9.282, "densitatePrag": 89, "densitatePragPct": 68.5, "distributie": [{"media": 9.9, "nr": 1}, {"media": 9.85, "nr": 1}, {"media": 9.82, "nr": 1}, {"media": 9.75, "nr": 2}, {"media": 9.7, "nr": 1}, {"media": 9.65, "nr": 1}, {"media": 9.62, "nr": 3}, {"media": 9.6, "nr": 1}, {"media": 9.57, "nr": 3}, {"media": 9.55, "nr": 1}, {"media": 9.5, "nr": 2}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 4}, {"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 4}, {"media": 9.37, "nr": 5}, {"media": 9.35, "nr": 3}, {"media": 9.32, "nr": 6}, {"media": 9.3, "nr": 4}, {"media": 9.27, "nr": 4}, {"media": 9.25, "nr": 10}, {"media": 9.22, "nr": 7}, {"media": 9.2, "nr": 15}, {"media": 9.17, "nr": 16}, {"media": 9.15, "nr": 14}, {"media": 9.12, "nr": 17}, {"media": 9.1, "nr": 2}]}, {"nume": "Ştiinţe Sociale", "total": 52, "prag": 9.0, "max": 9.5, "medie": 9.082, "densitatePrag": 46, "densitatePragPct": 88.5, "distributie": [{"media": 9.5, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.32, "nr": 1}, {"media": 9.27, "nr": 2}, {"media": 9.25, "nr": 1}, {"media": 9.2, "nr": 1}, {"media": 9.17, "nr": 1}, {"media": 9.15, "nr": 2}, {"media": 9.12, "nr": 1}, {"media": 9.1, "nr": 4}, {"media": 9.07, "nr": 6}, {"media": 9.05, "nr": 10}, {"media": 9.02, "nr": 11}, {"media": 9.0, "nr": 10}]}]}, {"rank": 14, "cod": "Colegiul German „Goethe”", "nume": "Colegiul German „Goethe”", "specializari": [{"nume": "Teor.real spec.germană", "total": 25, "prag": 9.23, "max": 9.9, "medie": 9.587, "densitatePrag": 8, "densitatePragPct": 32.0, "distributie": [{"media": 9.9, "nr": 1}, {"media": 9.86, "nr": 1}, {"media": 9.8, "nr": 2}, {"media": 9.78, "nr": 1}, {"media": 9.76, "nr": 1}, {"media": 9.7, "nr": 3}, {"media": 9.65, "nr": 3}, {"media": 9.63, "nr": 1}, {"media": 9.58, "nr": 1}, {"media": 9.56, "nr": 2}, {"media": 9.48, "nr": 1}, {"media": 9.43, "nr": 1}, {"media": 9.4, "nr": 2}, {"media": 9.38, "nr": 1}, {"media": 9.36, "nr": 3}, {"media": 9.23, "nr": 1}]}, {"nume": "Teor.uman.spec.germană", "total": 25, "prag": 8.98, "max": 9.63, "medie": 9.201, "densitatePrag": 11, "densitatePragPct": 44.0, "distributie": [{"media": 9.63, "nr": 1}, {"media": 9.5, "nr": 2}, {"media": 9.35, "nr": 1}, {"media": 9.28, "nr": 1}, {"media": 9.25, "nr": 1}, {"media": 9.23, "nr": 2}, {"media": 9.21, "nr": 1}, {"media": 9.2, "nr": 5}, {"media": 9.16, "nr": 1}, {"media": 9.15, "nr": 2}, {"media": 9.11, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.08, "nr": 2}, {"media": 9.06, "nr": 1}, {"media": 9.0, "nr": 1}, {"media": 8.98, "nr": 2}]}, {"nume": "Matematică-Informatică", "total": 26, "prag": 8.36, "max": 9.9, "medie": 8.942, "densitatePrag": 4, "densitatePragPct": 15.4, "distributie": [{"media": 9.9, "nr": 1}, {"media": 9.81, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.25, "nr": 1}, {"media": 9.21, "nr": 1}, {"media": 9.13, "nr": 2}, {"media": 8.98, "nr": 1}, {"media": 8.95, "nr": 2}, {"media": 8.91, "nr": 2}, {"media": 8.9, "nr": 2}, {"media": 8.88, "nr": 1}, {"media": 8.81, "nr": 1}, {"media": 8.8, "nr": 1}, {"media": 8.78, "nr": 1}, {"media": 8.76, "nr": 1}, {"media": 8.75, "nr": 1}, {"media": 8.65, "nr": 1}, {"media": 8.6, "nr": 1}, {"media": 8.51, "nr": 1}, {"media": 8.5, "nr": 1}, {"media": 8.4, "nr": 1}, {"media": 8.36, "nr": 1}]}, {"nume": "Filologie", "total": 26, "prag": 7.42, "max": 8.95, "medie": 8.203, "densitatePrag": 2, "densitatePragPct": 7.7, "distributie": [{"media": 8.95, "nr": 1}, {"media": 8.93, "nr": 1}, {"media": 8.66, "nr": 1}, {"media": 8.65, "nr": 1}, {"media": 8.55, "nr": 1}, {"media": 8.51, "nr": 1}, {"media": 8.5, "nr": 1}, {"media": 8.43, "nr": 1}, {"media": 8.41, "nr": 1}, {"media": 8.4, "nr": 1}, {"media": 8.31, "nr": 1}, {"media": 8.3, "nr": 1}, {"media": 8.28, "nr": 1}, {"media": 8.25, "nr": 2}, {"media": 8.11, "nr": 1}, {"media": 8.03, "nr": 1}, {"media": 7.96, "nr": 1}, {"media": 7.91, "nr": 1}, {"media": 7.9, "nr": 1}, {"media": 7.85, "nr": 1}, {"media": 7.81, "nr": 1}, {"media": 7.76, "nr": 1}, {"media": 7.63, "nr": 1}, {"media": 7.51, "nr": 1}, {"media": 7.42, "nr": 1}]}]}, {"rank": 15, "cod": "Colegiul Național „Cantemir Vodă”", "nume": "Colegiul Național „Cantemir Vodă”", "specializari": [{"nume": "Matematică-Informatică", "total": 130, "prag": 9.22, "max": 9.75, "medie": 9.35, "densitatePrag": 100, "densitatePragPct": 76.9, "distributie": [{"media": 9.75, "nr": 1}, {"media": 9.7, "nr": 1}, {"media": 9.65, "nr": 3}, {"media": 9.62, "nr": 1}, {"media": 9.6, "nr": 4}, {"media": 9.57, "nr": 2}, {"media": 9.55, "nr": 1}, {"media": 9.5, "nr": 5}, {"media": 9.47, "nr": 7}, {"media": 9.45, "nr": 5}, {"media": 9.42, "nr": 6}, {"media": 9.4, "nr": 7}, {"media": 9.37, "nr": 4}, {"media": 9.35, "nr": 5}, {"media": 9.32, "nr": 13}, {"media": 9.3, "nr": 12}, {"media": 9.27, "nr": 15}, {"media": 9.25, "nr": 21}, {"media": 9.22, "nr": 17}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.22, "max": 9.77, "medie": 9.382, "densitatePrag": 41, "densitatePragPct": 78.8, "distributie": [{"media": 9.77, "nr": 1}, {"media": 9.65, "nr": 1}, {"media": 9.62, "nr": 1}, {"media": 9.6, "nr": 2}, {"media": 9.57, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 2}, {"media": 9.45, "nr": 2}, {"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 7}, {"media": 9.37, "nr": 6}, {"media": 9.35, "nr": 8}, {"media": 9.32, "nr": 5}, {"media": 9.3, "nr": 3}, {"media": 9.27, "nr": 5}, {"media": 9.25, "nr": 5}, {"media": 9.22, "nr": 1}]}]}, {"rank": 16, "cod": "Colegiul Naţional Elena Cuza", "nume": "Colegiul Naţional Elena Cuza", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 9.22, "max": 9.82, "medie": 9.369, "densitatePrag": 38, "densitatePragPct": 73.1, "distributie": [{"media": 9.82, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.57, "nr": 1}, {"media": 9.52, "nr": 2}, {"media": 9.5, "nr": 3}, {"media": 9.47, "nr": 3}, {"media": 9.45, "nr": 3}, {"media": 9.42, "nr": 3}, {"media": 9.4, "nr": 2}, {"media": 9.37, "nr": 3}, {"media": 9.35, "nr": 7}, {"media": 9.32, "nr": 3}, {"media": 9.3, "nr": 4}, {"media": 9.27, "nr": 5}, {"media": 9.25, "nr": 7}, {"media": 9.22, "nr": 4}]}, {"nume": "Filologie", "total": 52, "prag": 8.95, "max": 9.65, "medie": 9.151, "densitatePrag": 36, "densitatePragPct": 69.2, "distributie": [{"media": 9.65, "nr": 1}, {"media": 9.55, "nr": 2}, {"media": 9.5, "nr": 2}, {"media": 9.45, "nr": 2}, {"media": 9.35, "nr": 1}, {"media": 9.32, "nr": 1}, {"media": 9.27, "nr": 1}, {"media": 9.25, "nr": 1}, {"media": 9.22, "nr": 2}, {"media": 9.2, "nr": 1}, {"media": 9.17, "nr": 2}, {"media": 9.15, "nr": 3}, {"media": 9.12, "nr": 6}, {"media": 9.1, "nr": 4}, {"media": 9.07, "nr": 2}, {"media": 9.05, "nr": 8}, {"media": 9.02, "nr": 5}, {"media": 9.0, "nr": 3}, {"media": 8.97, "nr": 4}, {"media": 8.95, "nr": 1}]}]}, {"rank": 17, "cod": "Liceul Teoretic „Nicolae Iorga”", "nume": "Liceul Teoretic „Nicolae Iorga”", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 9.2, "max": 9.9, "medie": 9.296, "densitatePrag": 44, "densitatePragPct": 84.6, "distributie": [{"media": 9.9, "nr": 1}, {"media": 9.57, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.5, "nr": 2}, {"media": 9.45, "nr": 1}, {"media": 9.42, "nr": 1}, {"media": 9.37, "nr": 3}, {"media": 9.35, "nr": 2}, {"media": 9.32, "nr": 2}, {"media": 9.3, "nr": 4}, {"media": 9.27, "nr": 4}, {"media": 9.25, "nr": 7}, {"media": 9.22, "nr": 6}, {"media": 9.2, "nr": 16}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.17, "max": 9.62, "medie": 9.293, "densitatePrag": 45, "densitatePragPct": 86.5, "distributie": [{"media": 9.62, "nr": 1}, {"media": 9.57, "nr": 1}, {"media": 9.52, "nr": 2}, {"media": 9.47, "nr": 1}, {"media": 9.42, "nr": 2}, {"media": 9.37, "nr": 6}, {"media": 9.35, "nr": 3}, {"media": 9.32, "nr": 2}, {"media": 9.3, "nr": 3}, {"media": 9.27, "nr": 4}, {"media": 9.25, "nr": 7}, {"media": 9.22, "nr": 6}, {"media": 9.2, "nr": 11}, {"media": 9.17, "nr": 3}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.07, "max": 9.62, "medie": 9.152, "densitatePrag": 23, "densitatePragPct": 88.5, "distributie": [{"media": 9.62, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.3, "nr": 1}, {"media": 9.2, "nr": 1}, {"media": 9.17, "nr": 3}, {"media": 9.15, "nr": 3}, {"media": 9.12, "nr": 5}, {"media": 9.1, "nr": 3}, {"media": 9.07, "nr": 8}]}, {"nume": "Filologie", "total": 26, "prag": 8.97, "max": 9.32, "medie": 9.043, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 9.32, "nr": 1}, {"media": 9.15, "nr": 1}, {"media": 9.12, "nr": 1}, {"media": 9.1, "nr": 2}, {"media": 9.07, "nr": 1}, {"media": 9.05, "nr": 5}, {"media": 9.02, "nr": 5}, {"media": 9.0, "nr": 7}, {"media": 8.97, "nr": 3}]}]}, {"rank": 18, "cod": "Colegiul Naţional „Mihai Eminescu”", "nume": "Colegiul Naţional „Mihai Eminescu”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 9.12, "max": 9.55, "medie": 9.229, "densitatePrag": 44, "densitatePragPct": 84.6, "distributie": [{"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 2}, {"media": 9.4, "nr": 2}, {"media": 9.37, "nr": 1}, {"media": 9.35, "nr": 2}, {"media": 9.32, "nr": 2}, {"media": 9.3, "nr": 1}, {"media": 9.27, "nr": 2}, {"media": 9.25, "nr": 4}, {"media": 9.22, "nr": 7}, {"media": 9.2, "nr": 6}, {"media": 9.17, "nr": 6}, {"media": 9.15, "nr": 9}, {"media": 9.12, "nr": 7}]}, {"nume": "Matematică-Informatică", "total": 104, "prag": 9.1, "max": 9.62, "medie": 9.191, "densitatePrag": 95, "densitatePragPct": 91.3, "distributie": [{"media": 9.62, "nr": 1}, {"media": 9.45, "nr": 1}, {"media": 9.4, "nr": 3}, {"media": 9.35, "nr": 2}, {"media": 9.32, "nr": 2}, {"media": 9.3, "nr": 3}, {"media": 9.27, "nr": 9}, {"media": 9.25, "nr": 5}, {"media": 9.22, "nr": 10}, {"media": 9.2, "nr": 10}, {"media": 9.17, "nr": 12}, {"media": 9.15, "nr": 8}, {"media": 9.12, "nr": 21}, {"media": 9.1, "nr": 17}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 9.05, "max": 9.45, "medie": 9.159, "densitatePrag": 21, "densitatePragPct": 80.8, "distributie": [{"media": 9.45, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.37, "nr": 1}, {"media": 9.35, "nr": 2}, {"media": 9.25, "nr": 2}, {"media": 9.22, "nr": 1}, {"media": 9.17, "nr": 1}, {"media": 9.15, "nr": 2}, {"media": 9.1, "nr": 4}, {"media": 9.07, "nr": 4}, {"media": 9.05, "nr": 7}]}, {"nume": "Filologie", "total": 52, "prag": 8.97, "max": 9.35, "medie": 9.036, "densitatePrag": 51, "densitatePragPct": 98.1, "distributie": [{"media": 9.35, "nr": 1}, {"media": 9.17, "nr": 2}, {"media": 9.15, "nr": 1}, {"media": 9.12, "nr": 1}, {"media": 9.1, "nr": 2}, {"media": 9.07, "nr": 4}, {"media": 9.05, "nr": 9}, {"media": 9.02, "nr": 13}, {"media": 9.0, "nr": 10}, {"media": 8.97, "nr": 9}]}]}, {"rank": 19, "cod": "Colegiul Național „Ion Neculce”", "nume": "Colegiul Național „Ion Neculce”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 9.07, "max": 9.6, "medie": 9.158, "densitatePrag": 72, "densitatePragPct": 92.3, "distributie": [{"media": 9.6, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.37, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.32, "nr": 1}, {"media": 9.27, "nr": 2}, {"media": 9.25, "nr": 2}, {"media": 9.22, "nr": 5}, {"media": 9.2, "nr": 5}, {"media": 9.17, "nr": 8}, {"media": 9.15, "nr": 8}, {"media": 9.12, "nr": 13}, {"media": 9.1, "nr": 13}, {"media": 9.07, "nr": 16}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 8.97, "max": 9.57, "medie": 9.123, "densitatePrag": 43, "densitatePragPct": 82.7, "distributie": [{"media": 9.57, "nr": 1}, {"media": 9.37, "nr": 1}, {"media": 9.32, "nr": 1}, {"media": 9.27, "nr": 2}, {"media": 9.25, "nr": 1}, {"media": 9.22, "nr": 1}, {"media": 9.2, "nr": 2}, {"media": 9.17, "nr": 6}, {"media": 9.15, "nr": 6}, {"media": 9.12, "nr": 6}, {"media": 9.1, "nr": 7}, {"media": 9.07, "nr": 2}, {"media": 9.05, "nr": 6}, {"media": 9.02, "nr": 1}, {"media": 9.0, "nr": 6}, {"media": 8.97, "nr": 3}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 8.97, "max": 9.32, "medie": 9.074, "densitatePrag": 23, "densitatePragPct": 88.5, "distributie": [{"media": 9.32, "nr": 1}, {"media": 9.27, "nr": 1}, {"media": 9.25, "nr": 1}, {"media": 9.12, "nr": 5}, {"media": 9.1, "nr": 2}, {"media": 9.07, "nr": 3}, {"media": 9.05, "nr": 3}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 4}, {"media": 8.97, "nr": 4}]}, {"nume": "Filologie", "total": 52, "prag": 8.87, "max": 9.07, "medie": 8.944, "densitatePrag": 52, "densitatePragPct": 100.0, "distributie": [{"media": 9.07, "nr": 2}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 1}, {"media": 9.0, "nr": 4}, {"media": 8.97, "nr": 7}, {"media": 8.95, "nr": 16}, {"media": 8.92, "nr": 5}, {"media": 8.9, "nr": 7}, {"media": 8.87, "nr": 8}]}]}, {"rank": 20, "cod": "Liceul Teoretic „Jean Monnet”", "nume": "Liceul Teoretic „Jean Monnet”", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 8.97, "max": 9.77, "medie": 9.197, "densitatePrag": 32, "densitatePragPct": 61.5, "distributie": [{"media": 9.77, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.7, "nr": 1}, {"media": 9.67, "nr": 1}, {"media": 9.57, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.3, "nr": 4}, {"media": 9.27, "nr": 2}, {"media": 9.25, "nr": 1}, {"media": 9.22, "nr": 2}, {"media": 9.2, "nr": 1}, {"media": 9.17, "nr": 1}, {"media": 9.15, "nr": 5}, {"media": 9.1, "nr": 2}, {"media": 9.07, "nr": 3}, {"media": 9.05, "nr": 7}, {"media": 9.02, "nr": 6}, {"media": 9.0, "nr": 7}, {"media": 8.97, "nr": 1}]}, {"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 8.95, "max": 9.87, "medie": 9.109, "densitatePrag": 19, "densitatePragPct": 73.1, "distributie": [{"media": 9.87, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.22, "nr": 1}, {"media": 9.2, "nr": 2}, {"media": 9.17, "nr": 1}, {"media": 9.15, "nr": 1}, {"media": 9.12, "nr": 1}, {"media": 9.07, "nr": 2}, {"media": 9.05, "nr": 3}, {"media": 9.03, "nr": 1}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 1}, {"media": 8.97, "nr": 6}, {"media": 8.95, "nr": 2}]}, {"nume": "Ştiinţe Sociale", "total": 52, "prag": 8.8, "max": 9.72, "medie": 8.935, "densitatePrag": 43, "densitatePragPct": 82.7, "distributie": [{"media": 9.72, "nr": 1}, {"media": 9.5, "nr": 2}, {"media": 9.15, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.07, "nr": 2}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 1}, {"media": 8.97, "nr": 2}, {"media": 8.95, "nr": 4}, {"media": 8.92, "nr": 3}, {"media": 8.9, "nr": 8}, {"media": 8.87, "nr": 3}, {"media": 8.85, "nr": 8}, {"media": 8.82, "nr": 8}, {"media": 8.8, "nr": 6}]}]}, {"rank": 21, "cod": "Liceul Teoretic „Ion Barbu”", "nume": "Liceul Teoretic „Ion Barbu”", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 8.95, "max": 9.62, "medie": 9.054, "densitatePrag": 44, "densitatePragPct": 84.6, "distributie": [{"media": 9.62, "nr": 1}, {"media": 9.27, "nr": 1}, {"media": 9.25, "nr": 1}, {"media": 9.22, "nr": 2}, {"media": 9.2, "nr": 2}, {"media": 9.17, "nr": 1}, {"media": 9.15, "nr": 1}, {"media": 9.12, "nr": 2}, {"media": 9.1, "nr": 1}, {"media": 9.07, "nr": 5}, {"media": 9.05, "nr": 4}, {"media": 9.02, "nr": 10}, {"media": 9.0, "nr": 6}, {"media": 8.97, "nr": 9}, {"media": 8.95, "nr": 6}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 8.87, "max": 9.52, "medie": 8.988, "densitatePrag": 44, "densitatePragPct": 84.6, "distributie": [{"media": 9.52, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.3, "nr": 2}, {"media": 9.25, "nr": 1}, {"media": 9.22, "nr": 1}, {"media": 9.12, "nr": 2}, {"media": 9.07, "nr": 2}, {"media": 9.05, "nr": 3}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 4}, {"media": 8.97, "nr": 3}, {"media": 8.95, "nr": 4}, {"media": 8.92, "nr": 4}, {"media": 8.9, "nr": 10}, {"media": 8.87, "nr": 12}]}, {"nume": "Ştiinţe Sociale", "total": 52, "prag": 8.7, "max": 9.3, "medie": 8.849, "densitatePrag": 40, "densitatePragPct": 76.9, "distributie": [{"media": 9.3, "nr": 1}, {"media": 9.22, "nr": 2}, {"media": 9.17, "nr": 2}, {"media": 9.12, "nr": 1}, {"media": 9.05, "nr": 1}, {"media": 8.95, "nr": 1}, {"media": 8.92, "nr": 4}, {"media": 8.9, "nr": 5}, {"media": 8.87, "nr": 2}, {"media": 8.85, "nr": 6}, {"media": 8.82, "nr": 1}, {"media": 8.77, "nr": 4}, {"media": 8.75, "nr": 8}, {"media": 8.72, "nr": 11}, {"media": 8.7, "nr": 3}]}]}, {"rank": 22, "cod": "Colegiul Național „Tudor Vladimirescu”", "nume": "Colegiul Național „Tudor Vladimirescu”", "specializari": [{"nume": "Matematică-Informatică", "total": 52, "prag": 8.82, "max": 9.6, "medie": 8.983, "densitatePrag": 37, "densitatePragPct": 71.2, "distributie": [{"media": 9.6, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.27, "nr": 1}, {"media": 9.22, "nr": 2}, {"media": 9.15, "nr": 1}, {"media": 9.12, "nr": 2}, {"media": 9.1, "nr": 1}, {"media": 9.07, "nr": 4}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 4}, {"media": 9.0, "nr": 2}, {"media": 8.97, "nr": 1}, {"media": 8.95, "nr": 3}, {"media": 8.92, "nr": 5}, {"media": 8.9, "nr": 6}, {"media": 8.87, "nr": 4}, {"media": 8.85, "nr": 6}, {"media": 8.82, "nr": 6}]}, {"nume": "Ştiinţe ale Naturii", "total": 52, "prag": 8.7, "max": 9.27, "medie": 8.846, "densitatePrag": 40, "densitatePragPct": 76.9, "distributie": [{"media": 9.27, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 1}, {"media": 8.95, "nr": 3}, {"media": 8.92, "nr": 2}, {"media": 8.9, "nr": 3}, {"media": 8.87, "nr": 5}, {"media": 8.85, "nr": 4}, {"media": 8.82, "nr": 4}, {"media": 8.8, "nr": 4}, {"media": 8.77, "nr": 8}, {"media": 8.75, "nr": 4}, {"media": 8.72, "nr": 6}, {"media": 8.7, "nr": 2}]}, {"nume": "Filologie", "total": 26, "prag": 8.6, "max": 9.47, "medie": 8.755, "densitatePrag": 20, "densitatePragPct": 76.9, "distributie": [{"media": 9.47, "nr": 1}, {"media": 9.12, "nr": 1}, {"media": 8.97, "nr": 1}, {"media": 8.92, "nr": 2}, {"media": 8.85, "nr": 1}, {"media": 8.8, "nr": 2}, {"media": 8.75, "nr": 1}, {"media": 8.72, "nr": 2}, {"media": 8.7, "nr": 1}, {"media": 8.67, "nr": 2}, {"media": 8.65, "nr": 4}, {"media": 8.62, "nr": 7}, {"media": 8.6, "nr": 1}]}, {"nume": "Ştiinţe Sociale", "total": 78, "prag": 8.5, "max": 9.42, "medie": 8.65, "densitatePrag": 62, "densitatePragPct": 79.5, "distributie": [{"media": 9.42, "nr": 1}, {"media": 9.35, "nr": 1}, {"media": 9.07, "nr": 1}, {"media": 9.02, "nr": 1}, {"media": 8.95, "nr": 1}, {"media": 8.92, "nr": 1}, {"media": 8.9, "nr": 1}, {"media": 8.87, "nr": 1}, {"media": 8.85, "nr": 3}, {"media": 8.8, "nr": 1}, {"media": 8.77, "nr": 1}, {"media": 8.75, "nr": 1}, {"media": 8.72, "nr": 2}, {"media": 8.7, "nr": 2}, {"media": 8.67, "nr": 3}, {"media": 8.65, "nr": 7}, {"media": 8.62, "nr": 5}, {"media": 8.6, "nr": 12}, {"media": 8.57, "nr": 7}, {"media": 8.55, "nr": 9}, {"media": 8.52, "nr": 9}, {"media": 8.5, "nr": 8}]}]}, {"rank": 23, "cod": "Colegiul Economic „Virgil Madgearu”", "nume": "Colegiul Economic „Virgil Madgearu”", "specializari": [{"nume": "Turism şi alimentaţie", "total": 24, "prag": 8.8, "max": 9.2, "medie": 8.955, "densitatePrag": 16, "densitatePragPct": 66.7, "distributie": [{"media": 9.2, "nr": 1}, {"media": 9.15, "nr": 1}, {"media": 9.12, "nr": 1}, {"media": 9.07, "nr": 1}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 1}, {"media": 8.97, "nr": 2}, {"media": 8.95, "nr": 1}, {"media": 8.92, "nr": 3}, {"media": 8.9, "nr": 2}, {"media": 8.87, "nr": 2}, {"media": 8.82, "nr": 3}, {"media": 8.8, "nr": 2}]}, {"nume": "Economic", "total": 216, "prag": 8.55, "max": 9.7, "medie": 8.793, "densitatePrag": 126, "densitatePragPct": 58.3, "distributie": [{"media": 9.7, "nr": 1}, {"media": 9.67, "nr": 1}, {"media": 9.6, "nr": 1}, {"media": 9.5, "nr": 1}, {"media": 9.42, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.37, "nr": 2}, {"media": 9.35, "nr": 2}, {"media": 9.32, "nr": 1}, {"media": 9.3, "nr": 2}, {"media": 9.22, "nr": 1}, {"media": 9.2, "nr": 2}, {"media": 9.17, "nr": 2}, {"media": 9.15, "nr": 1}, {"media": 9.12, "nr": 2}, {"media": 9.1, "nr": 1}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 5}, {"media": 8.97, "nr": 4}, {"media": 8.95, "nr": 9}, {"media": 8.92, "nr": 2}, {"media": 8.9, "nr": 9}, {"media": 8.87, "nr": 3}, {"media": 8.85, "nr": 7}, {"media": 8.82, "nr": 6}, {"media": 8.8, "nr": 10}, {"media": 8.77, "nr": 9}, {"media": 8.75, "nr": 11}, {"media": 8.72, "nr": 16}, {"media": 8.7, "nr": 17}, {"media": 8.67, "nr": 16}, {"media": 8.65, "nr": 13}, {"media": 8.62, "nr": 13}, {"media": 8.6, "nr": 19}, {"media": 8.57, "nr": 17}, {"media": 8.55, "nr": 4}]}]}, {"rank": 24, "cod": "Liceul Teoretic „C.A. Rosetti”", "nume": "Liceul Teoretic „C.A. Rosetti”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 8.8, "max": 9.77, "medie": 8.967, "densitatePrag": 56, "densitatePragPct": 71.8, "distributie": [{"media": 9.77, "nr": 1}, {"media": 9.27, "nr": 2}, {"media": 9.25, "nr": 1}, {"media": 9.17, "nr": 3}, {"media": 9.15, "nr": 2}, {"media": 9.12, "nr": 3}, {"media": 9.07, "nr": 7}, {"media": 9.05, "nr": 1}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 3}, {"media": 8.97, "nr": 4}, {"media": 8.95, "nr": 6}, {"media": 8.92, "nr": 14}, {"media": 8.9, "nr": 8}, {"media": 8.87, "nr": 4}, {"media": 8.85, "nr": 4}, {"media": 8.82, "nr": 8}, {"media": 8.8, "nr": 5}]}, {"nume": "Filologie", "total": 26, "prag": 8.75, "max": 9.02, "medie": 8.845, "densitatePrag": 22, "densitatePragPct": 84.6, "distributie": [{"media": 9.02, "nr": 1}, {"media": 9.0, "nr": 2}, {"media": 8.97, "nr": 1}, {"media": 8.95, "nr": 1}, {"media": 8.92, "nr": 2}, {"media": 8.9, "nr": 3}, {"media": 8.87, "nr": 2}, {"media": 8.8, "nr": 2}, {"media": 8.77, "nr": 7}, {"media": 8.75, "nr": 5}]}, {"nume": "Ştiinţe ale Naturii", "total": 78, "prag": 8.75, "max": 9.22, "medie": 8.862, "densitatePrag": 62, "densitatePragPct": 79.5, "distributie": [{"media": 9.22, "nr": 1}, {"media": 9.17, "nr": 1}, {"media": 9.15, "nr": 1}, {"media": 9.07, "nr": 2}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 2}, {"media": 9.0, "nr": 2}, {"media": 8.97, "nr": 5}, {"media": 8.95, "nr": 2}, {"media": 8.92, "nr": 5}, {"media": 8.9, "nr": 7}, {"media": 8.87, "nr": 3}, {"media": 8.85, "nr": 4}, {"media": 8.82, "nr": 6}, {"media": 8.8, "nr": 8}, {"media": 8.77, "nr": 9}, {"media": 8.75, "nr": 18}]}]}, {"rank": 25, "cod": "Liceul Teoretic „George Călinescu”", "nume": "Liceul Teoretic „George Călinescu”", "specializari": [{"nume": "Matematică-Informatică", "total": 78, "prag": 8.77, "max": 9.12, "medie": 8.868, "densitatePrag": 72, "densitatePragPct": 92.3, "distributie": [{"media": 9.12, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.05, "nr": 1}, {"media": 9.02, "nr": 3}, {"media": 8.97, "nr": 2}, {"media": 8.95, "nr": 5}, {"media": 8.92, "nr": 7}, {"media": 8.9, "nr": 10}, {"media": 8.87, "nr": 5}, {"media": 8.85, "nr": 15}, {"media": 8.82, "nr": 4}, {"media": 8.8, "nr": 12}, {"media": 8.77, "nr": 12}]}, {"nume": "Filologie", "total": 78, "prag": 8.62, "max": 9.02, "medie": 8.706, "densitatePrag": 73, "densitatePragPct": 93.6, "distributie": [{"media": 9.02, "nr": 1}, {"media": 8.9, "nr": 1}, {"media": 8.87, "nr": 2}, {"media": 8.85, "nr": 1}, {"media": 8.82, "nr": 1}, {"media": 8.8, "nr": 1}, {"media": 8.77, "nr": 10}, {"media": 8.75, "nr": 4}, {"media": 8.72, "nr": 9}, {"media": 8.7, "nr": 12}, {"media": 8.67, "nr": 15}, {"media": 8.65, "nr": 10}, {"media": 8.62, "nr": 11}]}]}, {"rank": 26, "cod": "Liceul Teologic Adventist „Ştefan Demetrescu”", "nume": "Liceul Teologic Adventist „Ştefan Demetrescu”", "specializari": [{"nume": "Matematică-Informatică", "total": 26, "prag": 8.67, "max": 9.75, "medie": 9.177, "densitatePrag": 6, "densitatePragPct": 23.1, "distributie": [{"media": 9.75, "nr": 1}, {"media": 9.67, "nr": 3}, {"media": 9.65, "nr": 1}, {"media": 9.62, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.4, "nr": 1}, {"media": 9.37, "nr": 1}, {"media": 9.32, "nr": 1}, {"media": 9.22, "nr": 1}, {"media": 9.2, "nr": 1}, {"media": 9.17, "nr": 1}, {"media": 9.15, "nr": 1}, {"media": 9.02, "nr": 1}, {"media": 9.0, "nr": 2}, {"media": 8.97, "nr": 1}, {"media": 8.95, "nr": 1}, {"media": 8.9, "nr": 1}, {"media": 8.87, "nr": 1}, {"media": 8.75, "nr": 2}, {"media": 8.72, "nr": 1}, {"media": 8.67, "nr": 2}]}, {"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 8.37, "max": 9.85, "medie": 8.92, "densitatePrag": 6, "densitatePragPct": 23.1, "distributie": [{"media": 9.85, "nr": 1}, {"media": 9.67, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 1}, {"media": 9.42, "nr": 1}, {"media": 9.32, "nr": 1}, {"media": 9.12, "nr": 1}, {"media": 9.1, "nr": 1}, {"media": 9.0, "nr": 2}, {"media": 8.95, "nr": 1}, {"media": 8.92, "nr": 1}, {"media": 8.9, "nr": 1}, {"media": 8.87, "nr": 2}, {"media": 8.77, "nr": 1}, {"media": 8.7, "nr": 1}, {"media": 8.67, "nr": 1}, {"media": 8.65, "nr": 1}, {"media": 8.6, "nr": 1}, {"media": 8.5, "nr": 1}, {"media": 8.47, "nr": 1}, {"media": 8.45, "nr": 1}, {"media": 8.42, "nr": 2}, {"media": 8.37, "nr": 1}]}, {"nume": "Filologie", "total": 26, "prag": 7.95, "max": 9.32, "medie": 8.415, "densitatePrag": 10, "densitatePragPct": 38.5, "distributie": [{"media": 9.32, "nr": 1}, {"media": 9.27, "nr": 1}, {"media": 9.22, "nr": 1}, {"media": 8.95, "nr": 1}, {"media": 8.87, "nr": 1}, {"media": 8.77, "nr": 1}, {"media": 8.65, "nr": 1}, {"media": 8.55, "nr": 1}, {"media": 8.52, "nr": 1}, {"media": 8.47, "nr": 1}, {"media": 8.37, "nr": 1}, {"media": 8.32, "nr": 1}, {"media": 8.3, "nr": 3}, {"media": 8.17, "nr": 1}, {"media": 8.15, "nr": 1}, {"media": 8.12, "nr": 2}, {"media": 8.07, "nr": 2}, {"media": 8.02, "nr": 1}, {"media": 8.0, "nr": 2}, {"media": 7.95, "nr": 2}]}]}, {"rank": 27, "cod": "Colegiul Național „Emil Racoviță”", "nume": "Colegiul Național „Emil Racoviță”", "specializari": [{"nume": "Matematică-Informatică", "total": 26, "prag": 8.62, "max": 8.95, "medie": 8.702, "densitatePrag": 22, "densitatePragPct": 84.6, "distributie": [{"media": 8.95, "nr": 1}, {"media": 8.9, "nr": 1}, {"media": 8.85, "nr": 2}, {"media": 8.77, "nr": 2}, {"media": 8.72, "nr": 1}, {"media": 8.7, "nr": 2}, {"media": 8.67, "nr": 6}, {"media": 8.65, "nr": 7}, {"media": 8.62, "nr": 4}]}, {"nume": "Filologie", "total": 78, "prag": 8.42, "max": 9.27, "medie": 8.555, "densitatePrag": 66, "densitatePragPct": 84.6, "distributie": [{"media": 9.27, "nr": 1}, {"media": 9.15, "nr": 1}, {"media": 9.07, "nr": 1}, {"media": 8.85, "nr": 1}, {"media": 8.82, "nr": 2}, {"media": 8.75, "nr": 1}, {"media": 8.7, "nr": 2}, {"media": 8.67, "nr": 2}, {"media": 8.65, "nr": 1}, {"media": 8.62, "nr": 4}, {"media": 8.6, "nr": 3}, {"media": 8.57, "nr": 3}, {"media": 8.55, "nr": 9}, {"media": 8.52, "nr": 7}, {"media": 8.5, "nr": 11}, {"media": 8.47, "nr": 9}, {"media": 8.45, "nr": 15}, {"media": 8.42, "nr": 5}]}]}, {"rank": 28, "cod": "Colegiul Național „Școala Centrală”", "nume": "Colegiul Național „Școala Centrală”", "specializari": [{"nume": "Matematică-Informatică", "total": 130, "prag": 8.6, "max": 9.8, "medie": 9.093, "densitatePrag": 8, "densitatePragPct": 6.2, "distributie": [{"media": 9.8, "nr": 1}, {"media": 9.75, "nr": 1}, {"media": 9.72, "nr": 1}, {"media": 9.67, "nr": 1}, {"media": 9.55, "nr": 1}, {"media": 9.52, "nr": 1}, {"media": 9.47, "nr": 1}, {"media": 9.45, "nr": 1}, {"media": 9.42, "nr": 1}, {"media": 9.37, "nr": 1}, {"media": 9.27, "nr": 4}, {"media": 9.25, "nr": 3}, {"media": 9.22, "nr": 2}, {"media": 9.2, "nr": 7}, {"media": 9.17, "nr": 6}, {"media": 9.15, "nr": 8}, {"media": 9.12, "nr": 11}, {"media": 9.1, "nr": 11}, {"media": 9.07, "nr": 13}, {"media": 9.05, "nr": 18}, {"media": 9.02, "nr": 4}, {"media": 9.0, "nr": 3}, {"media": 8.97, "nr": 6}, {"media": 8.95, "nr": 9}, {"media": 8.92, "nr": 4}, {"media": 8.9, "nr": 1}, {"media": 8.87, "nr": 1}, {"media": 8.85, "nr": 1}, {"media": 8.8, "nr": 1}, {"media": 8.77, "nr": 1}, {"media": 8.72, "nr": 1}, {"media": 8.7, "nr": 1}, {"media": 8.67, "nr": 1}, {"media": 8.6, "nr": 3}]}, {"nume": "Filologie", "total": 131, "prag": 8.4, "max": 9.32, "medie": 8.866, "densitatePrag": 13, "densitatePragPct": 9.9, "distributie": [{"media": 9.32, "nr": 1}, {"media": 9.22, "nr": 1}, {"media": 9.17, "nr": 1}, {"media": 9.15, "nr": 1}, {"media": 9.12, "nr": 2}, {"media": 9.1, "nr": 2}, {"media": 9.07, "nr": 1}, {"media": 9.05, "nr": 2}, {"media": 9.02, "nr": 5}, {"media": 9.0, "nr": 5}, {"media": 8.97, "nr": 4}, {"media": 8.95, "nr": 8}, {"media": 8.92, "nr": 15}, {"media": 8.9, "nr": 19}, {"media": 8.87, "nr": 14}, {"media": 8.85, "nr": 13}, {"media": 8.82, "nr": 8}, {"media": 8.8, "nr": 10}, {"media": 8.77, "nr": 2}, {"media": 8.72, "nr": 1}, {"media": 8.67, "nr": 2}, {"media": 8.65, "nr": 1}, {"media": 8.57, "nr": 3}, {"media": 8.52, "nr": 1}, {"media": 8.5, "nr": 4}, {"media": 8.47, "nr": 3}, {"media": 8.42, "nr": 1}, {"media": 8.4, "nr": 1}]}]}, {"rank": 29, "cod": "Liceul Teoretic „Ștefan Odobleja”", "nume": "Liceul Teoretic „Ștefan Odobleja”", "specializari": [{"nume": "Ştiinţe ale Naturii", "total": 26, "prag": 8.55, "max": 9.12, "medie": 8.693, "densitatePrag": 17, "densitatePragPct": 65.4, "distributie": [{"media": 9.12, "nr": 1}, {"media": 8.92, "nr": 2}, {"media": 8.9, "nr": 1}, {"media": 8.82, "nr": 2}, {"media": 8.77, "nr": 3}, {"media": 8.7, "nr": 2}, {"media": 8.67, "nr": 2}, {"media": 8.62, "nr": 1}, {"media": 8.6, "nr": 3}, {"media": 8.57, "nr": 5}, {"media": 8.55, "nr": 4}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 8.4, "max": 9.35, "medie": 8.548, "densitatePrag": 20, "densitatePragPct": 76.9, "distributie": [{"media": 9.35, "nr": 1}, {"media": 8.87, "nr": 1}, {"media": 8.7, "nr": 1}, {"media": 8.67, "nr": 1}, {"media": 8.65, "nr": 1}, {"media": 8.62, "nr": 1}, {"media": 8.57, "nr": 2}, {"media": 8.52, "nr": 3}, {"media": 8.5, "nr": 1}, {"media": 8.47, "nr": 4}, {"media": 8.45, "nr": 4}, {"media": 8.42, "nr": 5}, {"media": 8.4, "nr": 1}]}, {"nume": "Matematică-Informatică", "total": 78, "prag": 8.37, "max": 9.12, "medie": 8.614, "densitatePrag": 40, "densitatePragPct": 51.3, "distributie": [{"media": 9.12, "nr": 1}, {"media": 9.07, "nr": 1}, {"media": 8.92, "nr": 2}, {"media": 8.9, "nr": 2}, {"media": 8.85, "nr": 4}, {"media": 8.82, "nr": 3}, {"media": 8.8, "nr": 3}, {"media": 8.77, "nr": 2}, {"media": 8.75, "nr": 2}, {"media": 8.7, "nr": 2}, {"media": 8.67, "nr": 2}, {"media": 8.65, "nr": 4}, {"media": 8.62, "nr": 5}, {"media": 8.6, "nr": 5}, {"media": 8.57, "nr": 2}, {"media": 8.55, "nr": 7}, {"media": 8.52, "nr": 3}, {"media": 8.5, "nr": 6}, {"media": 8.47, "nr": 11}, {"media": 8.45, "nr": 3}, {"media": 8.42, "nr": 3}, {"media": 8.4, "nr": 4}, {"media": 8.37, "nr": 1}]}, {"nume": "Filologie", "total": 26, "prag": 8.3, "max": 8.57, "medie": 8.373, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 8.57, "nr": 1}, {"media": 8.5, "nr": 1}, {"media": 8.47, "nr": 1}, {"media": 8.42, "nr": 2}, {"media": 8.4, "nr": 5}, {"media": 8.37, "nr": 2}, {"media": 8.35, "nr": 5}, {"media": 8.32, "nr": 7}, {"media": 8.3, "nr": 2}]}]}, {"rank": 30, "cod": "Colegiul Național „Victor Babeș”", "nume": "Colegiul Național „Victor Babeș”", "specializari": [{"nume": "Matematică-Informatică", "total": 26, "prag": 8.5, "max": 8.72, "medie": 8.58, "densitatePrag": 25, "densitatePragPct": 96.2, "distributie": [{"media": 8.72, "nr": 1}, {"media": 8.7, "nr": 1}, {"media": 8.67, "nr": 3}, {"media": 8.65, "nr": 1}, {"media": 8.62, "nr": 3}, {"media": 8.6, "nr": 2}, {"media": 8.57, "nr": 2}, {"media": 8.55, "nr": 5}, {"media": 8.52, "nr": 3}, {"media": 8.5, "nr": 5}]}, {"nume": "Filologie", "total": 26, "prag": 8.15, "max": 8.77, "medie": 8.378, "densitatePrag": 16, "densitatePragPct": 61.5, "distributie": [{"media": 8.77, "nr": 1}, {"media": 8.6, "nr": 1}, {"media": 8.57, "nr": 1}, {"media": 8.55, "nr": 2}, {"media": 8.52, "nr": 2}, {"media": 8.42, "nr": 2}, {"media": 8.4, "nr": 1}, {"media": 8.35, "nr": 5}, {"media": 8.32, "nr": 1}, {"media": 8.3, "nr": 2}, {"media": 8.27, "nr": 3}, {"media": 8.25, "nr": 1}, {"media": 8.22, "nr": 2}, {"media": 8.2, "nr": 1}, {"media": 8.15, "nr": 1}]}, {"nume": "Ştiinţe Sociale", "total": 26, "prag": 8.1, "max": 9.07, "medie": 8.309, "densitatePrag": 17, "densitatePragPct": 65.4, "distributie": [{"media": 9.07, "nr": 1}, {"media": 8.67, "nr": 1}, {"media": 8.6, "nr": 1}, {"media": 8.47, "nr": 1}, {"media": 8.42, "nr": 3}, {"media": 8.4, "nr": 1}, {"media": 8.37, "nr": 1}, {"media": 8.3, "nr": 1}, {"media": 8.27, "nr": 3}, {"media": 8.25, "nr": 2}, {"media": 8.17, "nr": 4}, {"media": 8.15, "nr": 3}, {"media": 8.12, "nr": 3}, {"media": 8.1, "nr": 1}]}, {"nume": "Ştiinţe ale Naturii", "total": 104, "prag": 8.02, "max": 9.02, "medie": 8.34, "densitatePrag": 35, "densitatePragPct": 33.7, "distributie": [{"media": 9.02, "nr": 1}, {"media": 8.95, "nr": 1}, {"media": 8.92, "nr": 1}, {"media": 8.82, "nr": 2}, {"media": 8.75, "nr": 1}, {"media": 8.7, "nr": 1}, {"media": 8.67, "nr": 1}, {"media": 8.65, "nr": 1}, {"media": 8.6, "nr": 1}, {"media": 8.57, "nr": 1}, {"media": 8.55, "nr": 5}, {"media": 8.52, "nr": 3}, {"media": 8.5, "nr": 4}, {"media": 8.47, "nr": 7}, {"media": 8.45, "nr": 5}, {"media": 8.42, "nr": 3}, {"media": 8.4, "nr": 1}, {"media": 8.37, "nr": 4}, {"media": 8.35, "nr": 3}, {"media": 8.32, "nr": 8}, {"media": 8.3, "nr": 4}, {"media": 8.27, "nr": 6}, {"media": 8.25, "nr": 5}, {"media": 8.22, "nr": 3}, {"media": 8.2, "nr": 6}, {"media": 8.17, "nr": 1}, {"media": 8.15, "nr": 7}, {"media": 8.1, "nr": 6}, {"media": 8.07, "nr": 4}, {"media": 8.05, "nr": 5}, {"media": 8.02, "nr": 3}]}]}], "totalLicee": 95, "totalNerepartizati": 52, "dataExtragere": "2025-07-23", "citywide": {"total": 14953, "distributie": [{"media": 10.0, "nr": 32}, {"media": 9.97, "nr": 22}, {"media": 9.95, "nr": 44}, {"media": 9.92, "nr": 44}, {"media": 9.9, "nr": 75}, {"media": 9.87, "nr": 64}, {"media": 9.86, "nr": 1}, {"media": 9.85, "nr": 78}, {"media": 9.82, "nr": 87}, {"media": 9.81, "nr": 1}, {"media": 9.8, "nr": 79}, {"media": 9.78, "nr": 1}, {"media": 9.77, "nr": 84}, {"media": 9.76, "nr": 2}, {"media": 9.75, "nr": 102}, {"media": 9.72, "nr": 108}, {"media": 9.7, "nr": 107}, {"media": 9.68, "nr": 1}, {"media": 9.67, "nr": 97}, {"media": 9.65, "nr": 116}, {"media": 9.63, "nr": 2}, {"media": 9.62, "nr": 112}, {"media": 9.6, "nr": 117}, {"media": 9.58, "nr": 1}, {"media": 9.57, "nr": 109}, {"media": 9.56, "nr": 2}, {"media": 9.55, "nr": 123}, {"media": 9.52, "nr": 107}, {"media": 9.5, "nr": 138}, {"media": 9.48, "nr": 2}, {"media": 9.47, "nr": 95}, {"media": 9.46, "nr": 1}, {"media": 9.45, "nr": 123}, {"media": 9.43, "nr": 1}, {"media": 9.42, "nr": 110}, {"media": 9.4, "nr": 130}, {"media": 9.38, "nr": 1}, {"media": 9.37, "nr": 97}, {"media": 9.36, "nr": 3}, {"media": 9.35, "nr": 127}, {"media": 9.32, "nr": 126}, {"media": 9.3, "nr": 106}, {"media": 9.28, "nr": 1}, {"media": 9.27, "nr": 132}, {"media": 9.25, "nr": 108}, {"media": 9.23, "nr": 3}, {"media": 9.22, "nr": 118}, {"media": 9.21, "nr": 2}, {"media": 9.2, "nr": 125}, {"media": 9.18, "nr": 1}, {"media": 9.17, "nr": 115}, {"media": 9.16, "nr": 1}, {"media": 9.15, "nr": 105}, {"media": 9.13, "nr": 2}, {"media": 9.12, "nr": 150}, {"media": 9.11, "nr": 1}, {"media": 9.1, "nr": 111}, {"media": 9.08, "nr": 3}, {"media": 9.07, "nr": 112}, {"media": 9.06, "nr": 1}, {"media": 9.05, "nr": 111}, {"media": 9.03, "nr": 2}, {"media": 9.02, "nr": 107}, {"media": 9.0, "nr": 103}, {"media": 8.98, "nr": 5}, {"media": 8.97, "nr": 98}, {"media": 8.95, "nr": 110}, {"media": 8.93, "nr": 2}, {"media": 8.92, "nr": 112}, {"media": 8.91, "nr": 2}, {"media": 8.9, "nr": 133}, {"media": 8.88, "nr": 1}, {"media": 8.87, "nr": 92}, {"media": 8.85, "nr": 108}, {"media": 8.83, "nr": 1}, {"media": 8.82, "nr": 89}, {"media": 8.81, "nr": 2}, {"media": 8.8, "nr": 87}, {"media": 8.78, "nr": 1}, {"media": 8.77, "nr": 106}, {"media": 8.76, "nr": 2}, {"media": 8.75, "nr": 96}, {"media": 8.73, "nr": 1}, {"media": 8.72, "nr": 105}, {"media": 8.7, "nr": 93}, {"media": 8.67, "nr": 100}, {"media": 8.66, "nr": 1}, {"media": 8.65, "nr": 90}, {"media": 8.62, "nr": 96}, {"media": 8.61, "nr": 1}, {"media": 8.6, "nr": 94}, {"media": 8.57, "nr": 98}, {"media": 8.56, "nr": 1}, {"media": 8.55, "nr": 108}, {"media": 8.52, "nr": 87}, {"media": 8.51, "nr": 2}, {"media": 8.5, "nr": 99}, {"media": 8.48, "nr": 1}, {"media": 8.47, "nr": 111}, {"media": 8.45, "nr": 87}, {"media": 8.43, "nr": 1}, {"media": 8.42, "nr": 95}, {"media": 8.41, "nr": 2}, {"media": 8.4, "nr": 74}, {"media": 8.38, "nr": 1}, {"media": 8.37, "nr": 90}, {"media": 8.36, "nr": 2}, {"media": 8.35, "nr": 101}, {"media": 8.33, "nr": 2}, {"media": 8.32, "nr": 92}, {"media": 8.31, "nr": 1}, {"media": 8.3, "nr": 97}, {"media": 8.28, "nr": 1}, {"media": 8.27, "nr": 98}, {"media": 8.25, "nr": 83}, {"media": 8.22, "nr": 77}, {"media": 8.2, "nr": 99}, {"media": 8.18, "nr": 2}, {"media": 8.17, "nr": 67}, {"media": 8.15, "nr": 73}, {"media": 8.12, "nr": 78}, {"media": 8.11, "nr": 1}, {"media": 8.1, "nr": 82}, {"media": 8.07, "nr": 69}, {"media": 8.05, "nr": 85}, {"media": 8.03, "nr": 2}, {"media": 8.02, "nr": 75}, {"media": 8.01, "nr": 1}, {"media": 8.0, "nr": 90}, {"media": 7.97, "nr": 73}, {"media": 7.96, "nr": 2}, {"media": 7.95, "nr": 81}, {"media": 7.92, "nr": 66}, {"media": 7.91, "nr": 2}, {"media": 7.9, "nr": 67}, {"media": 7.87, "nr": 62}, {"media": 7.86, "nr": 1}, {"media": 7.85, "nr": 81}, {"media": 7.82, "nr": 80}, {"media": 7.81, "nr": 3}, {"media": 7.8, "nr": 84}, {"media": 7.78, "nr": 1}, {"media": 7.77, "nr": 68}, {"media": 7.76, "nr": 1}, {"media": 7.75, "nr": 74}, {"media": 7.72, "nr": 67}, {"media": 7.7, "nr": 67}, {"media": 7.67, "nr": 58}, {"media": 7.65, "nr": 77}, {"media": 7.63, "nr": 1}, {"media": 7.62, "nr": 68}, {"media": 7.61, "nr": 1}, {"media": 7.6, "nr": 73}, {"media": 7.57, "nr": 59}, {"media": 7.55, "nr": 73}, {"media": 7.52, "nr": 66}, {"media": 7.51, "nr": 1}, {"media": 7.5, "nr": 74}, {"media": 7.47, "nr": 51}, {"media": 7.45, "nr": 68}, {"media": 7.42, "nr": 67}, {"media": 7.41, "nr": 1}, {"media": 7.4, "nr": 61}, {"media": 7.37, "nr": 56}, {"media": 7.35, "nr": 63}, {"media": 7.32, "nr": 70}, {"media": 7.3, "nr": 48}, {"media": 7.27, "nr": 70}, {"media": 7.25, "nr": 79}, {"media": 7.23, "nr": 1}, {"media": 7.22, "nr": 52}, {"media": 7.2, "nr": 62}, {"media": 7.17, "nr": 63}, {"media": 7.15, "nr": 64}, {"media": 7.12, "nr": 51}, {"media": 7.1, "nr": 51}, {"media": 7.08, "nr": 1}, {"media": 7.07, "nr": 57}, {"media": 7.05, "nr": 66}, {"media": 7.02, "nr": 58}, {"media": 7.01, "nr": 1}, {"media": 7.0, "nr": 47}, {"media": 6.97, "nr": 60}, {"media": 6.95, "nr": 45}, {"media": 6.93, "nr": 2}, {"media": 6.92, "nr": 48}, {"media": 6.9, "nr": 43}, {"media": 6.87, "nr": 43}, {"media": 6.85, "nr": 51}, {"media": 6.82, "nr": 64}, {"media": 6.8, "nr": 41}, {"media": 6.77, "nr": 46}, {"media": 6.76, "nr": 1}, {"media": 6.75, "nr": 48}, {"media": 6.72, "nr": 40}, {"media": 6.7, "nr": 47}, {"media": 6.68, "nr": 2}, {"media": 6.67, "nr": 60}, {"media": 6.65, "nr": 49}, {"media": 6.62, "nr": 42}, {"media": 6.61, "nr": 1}, {"media": 6.6, "nr": 46}, {"media": 6.57, "nr": 48}, {"media": 6.55, "nr": 51}, {"media": 6.52, "nr": 41}, {"media": 6.51, "nr": 1}, {"media": 6.5, "nr": 56}, {"media": 6.47, "nr": 49}, {"media": 6.45, "nr": 43}, {"media": 6.42, "nr": 55}, {"media": 6.4, "nr": 42}, {"media": 6.37, "nr": 47}, {"media": 6.35, "nr": 44}, {"media": 6.32, "nr": 50}, {"media": 6.3, "nr": 45}, {"media": 6.28, "nr": 1}, {"media": 6.27, "nr": 32}, {"media": 6.25, "nr": 41}, {"media": 6.22, "nr": 44}, {"media": 6.2, "nr": 53}, {"media": 6.17, "nr": 28}, {"media": 6.15, "nr": 43}, {"media": 6.13, "nr": 1}, {"media": 6.12, "nr": 40}, {"media": 6.1, "nr": 44}, {"media": 6.07, "nr": 47}, {"media": 6.05, "nr": 44}, {"media": 6.02, "nr": 36}, {"media": 6.0, "nr": 36}, {"media": 5.97, "nr": 36}, {"media": 5.95, "nr": 42}, {"media": 5.92, "nr": 38}, {"media": 5.9, "nr": 47}, {"media": 5.87, "nr": 39}, {"media": 5.85, "nr": 29}, {"media": 5.82, "nr": 30}, {"media": 5.8, "nr": 35}, {"media": 5.77, "nr": 40}, {"media": 5.75, "nr": 33}, {"media": 5.72, "nr": 32}, {"media": 5.7, "nr": 35}, {"media": 5.67, "nr": 32}, {"media": 5.65, "nr": 31}, {"media": 5.62, "nr": 40}, {"media": 5.6, "nr": 34}, {"media": 5.57, "nr": 28}, {"media": 5.55, "nr": 35}, {"media": 5.52, "nr": 23}, {"media": 5.5, "nr": 38}, {"media": 5.47, "nr": 32}, {"media": 5.45, "nr": 36}, {"media": 5.42, "nr": 40}, {"media": 5.4, "nr": 37}, {"media": 5.37, "nr": 39}, {"media": 5.35, "nr": 36}, {"media": 5.32, "nr": 26}, {"media": 5.31, "nr": 1}, {"media": 5.3, "nr": 28}, {"media": 5.27, "nr": 23}, {"media": 5.25, "nr": 37}, {"media": 5.22, "nr": 21}, {"media": 5.2, "nr": 30}, {"media": 5.17, "nr": 29}, {"media": 5.15, "nr": 37}, {"media": 5.12, "nr": 32}, {"media": 5.1, "nr": 35}, {"media": 5.07, "nr": 31}, {"media": 5.05, "nr": 31}, {"media": 5.02, "nr": 25}, {"media": 5.0, "nr": 32}, {"media": 4.97, "nr": 23}, {"media": 4.95, "nr": 24}, {"media": 4.92, "nr": 18}, {"media": 4.9, "nr": 23}, {"media": 4.87, "nr": 22}, {"media": 4.85, "nr": 27}, {"media": 4.82, "nr": 26}, {"media": 4.8, "nr": 18}, {"media": 4.77, "nr": 12}, {"media": 4.75, "nr": 22}, {"media": 4.72, "nr": 15}, {"media": 4.7, "nr": 24}, {"media": 4.67, "nr": 29}, {"media": 4.65, "nr": 21}, {"media": 4.62, "nr": 25}, {"media": 4.6, "nr": 22}, {"media": 4.57, "nr": 19}, {"media": 4.55, "nr": 25}, {"media": 4.52, "nr": 17}, {"media": 4.5, "nr": 23}, {"media": 4.47, "nr": 16}, {"media": 4.45, "nr": 23}, {"media": 4.42, "nr": 18}, {"media": 4.4, "nr": 23}, {"media": 4.37, "nr": 24}, {"media": 4.35, "nr": 11}, {"media": 4.32, "nr": 25}, {"media": 4.3, "nr": 17}, {"media": 4.27, "nr": 19}, {"media": 4.25, "nr": 24}, {"media": 4.22, "nr": 15}, {"media": 4.2, "nr": 23}, {"media": 4.17, "nr": 12}, {"media": 4.15, "nr": 13}, {"media": 4.12, "nr": 9}, {"media": 4.1, "nr": 15}, {"media": 4.07, "nr": 18}, {"media": 4.05, "nr": 21}, {"media": 4.02, "nr": 20}, {"media": 4.0, "nr": 20}, {"media": 3.97, "nr": 17}, {"media": 3.95, "nr": 18}, {"media": 3.92, "nr": 14}, {"media": 3.9, "nr": 11}, {"media": 3.87, "nr": 14}, {"media": 3.85, "nr": 17}, {"media": 3.82, "nr": 6}, {"media": 3.8, "nr": 12}, {"media": 3.77, "nr": 4}, {"media": 3.75, "nr": 10}, {"media": 3.72, "nr": 15}, {"media": 3.7, "nr": 10}, {"media": 3.67, "nr": 11}, {"media": 3.65, "nr": 9}, {"media": 3.62, "nr": 12}, {"media": 3.6, "nr": 9}, {"media": 3.57, "nr": 9}, {"media": 3.55, "nr": 9}, {"media": 3.52, "nr": 8}, {"media": 3.5, "nr": 5}, {"media": 3.47, "nr": 7}, {"media": 3.45, "nr": 6}, {"media": 3.42, "nr": 4}, {"media": 3.4, "nr": 9}, {"media": 3.37, "nr": 3}, {"media": 3.35, "nr": 9}, {"media": 3.32, "nr": 8}, {"media": 3.3, "nr": 5}, {"media": 3.27, "nr": 11}, {"media": 3.25, "nr": 6}, {"media": 3.22, "nr": 4}, {"media": 3.2, "nr": 8}, {"media": 3.17, "nr": 4}, {"media": 3.15, "nr": 5}, {"media": 3.12, "nr": 5}, {"media": 3.1, "nr": 8}, {"media": 3.07, "nr": 3}, {"media": 3.05, "nr": 5}, {"media": 3.02, "nr": 1}, {"media": 3.0, "nr": 1}, {"media": 2.97, "nr": 3}, {"media": 2.95, "nr": 2}, {"media": 2.92, "nr": 1}, {"media": 2.9, "nr": 3}, {"media": 2.87, "nr": 3}, {"media": 2.85, "nr": 2}, {"media": 2.82, "nr": 1}, {"media": 2.8, "nr": 3}, {"media": 2.77, "nr": 2}, {"media": 2.72, "nr": 4}, {"media": 2.7, "nr": 2}, {"media": 2.67, "nr": 1}, {"media": 2.65, "nr": 1}, {"media": 2.6, "nr": 3}, {"media": 2.57, "nr": 3}, {"media": 2.5, "nr": 2}, {"media": 2.47, "nr": 3}, {"media": 2.4, "nr": 3}, {"media": 2.37, "nr": 1}, {"media": 2.35, "nr": 1}, {"media": 2.32, "nr": 1}, {"media": 2.1, "nr": 1}, {"media": 2.05, "nr": 2}, {"media": 1.92, "nr": 1}, {"media": 1.75, "nr": 1}]}}};
+
+function fmt2(n) {
+  return n.toFixed(2);
+}
+
+function CustomTooltip({ active, payload }) {
+  if (!active || !payload || !payload.length) return null;
+  const p = payload[0].payload;
+  return (
+    <div className="tooltipBox">
+      <div className="tooltipMedia">{fmt2(p.media)}</div>
+      <div className="tooltipNr">{p.nr} candidat{p.nr === 1 ? "" : "i"}</div>
+      {p.specNume && <div className="tooltipSpec">{p.specNume}</div>}
+    </div>
+  );
+}
+
+function normalizeName(s) {
+  return (s || "")
+    .replace(/[\u201E\u201D\u201C\u2018\u2019"']/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+// Checks the OTHER year's data for the same liceu+specializare and returns
+// the match only if the threshold (prag) is identical to 2 decimals.
+function findCrossYearMatch(liceuNume, specNume, currentPrag, currentYear) {
+  const years = Object.keys(DATA_BY_YEAR);
+  const otherYear = years.find((y) => y !== currentYear);
+  if (!otherYear) return null;
+  const otherLiceu = DATA_BY_YEAR[otherYear].licee.find(
+    (l) => normalizeName(l.nume) === normalizeName(liceuNume)
+  );
+  if (!otherLiceu) return null;
+  const otherSpec = otherLiceu.specializari.find((s) => s.nume === specNume);
+  if (!otherSpec) return null;
+  if (Math.abs(otherSpec.prag - currentPrag) < 0.001) {
+    return { year: otherYear, prag: otherSpec.prag, nr: otherSpec.total };
+  }
+  return null;
+}
+
+function DistributieIstorica({ theme, focusLiceu, onFocusHandled }) {
+  const [year, setYear] = useState("2025");
+  const [selectedName, setSelectedName] = useState(DATA_BY_YEAR["2025"].licee[0].nume);
+  const [specIdx, setSpecIdx] = useState(-1);
+  const [query, setQuery] = useState("");
+  const [percentileInput, setPercentileInput] = useState("");
+  const pal = PALETTES[theme];
+
+  const availableYears = Object.keys(DATA_BY_YEAR).sort((a, b) => b - a);
+  const yearInfo = DATA_BY_YEAR[year];
+  const DATA = yearInfo.licee;
+  const cityData = yearInfo.citywide;
+
+  function selectYear(y) {
+    setYear(y);
+    setSpecIdx(-1);
+    setPercentileInput("");
+    // selectedName is intentionally kept — same liceu stays selected across years
+  }
+
+  function selectLiceu(l) {
+    setSelectedName(l.nume);
+    setSpecIdx(-1);
+    setPercentileInput("");
+  }
+
+  // When the Simulator tab sends us here for a specific school, pick the year
+  // where that school actually has data (prefer 2025), select it, and clear the request.
+  useEffect(() => {
+    if (!focusLiceu) return;
+    const years = Object.keys(DATA_BY_YEAR).sort((a, b) => b - a);
+    const yearWithMatch = years.find((y) =>
+      DATA_BY_YEAR[y].licee.some((l) => l.nume === focusLiceu)
+    );
+    if (yearWithMatch) setYear(yearWithMatch);
+    setSelectedName(focusLiceu);
+    setSpecIdx(-1);
+    setPercentileInput("");
+    onFocusHandled && onFocusHandled();
+  }, [focusLiceu]);
+
+  const filteredLicee = useMemo(() => {
+    if (!query.trim()) return DATA;
+    const q = query.trim().toLowerCase();
+    return DATA.filter((l) => l.nume.toLowerCase().includes(q));
+  }, [query, year, DATA]);
+
+  const liceu =
+    DATA.find((l) => normalizeName(l.nume) === normalizeName(selectedName)) || DATA[0];
+  const liceuMissingThisYear = normalizeName(liceu.nume) !== normalizeName(selectedName);
+  const specializari = liceu.specializari;
+
+  const SPEC_COLORS = ["#C9A24B", "#5C7AA6", "#5B8C7B", "#B3312C", "#8B6F9E"];
+  const specColor = (idx) => SPEC_COLORS[idx % SPEC_COLORS.length];
+  const specColorMap = {};
+  specializari.forEach((s, i) => { specColorMap[s.nume] = specColor(i); });
+
+  const crossYearMatches = {};
+  specializari.forEach((s) => {
+    crossYearMatches[s.nume] = findCrossYearMatch(liceu.nume, s.nume, s.prag, year);
+  });
+
+  const isAll = specIdx === -1;
+
+  const viewData = useMemo(() => {
+    if (isAll) {
+      const merged = [];
+      specializari.forEach((s) => {
+        s.distributie.forEach((d) => merged.push({ media: d.media, nr: d.nr, specNume: s.nume }));
+      });
+      merged.sort((a, b) => a.media - b.media);
+      const total = merged.reduce((s, d) => s + d.nr, 0);
+      const prag = Math.min(...specializari.map((s) => s.prag));
+      const max = Math.max(...specializari.map((s) => s.max));
+      const medie = total ? merged.reduce((s, d) => s + d.media * d.nr, 0) / total : 0;
+      const pragSpec = specializari.find((s) => Math.abs(s.prag - prag) < 0.001);
+      const dens = merged.filter((d) => d.media <= prag + 0.2001).reduce((s, d) => s + d.nr, 0);
+      return {
+        nume: "Tot liceul",
+        total,
+        prag,
+        max,
+        medie,
+        pragSpecNume: pragSpec ? pragSpec.nume : "",
+        densitatePrag: dens,
+        densitatePragPct: total ? Math.round((dens / total) * 1000) / 10 : 0,
+        distributie: merged,
+      };
+    }
+    return specializari[Math.min(specIdx, specializari.length - 1)];
+  }, [isAll, specIdx, liceu]);
+
+  const chartData = viewData.distributie
+    .slice()
+    .sort((a, b) => a.media - b.media)
+    .map((d) => ({ ...d, isPrag: Math.abs(d.media - viewData.prag) < 0.001 }));
+
+  const totalLiceu = specializari.reduce((s, x) => s + x.total, 0);
+
+  let percResult = null;
+  if (!isAll && percentileInput !== "" && !isNaN(parseFloat(percentileInput))) {
+    const val = parseFloat(percentileInput);
+    const countAtOrAbove = viewData.distributie
+      .filter((d) => d.media >= val)
+      .reduce((s, d) => s + d.nr, 0);
+    const pct = (countAtOrAbove / viewData.total) * 100;
+    const admis = val >= viewData.prag;
+    percResult = { val, countAtOrAbove, pct, admis };
+  }
+
+  function selectSpec(idx) {
+    setSpecIdx(idx);
+    setPercentileInput("");
+  }
+
+  // For every distinct grade actually present at the selected liceu/specializare,
+  // find its position INTERVAL within the full Bucharest citywide ranking (not local rank).
+  const classGradesCityPosition = useMemo(() => {
+    const sortedDesc = viewData.distributie.slice().sort((a, b) => b.media - a.media);
+    return sortedDesc.map((d) => {
+      const above = cityData.distributie
+        .filter((c) => c.media > d.media + 0.001)
+        .reduce((s, c) => s + c.nr, 0);
+      const atValue = cityData.distributie.find((c) => Math.abs(c.media - d.media) < 0.001);
+      const cityNr = atValue ? atValue.nr : d.nr;
+      return {
+        media: d.media,
+        nrAici: d.nr,
+        specNume: d.specNume,
+        cityPosStart: above + 1,
+        cityPosEnd: above + cityNr,
+        isPrag: Math.abs(d.media - viewData.prag) < 0.001,
+      };
+    });
+  }, [viewData, cityData]);
+
+  return (
+    <div className="app">
+      <style>{`
+        * { box-sizing: border-box; }
+
+        .app {
+          display: flex;
+          height: 100%;
+          min-height: 640px;
+          background: var(--ink);
+          color: var(--text);
+          font-family: 'Inter', system-ui, sans-serif;
+          overflow: hidden;
+          transition: background 0.2s, color 0.2s;
+        }
+
+        .themeToggle {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: var(--panel-raised);
+          border: 1px solid var(--border);
+          border-radius: 7px;
+          padding: 5px 10px;
+          font-size: 11px;
+          color: var(--text-dim);
+          cursor: pointer;
+          font-family: 'Inter', sans-serif;
+        }
+        .themeToggle:hover { border-color: var(--gold); color: var(--text); }
+        .themeToggle svg { width: 13px; height: 13px; }
+
+        .yearRow {
+          display: flex;
+          gap: 6px;
+          margin: 12px 0 6px;
+        }
+        .yearPill {
+          background: var(--panel-raised);
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          padding: 4px 11px;
+          font-size: 11.5px;
+          font-family: 'JetBrains Mono', monospace;
+          color: var(--text-dim);
+          cursor: pointer;
+        }
+        .yearPill:hover { border-color: var(--gold); color: var(--text); }
+        .yearPill.active {
+          background: var(--gold);
+          border-color: var(--gold);
+          color: var(--ink);
+          font-weight: 600;
+        }
+
+        .missingBanner {
+          background: var(--accent-soft);
+          border: 1px solid var(--accent);
+          border-radius: 8px;
+          padding: 10px 14px;
+          font-size: 12px;
+          margin-bottom: 16px;
+          line-height: 1.5;
+        }
+
+        .sidebar {
+          width: 300px;
+          min-width: 220px;
+          background: var(--panel);
+          border-right: 1px solid var(--border);
+          display: flex;
+          flex-direction: column;
+        }
+
+        .sidebarHead {
+          padding: 20px 18px 14px;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .sidebarEyebrow {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10.5px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: var(--gold);
+        }
+
+        .sidebarTitle {
+          font-family: 'Fraunces', serif;
+          font-size: 21px;
+          font-weight: 600;
+          margin: 4px 0 2px;
+          line-height: 1.15;
+        }
+
+        .sidebarSub {
+          font-size: 11.5px;
+          color: var(--text-dim);
+        }
+
+        .searchWrap {
+          position: relative;
+          margin: 12px 18px 8px;
+        }
+
+        .searchWrap input {
+          width: 100%;
+          background: var(--panel-raised);
+          border: 1px solid var(--border);
+          border-radius: 7px;
+          padding: 7px 10px 7px 30px;
+          color: var(--text);
+          font-size: 12.5px;
+          font-family: 'Inter', sans-serif;
+          outline: none;
+        }
+        .searchWrap input:focus { border-color: var(--gold); }
+        .searchWrap svg {
+          position: absolute;
+          left: 9px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 14px;
+          height: 14px;
+          color: var(--text-faint);
+        }
+
+        .liceuList {
+          flex: 1;
+          overflow-y: auto;
+          padding: 4px 10px 16px;
+        }
+
+        .liceuRow {
+          display: flex;
+          align-items: baseline;
+          gap: 10px;
+          width: 100%;
+          text-align: left;
+          background: none;
+          border: none;
+          padding: 9px 8px;
+          border-radius: 7px;
+          cursor: pointer;
+          color: var(--text);
+        }
+        .liceuRow:hover { background: var(--panel-raised); }
+        .liceuRow.active {
+          background: var(--accent-soft);
+          box-shadow: inset 2px 0 0 var(--accent);
+        }
+
+        .liceuRank {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          color: var(--text-faint);
+          min-width: 20px;
+        }
+        .liceuRow.active .liceuRank { color: var(--gold); }
+
+        .liceuMeta { flex: 1; min-width: 0; }
+        .liceuName {
+          font-size: 12.8px;
+          line-height: 1.3;
+          font-weight: 500;
+        }
+        .liceuPrag {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10.5px;
+          color: var(--text-dim);
+          margin-top: 1px;
+        }
+
+        .main {
+          flex: 1;
+          overflow-y: auto;
+          padding: 26px 34px 40px;
+          min-width: 0;
+        }
+
+        .mainHead {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 20px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid var(--border);
+          margin-bottom: 20px;
+        }
+
+        .mainHeadLeft { min-width: 0; }
+
+        .mainRankBadge {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10.5px;
+          color: var(--gold);
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          margin-bottom: 6px;
+        }
+
+        .mainTitle {
+          font-family: 'Fraunces', serif;
+          font-size: 27px;
+          font-weight: 600;
+          line-height: 1.15;
+        }
+
+        .mainCod {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          color: var(--text-faint);
+          margin-top: 4px;
+        }
+
+        .mainTotalBox {
+          text-align: right;
+          flex-shrink: 0;
+        }
+        .mainTotalNum {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 26px;
+          font-weight: 600;
+          color: var(--text);
+        }
+        .mainTotalLabel {
+          font-size: 10.5px;
+          color: var(--text-dim);
+          margin-top: 2px;
+        }
+
+        .tabRow {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 22px;
+          flex-wrap: wrap;
+        }
+
+        .tabPill {
+          background: var(--panel);
+          border: 1px solid var(--border);
+          border-radius: 999px;
+          padding: 7px 14px;
+          font-size: 12.5px;
+          color: var(--text-dim);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 7px;
+        }
+        .tabPill:hover { border-color: var(--gold); color: var(--text); }
+        .tabPill.active {
+          background: var(--accent);
+          border-color: var(--accent);
+          color: #fff;
+        }
+        .tabPillPrag {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          opacity: 0.8;
+        }
+
+        .statsGrid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+          margin-bottom: 24px;
+        }
+
+        .statCard {
+          background: var(--panel);
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          padding: 14px 16px;
+        }
+        .statCard.highlight { border-color: var(--accent); background: var(--accent-soft); }
+
+        .statIconRow {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: var(--text-dim);
+          font-size: 10.5px;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          margin-bottom: 8px;
+        }
+        .statIconRow svg { width: 12px; height: 12px; }
+
+        .statValue {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 21px;
+          font-weight: 600;
+        }
+        .statSub {
+          font-size: 10.8px;
+          color: var(--text-dim);
+          margin-top: 3px;
+          line-height: 1.35;
+        }
+
+        .chartPanel {
+          background: var(--panel);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 20px 20px 8px;
+          margin-bottom: 24px;
+        }
+
+        .chartPanelHead {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          margin-bottom: 4px;
+        }
+
+        .chartTitle {
+          font-family: 'Fraunces', serif;
+          font-size: 15.5px;
+          font-weight: 600;
+        }
+
+        .chartCaption {
+          font-size: 11px;
+          color: var(--text-dim);
+          margin-bottom: 14px;
+        }
+        .chartCaption b { color: var(--accent); font-weight: 600; }
+
+        .tooltipBox {
+          background: var(--panel-raised);
+          border: 1px solid var(--gold);
+          border-radius: 6px;
+          padding: 6px 10px;
+        }
+        .tooltipMedia {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 13px;
+          font-weight: 600;
+        }
+        .tooltipNr { font-size: 10.5px; color: var(--text-dim); }
+        .tooltipSpec {
+          font-size: 10px;
+          color: var(--gold);
+          margin-top: 2px;
+          border-top: 1px solid var(--border);
+          padding-top: 3px;
+        }
+
+        .tabDot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        .legendRow {
+          display: flex;
+          gap: 16px;
+          flex-wrap: wrap;
+          margin: 2px 0 16px;
+        }
+        .legendItem {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          color: var(--text-dim);
+        }
+        .legendItem .tabDot { width: 8px; height: 8px; }
+        .legendItem b { color: var(--text); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+
+        .matchBadge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 15px;
+          height: 15px;
+          border-radius: 50%;
+          background: var(--gold);
+          color: var(--ink);
+          font-size: 10px;
+          font-weight: 700;
+          font-family: 'JetBrains Mono', monospace;
+          cursor: help;
+          flex-shrink: 0;
+        }
+
+        .percBox {
+          background: var(--panel);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 18px 20px;
+        }
+
+        .percHead {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 4px;
+        }
+        .percHead svg { width: 14px; height: 14px; color: var(--gold); }
+        .percTitle { font-family: 'Fraunces', serif; font-size: 15.5px; font-weight: 600; }
+        .percCaption { font-size: 11px; color: var(--text-dim); margin-bottom: 14px; }
+
+        .percInputRow {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 14px;
+        }
+        .percInputRow input {
+          width: 100px;
+          background: var(--panel-raised);
+          border: 1px solid var(--border);
+          border-radius: 7px;
+          padding: 8px 10px;
+          color: var(--text);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 15px;
+          outline: none;
+        }
+        .percInputRow input:focus { border-color: var(--gold); }
+        .percInputLabel { font-size: 12px; color: var(--text-dim); }
+
+        .percResult {
+          border-radius: 8px;
+          padding: 12px 14px;
+          font-size: 13px;
+          line-height: 1.5;
+        }
+        .percResult.ok {
+          background: var(--gold-soft);
+          border: 1px solid var(--gold);
+        }
+        .percResult.no {
+          background: var(--accent-soft);
+          border: 1px solid var(--accent);
+        }
+        .percResult b { font-family: 'JetBrains Mono', monospace; }
+
+        .posBox {
+          background: var(--panel);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 18px 20px;
+          margin-top: 20px;
+        }
+        .posHead { margin-bottom: 10px; }
+
+        .posWarning {
+          background: var(--accent-soft);
+          border: 1px solid var(--accent);
+          border-radius: 8px;
+          padding: 10px 14px;
+          font-size: 12px;
+          line-height: 1.55;
+          margin-bottom: 16px;
+        }
+
+        .posTableWrap {
+          max-height: 340px;
+          overflow-y: auto;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+        }
+
+        .posTable {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 12.5px;
+        }
+        .posTable thead th {
+          position: sticky;
+          top: 0;
+          background: var(--panel-raised);
+          text-align: left;
+          padding: 8px 12px;
+          font-size: 10.5px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: var(--text-dim);
+          border-bottom: 1px solid var(--border);
+        }
+        .posTable tbody td {
+          padding: 6px 12px;
+          border-bottom: 1px solid var(--border);
+        }
+        .posTable tbody tr:last-child td { border-bottom: none; }
+        .posMedia {
+          font-family: 'JetBrains Mono', monospace;
+          font-weight: 600;
+        }
+        .posRange {
+          font-family: 'JetBrains Mono', monospace;
+          color: var(--text-dim);
+        }
+        .posPragRow td { background: var(--accent-soft); }
+        .posPragRow .posMedia, .posPragRow .posRange { color: var(--accent); font-weight: 600; }
+        .posPragTag {
+          margin-left: 8px;
+          font-size: 9.5px;
+          font-family: 'Inter', sans-serif;
+          text-transform: uppercase;
+          background: var(--accent);
+          color: #fff;
+          padding: 1px 6px;
+          border-radius: 4px;
+          font-weight: 700;
+        }
+
+        .footer {
+          margin-top: 28px;
+          padding-top: 16px;
+          border-top: 1px solid var(--border);
+          font-size: 10.8px;
+          color: var(--text-faint);
+          line-height: 1.6;
+        }
+
+        @media (max-width: 780px) {
+          .app { flex-direction: column; height: auto; }
+          .sidebar { width: 100%; max-height: 220px; }
+          .statsGrid { grid-template-columns: repeat(2, 1fr); }
+          .main { padding: 18px; }
+        }
+      `}</style>
+
+      <div className="sidebar">
+        <div className="sidebarHead">
+          <div>
+            <div className="sidebarEyebrow">Admitere · București</div>
+            <div className="sidebarTitle">Top 30 licee</div>
+          </div>
+          <div className="yearRow">
+            {availableYears.map((y) => (
+              <button
+                key={y}
+                className={"yearPill" + (y === year ? " active" : "")}
+                onClick={() => selectYear(y)}
+              >
+                {y}
+              </button>
+            ))}
+          </div>
+          <div className="sidebarSub">după pragul celei mai selective specializări · {yearInfo.totalLicee} licee cu repartizări</div>
+        </div>
+        <div className="searchWrap">
+          <Search />
+          <input
+            placeholder="Caută liceu..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+        <div className="liceuList">
+          {filteredLicee.map((l, idx) => (
+            <button
+              key={l.cod}
+              className={"liceuRow" + (normalizeName(l.nume) === normalizeName(selectedName) ? " active" : "")}
+              onClick={() => selectLiceu(l)}
+            >
+              <span className="liceuRank">{String(l.rank).padStart(2, "0")}</span>
+              <span className="liceuMeta">
+                <div className="liceuName">{l.nume}</div>
+                <div className="liceuPrag">prag max {fmt2(l.specializari[0].prag)}</div>
+              </span>
+            </button>
+          ))}
+          {filteredLicee.length === 0 && (
+            <div style={{ padding: 16, fontSize: 12, color: "var(--text-faint)" }}>
+              Niciun liceu găsit.
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="main">
+        {liceuMissingThisYear && (
+          <div className="missingBanner">
+            <b>{selectedName}</b> nu apare în top 30 pentru {year} — afișăm în schimb rank #1 ({liceu.nume}). Alege alt liceu din listă sau schimbă anul înapoi.
+          </div>
+        )}
+        <div className="mainHead">
+          <div className="mainHeadLeft">
+            <div className="mainRankBadge">
+              <GraduationCap size={12} /> Rank #{liceu.rank} din {yearInfo.totalLicee} licee București · {year}
+            </div>
+            <div className="mainTitle">{liceu.nume}</div>
+            <div className="mainCod">cod SIIIR {liceu.cod}</div>
+          </div>
+          <div className="mainTotalBox">
+            <div className="mainTotalNum">{totalLiceu}</div>
+            <div className="mainTotalLabel">candidați repartizați total</div>
+          </div>
+        </div>
+
+        <div className="tabRow">
+          <button
+            className={"tabPill" + (isAll ? " active" : "")}
+            onClick={() => selectSpec(-1)}
+          >
+            Tot liceul
+            <span className="tabPillPrag">{specializari.length} specializări</span>
+          </button>
+          {specializari.map((s, idx) => (
+            <button
+              key={s.nume}
+              className={"tabPill" + (idx === specIdx ? " active" : "")}
+              onClick={() => selectSpec(idx)}
+            >
+              <span className="tabDot" style={{ background: specColor(idx) }} />
+              {s.nume}
+              <span className="tabPillPrag">{fmt2(s.prag)}</span>
+              {crossYearMatches[s.nume] && (
+                <span className="matchBadge" title={`Prag identic cu ${crossYearMatches[s.nume].year}: ${fmt2(crossYearMatches[s.nume].prag)}`}>
+                  ≡
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {isAll && (
+          <div className="legendRow">
+            {specializari.map((s, idx) => (
+              <div className="legendItem" key={s.nume}>
+                <span className="tabDot" style={{ background: specColor(idx) }} />
+                {s.nume} <b>{fmt2(s.prag)}</b>
+                {crossYearMatches[s.nume] && (
+                  <span className="matchBadge" title={`Prag identic cu ${crossYearMatches[s.nume].year}: ${fmt2(crossYearMatches[s.nume].prag)}`}>
+                    ≡
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="statsGrid">
+          <div className="statCard">
+            <div className="statIconRow"><Users /> Candidați</div>
+            <div className="statValue">{viewData.total}</div>
+            <div className="statSub">
+              {isAll ? "repartizați în tot liceul, etapa I" : "repartizați pe această specializare, etapa I"}
+            </div>
+          </div>
+          <div className="statCard highlight">
+            <div className="statIconRow"><Target /> {isAll ? "Cel mai accesibil prag" : "Prag (ultimul admis)"}</div>
+            <div className="statValue">
+              {fmt2(viewData.prag)}
+              {(isAll ? crossYearMatches[viewData.pragSpecNume] : crossYearMatches[viewData.nume]) && (
+                <span
+                  className="matchBadge"
+                  style={{ marginLeft: 8, verticalAlign: "middle" }}
+                  title="Prag identic cu celălalt an — verificat la sursă, nu e o eroare de date"
+                >
+                  ≡
+                </span>
+              )}
+            </div>
+            <div className="statSub">
+              {isAll ? <>la <b style={{ color: "var(--text)" }}>{viewData.pragSpecNume}</b></> : "cea mai mică medie de admitere înregistrată"}
+              {(isAll ? crossYearMatches[viewData.pragSpecNume] : crossYearMatches[viewData.nume]) && (
+                <> · identic cu {(isAll ? crossYearMatches[viewData.pragSpecNume] : crossYearMatches[viewData.nume]).year}</>
+              )}
+            </div>
+          </div>
+          <div className="statCard">
+            <div className="statIconRow">Medie</div>
+            <div className="statValue">{fmt2(viewData.medie)}</div>
+            <div className="statSub">{isAll ? "media ponderată pe tot liceul" : "media aritmetică a mediilor de admitere"}</div>
+          </div>
+          {isAll ? (
+            <div className="statCard">
+              <div className="statIconRow">Interval</div>
+              <div className="statValue">{fmt2(viewData.prag)}–{fmt2(viewData.max)}</div>
+              <div className="statSub">de la cea mai accesibilă la cea mai selectivă specializare</div>
+            </div>
+          ) : (
+            <div className="statCard">
+              <div className="statIconRow"><TrendingDown /> Zonă de risc</div>
+              <div className="statValue">{viewData.densitatePrag}</div>
+              <div className="statSub">
+                candidați intrați la mai puțin de 0.20p peste prag ({viewData.densitatePragPct}% din total)
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="chartPanel">
+          <div className="chartPanelHead">
+            <div className="chartTitle">Distribuția mediilor de admitere</div>
+          </div>
+          <div className="chartCaption">
+            {isAll ? (
+              <>Fiecare bară = candidații cu media exact indicată, colorați după specializare. Bara cu contur <b>roșu</b> marchează cel mai jos prag din liceu.</>
+            ) : (
+              <>Fiecare bară = candidații cu media exact indicată. Bara <b>roșie</b> marchează pragul (ultimul loc ocupat).</>
+            )}
+          </div>
+          <ResponsiveContainer width="100%" height={340}>
+            <BarChart data={chartData} margin={{ top: 20, right: 8, left: -12, bottom: 34 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={pal.border} vertical={false} />
+              <XAxis
+                dataKey="media"
+                tickFormatter={fmt2}
+                tick={{ fill: pal.textDim, fontSize: 10, fontFamily: "JetBrains Mono" }}
+                axisLine={{ stroke: pal.border }}
+                tickLine={false}
+                interval={0}
+                angle={-60}
+                textAnchor="end"
+                height={50}
+              />
+              <YAxis
+                tick={{ fill: pal.textDim, fontSize: 10.5, fontFamily: "JetBrains Mono" }}
+                axisLine={{ stroke: pal.border }}
+                tickLine={false}
+                width={28}
+                allowDecimals={false}
+              />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: pal.cursor }} />
+              <Bar dataKey="nr" radius={[3, 3, 0, 0]}>
+                <LabelList
+                  dataKey="nr"
+                  position="top"
+                  style={{ fontFamily: "JetBrains Mono", fontSize: 10, fill: pal.textDim }}
+                />
+                {chartData.map((entry, i) => (
+                  <Cell
+                    key={i}
+                    fill={isAll ? specColorMap[entry.specNume] : (entry.isPrag ? pal.accent : pal.gold)}
+                    stroke={entry.isPrag ? pal.accent : "none"}
+                    strokeWidth={entry.isPrag ? 2 : 0}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="percBox">
+          <div className="percHead">
+            <Target />
+            <div className="percTitle">Unde m-aș fi situat?</div>
+          </div>
+          {isAll ? (
+            <div className="percCaption">
+              Calculul de poziție e disponibil doar pe o specializare anume — repartizarea se face pe clasă/specializare, nu pe liceu ca întreg. Alege o specializare din listă mai sus.
+            </div>
+          ) : (
+            <>
+              <div className="percCaption">
+                Introdu o medie de admitere și vezi cum s-ar fi clasat față de candidații reali din {year}, la {viewData.nume} — {liceu.nume}.
+              </div>
+              <div className="percInputRow">
+                <input
+                  type="number"
+                  step="0.01"
+                  min="1"
+                  max="10"
+                  placeholder="9.50"
+                  value={percentileInput}
+                  onChange={(e) => setPercentileInput(e.target.value)}
+                />
+                <span className="percInputLabel">medie de admitere</span>
+              </div>
+              {percResult && (
+                <div className={"percResult " + (percResult.admis ? "ok" : "no")}>
+                  {percResult.admis ? (
+                    <>
+                      Cu media <b>{fmt2(percResult.val)}</b>, te-ai fi clasat pe la poziția{" "}
+                      <b>~{percResult.countAtOrAbove}</b> din <b>{viewData.total}</b> (în topul{" "}
+                      <b>{percResult.pct.toFixed(1)}%</b> al celor repartizați aici).
+                    </>
+                  ) : (
+                    <>
+                      Cu media <b>{fmt2(percResult.val)}</b>, ai fi fost <b>sub pragul de admitere</b> ({fmt2(viewData.prag)})
+                      la {viewData.nume} — {liceu.nume}, etapa I {year}. Nu ai fi fost repartizat aici.
+                    </>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="posBox">
+          <div className="posHead">
+            <div className="percTitle">Mediile de aici — poziția lor pe tot Bucureștiul</div>
+          </div>
+          <div className="posWarning">
+            Pentru fiecare medie apărută efectiv {isAll ? "la acest liceu" : `la ${viewData.nume}`}, arăt poziția ei în clasamentul complet pe tot Bucureștiul (cei {cityData.total} candidați repartizați în {year}) — nu poziția locală în școală/specializare.
+            {" "}<b>Poziția NU e un câmp din sursă</b>, e derivată din note. La egalitate de medie (pe tot orașul, nu doar aici) dau interval, nu loc exact.
+          </div>
+          <div className="posTableWrap">
+            <table className="posTable">
+              <thead>
+                <tr>
+                  <th>Medie</th>
+                  <th>Nr. aici{isAll ? " / specializare" : ""}</th>
+                  <th>Poziție pe tot București (din {cityData.total})</th>
+                </tr>
+              </thead>
+              <tbody>
+                {classGradesCityPosition.map((r, i) => (
+                  <tr key={i} className={r.isPrag ? "posPragRow" : ""}>
+                    <td className="posMedia">{fmt2(r.media)}</td>
+                    <td>
+                      {r.nrAici}
+                      {isAll && r.specNume && (
+                        <span className="tabDot" style={{ background: specColorMap[r.specNume], marginLeft: 7, marginRight: 4 }} />
+                      )}
+                    </td>
+                    <td className="posRange">
+                      {r.cityPosStart === r.cityPosEnd ? r.cityPosStart : `${r.cityPosStart}–${r.cityPosEnd}`}
+                      {r.isPrag && <span className="posPragTag">prag {isAll ? "liceu" : "aici"}</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="footer">
+          Sursă: tabela admitere_{year}, baza statulpa_scoli (conector aiparte.ro), extragere {yearInfo.dataExtragere}, etapa I, judet_repartizare = București.
+          {" "}{yearInfo.totalNerepartizati} candidați au rămas nerepartizați în București la această etapă (excluși din acest tabel).
+          Specializările combină clasele paralele cu aceeași denumire din același liceu.
+          {" "}{year === "2024" && "2024 nu are cod SIIIR de liceu în sursă — gruparea s-a făcut după numele liceului. "}
+          Media de admitere = media la Evaluarea Națională (medie_en), identică cu media de admitere conform datelor sursă — nu include media de absolvire a gimnaziului.
+          Pragurile unui an nu se transferă direct la anul următor (cohortă, locuri și dificultate diferă).
+        </div>
+      </div>
+    </div>
+  );
+}
 // ===== SIMULATOR 2026 — la momentul fișei (poziție cunoscută) =====
 // Bază reală 2025 (aiparte.ro/SIIIR): m=prag medie, pos=ultima poziție la admitere.
 const DATA = [{"n":"Gheorghe Lazăr","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.82,"pos":345,"pm":10.0,"l":84,"l5":78,"sec":"S5","r":1,"star":false},{"n":"Sfântul Sava","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.82,"pos":362,"pm":10.0,"l":28,"l5":26,"sec":"S1","r":2,"star":false},{"n":"Gheorghe Lazăr","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.8,"pos":455,"pm":10.0,"l":84,"l5":78,"sec":"S5","r":1,"star":false},{"n":"Spiru Haret","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.75,"pos":681,"pm":9.95,"l":56,"l5":52,"sec":"S2","r":3,"star":false},{"n":"Spiru Haret","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.72,"pos":748,"pm":9.97,"l":56,"l5":52,"sec":"S2","r":3,"star":false},{"n":"Sfântul Sava","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.72,"pos":800,"pm":10.0,"l":140,"l5":130,"sec":"S1","r":2,"star":false},{"n":"Tudor Vianu","t":"Colegiul Național de Informatică","p":"Real","s":"Matematică-Informatică","b":"Limba germană(fără examen)","m":9.67,"pos":957,"pm":10.0,"l":28,"l5":26,"sec":"S1","r":4,"star":false},{"n":"Gheorghe Lazăr","t":"Colegiul Național","p":"Umanist","s":"Științe Sociale","b":null,"m":9.65,"pos":1091,"pm":10.0,"l":56,"l5":52,"sec":"S5","r":1,"star":false},{"n":"Tudor Vianu","t":"Colegiul Național de Informatică","p":"Real","s":"Matematică-Informatică","b":null,"m":9.62,"pos":1244,"pm":10.0,"l":224,"l5":208,"sec":"S1","r":4,"star":false},{"n":"Tudor Vianu","t":"Colegiul Național de Informatică","p":"Real","s":"Științe ale Naturii","b":null,"m":9.62,"pos":1245,"pm":null,"l":28,"l5":null,"sec":"S1","r":4,"star":false},{"n":"Gheorghe Lazăr","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.62,"pos":1277,"pm":9.95,"l":28,"l5":26,"sec":"S5","r":1,"star":false},{"n":"Sfântul Sava","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.6,"pos":1398,"pm":10.0,"l":28,"l5":26,"sec":"S1","r":2,"star":false},{"n":"Grigore Moisil","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.6,"pos":1440,"pm":9.9,"l":28,"l5":26,"sec":"S6","r":5,"star":false},{"n":"I.L.Caragiale","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":"Limba germană(fără examen)","m":9.6,"pos":1462,"pm":9.8,"l":14,"l5":13,"sec":"S1","r":6,"star":false},{"n":"Spiru Haret","t":"Colegiul Național","p":"Umanist","s":"Științe Sociale","b":null,"m":9.57,"pos":1533,"pm":9.85,"l":56,"l5":52,"sec":"S2","r":3,"star":false},{"n":"Matei Basarab","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.55,"pos":1630,"pm":9.9,"l":56,"l5":52,"sec":"S3","r":8,"star":false},{"n":"Matei Basarab","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.55,"pos":1658,"pm":9.9,"l":112,"l5":104,"sec":"S3","r":8,"star":false},{"n":"I.L.Caragiale","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.55,"pos":1707,"pm":9.8,"l":28,"l5":26,"sec":"S1","r":6,"star":false},{"n":"Spiru Haret","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.52,"pos":1725,"pm":9.9,"l":28,"l5":26,"sec":"S2","r":3,"star":false},{"n":"Grigore Moisil","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.52,"pos":1816,"pm":9.97,"l":84,"l5":78,"sec":"S6","r":5,"star":false},{"n":"Gheorghe Șincai","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.52,"pos":1849,"pm":9.82,"l":56,"l5":52,"sec":"S4","r":9,"star":false},{"n":"Mihai Viteazul","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.5,"pos":1877,"pm":10.0,"l":56,"l5":52,"sec":"S2","r":10,"star":false},{"n":"Matei Basarab","t":"Colegiul Național","p":"Umanist","s":"Științe Sociale","b":null,"m":9.47,"pos":2018,"pm":9.75,"l":84,"l5":26,"sec":"S3","r":8,"star":false},{"n":"I.L.Caragiale","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.47,"pos":2043,"pm":9.77,"l":84,"l5":78,"sec":"S1","r":6,"star":false},{"n":"Gheorghe Șincai","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.47,"pos":2090,"pm":9.95,"l":140,"l5":130,"sec":"S4","r":9,"star":false},{"n":"Iulia Hașdeu","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.45,"pos":2254,"pm":9.82,"l":28,"l5":26,"sec":"S2","r":11,"star":false},{"n":"I.L.Caragiale","t":"Colegiul Național","p":"Umanist","s":"Științe Sociale","b":null,"m":9.42,"pos":2354,"pm":9.6,"l":28,"l5":26,"sec":"S1","r":6,"star":false},{"n":"Matei Basarab","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.42,"pos":2368,"pm":9.7,"l":28,"l5":26,"sec":"S3","r":8,"star":false},{"n":"Mihai Viteazul","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.4,"pos":2591,"pm":9.9,"l":224,"l5":208,"sec":"S2","r":10,"star":false},{"n":"Cantemir Vodă","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.37,"pos":2684,"pm":9.67,"l":56,"l5":52,"sec":"S2","r":12,"star":false},{"n":"Ion Creangă","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.37,"pos":2702,"pm":9.67,"l":56,"l5":52,"sec":"S4","r":13,"star":false},{"n":"Ion Creangă","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.35,"pos":2848,"pm":9.77,"l":56,"l5":52,"sec":"S4","r":13,"star":false},{"n":"Grigore Moisil","t":"Colegiul Național","p":"Umanist","s":"Științe Sociale","b":null,"m":9.35,"pos":2875,"pm":9.67,"l":28,"l5":26,"sec":"S6","r":5,"star":false},{"n":"Iulia Hașdeu","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.35,"pos":2876,"pm":9.8,"l":56,"l5":52,"sec":"S2","r":11,"star":false},{"n":"Cantemir Vodă","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.35,"pos":2885,"pm":9.65,"l":112,"l5":104,"sec":"S2","r":12,"star":false},{"n":"Gheorghe Șincai","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.35,"pos":2927,"pm":9.7,"l":56,"l5":52,"sec":"S4","r":9,"star":false},{"n":"Elena Cuza","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.32,"pos":2962,"pm":9.72,"l":56,"l5":52,"sec":"S6","r":14,"star":false},{"n":"Nicolae Iorga","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":9.3,"pos":3188,"pm":9.65,"l":56,"l5":52,"sec":"S1","r":15,"star":false},{"n":"I.L.Caragiale","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.3,"pos":3236,"pm":9.75,"l":28,"l5":26,"sec":"S1","r":6,"star":false},{"n":"Ion Creangă","t":"Colegiul Național","p":"Umanist","s":"Științe Sociale","b":null,"m":9.27,"pos":3255,"pm":9.5,"l":28,"l5":26,"sec":"S4","r":13,"star":false},{"n":"Mihai Eminescu","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.27,"pos":3403,"pm":9.75,"l":56,"l5":52,"sec":"S4","r":16,"star":false},{"n":"Nicolae Iorga","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":9.27,"pos":3406,"pm":9.55,"l":28,"l5":26,"sec":"S1","r":15,"star":false},{"n":"I.L.Caragiale","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":"Limba germană(fără examen)","m":9.27,"pos":3410,"pm":9.48,"l":14,"l5":13,"sec":"S1","r":6,"star":false},{"n":"Grigore Moisil","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.25,"pos":3418,"pm":9.62,"l":28,"l5":26,"sec":"S6","r":5,"star":false},{"n":"Alexandru Ioan Cuza","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":9.25,"pos":3430,"pm":9.57,"l":28,"l5":52,"sec":"S3","r":17,"star":false},{"n":"Mihai Eminescu","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.25,"pos":3476,"pm":9.82,"l":112,"l5":104,"sec":"S4","r":16,"star":false},{"n":"Ion Neculce","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":9.25,"pos":3492,"pm":9.9,"l":28,"l5":26,"sec":"S1","r":18,"star":true},{"n":"Alexandru Ioan Cuza","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":9.22,"pos":3685,"pm":9.87,"l":112,"l5":130,"sec":"S3","r":17,"star":false},{"n":"Iulia Hașdeu","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.22,"pos":3702,"pm":9.62,"l":56,"l5":52,"sec":"S2","r":11,"star":false},{"n":"Ion Neculce","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.22,"pos":3723,"pm":9.55,"l":84,"l5":78,"sec":"S1","r":18,"star":true},{"n":"Ion Creangă","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.2,"pos":3867,"pm":9.87,"l":56,"l5":52,"sec":"S4","r":13,"star":false},{"n":"Școala Centrală","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":9.2,"pos":3875,"pm":9.5,"l":112,"l5":104,"sec":"S2","r":19,"star":false},{"n":"Mihai Eminescu","t":"Colegiul Național","p":"Umanist","s":"Științe Sociale","b":null,"m":9.17,"pos":3913,"pm":9.4,"l":28,"l5":52,"sec":"S4","r":16,"star":false},{"n":"Ion Neculce","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":"Limba italiană(fără examen)","m":9.17,"pos":3915,"pm":9.67,"l":28,"l5":26,"sec":"S1","r":18,"star":true},{"n":"Nicolae Iorga","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":9.17,"pos":4007,"pm":9.3,"l":28,"l5":26,"sec":"S1","r":15,"star":false},{"n":"Școala Centrală","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":"Limba franceză(fără examan)","m":9.15,"pos":4090,"pm":9.32,"l":28,"l5":26,"sec":"S2","r":19,"star":false},{"n":"Miguel de Cervantes","t":"Liceul Teoretic Bilingv","p":"Real","s":"Matematică-Informatică","b":null,"m":9.15,"pos":4148,"pm":9.52,"l":28,"l5":26,"sec":"S1","r":20,"star":false},{"n":"Jean Monnet","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":9.15,"pos":4155,"pm":9.65,"l":56,"l5":52,"sec":"S1","r":21,"star":false},{"n":"Mihai Eminescu","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.15,"pos":4180,"pm":9.4,"l":28,"l5":52,"sec":"S4","r":16,"star":false},{"n":"Ion Neculce","t":"Colegiul Național","p":"Umanist","s":"Științe Sociale","b":null,"m":9.12,"pos":4226,"pm":9.5,"l":28,"l5":26,"sec":"S1","r":18,"star":true},{"n":"Alexandru Ioan Cuza","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":9.12,"pos":4247,"pm":9.62,"l":56,"l5":52,"sec":"S3","r":17,"star":false},{"n":"Nicolae Iorga","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":9.12,"pos":4328,"pm":9.3,"l":28,"l5":26,"sec":"S1","r":15,"star":false},{"n":"Jean Monnet","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":9.1,"pos":4446,"pm":9.67,"l":28,"l5":52,"sec":"S1","r":21,"star":false},{"n":"Ion Barbu","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":9.1,"pos":4491,"pm":9.45,"l":56,"l5":52,"sec":"S5","r":22,"star":false},{"n":"Ion Neculce","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.1,"pos":4493,"pm":9.47,"l":28,"l5":26,"sec":"S1","r":18,"star":true},{"n":"Goethe","t":"Colegiul German","p":"Real","s":"Teor.real spec.germană","b":null,"m":9.08,"pos":4518,"pm":9.86,"l":28,"l5":25,"sec":"S1","r":23,"star":false},{"n":"Elena Cuza","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.07,"pos":4605,"pm":9.42,"l":28,"l5":26,"sec":"S6","r":14,"star":false},{"n":"Ion Neculce","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":"Limba italiană(fără examen)","m":9.05,"pos":4685,"pm":9.6,"l":28,"l5":26,"sec":"S1","r":18,"star":true},{"n":"Ion Barbu","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":9.05,"pos":4785,"pm":9.27,"l":56,"l5":52,"sec":"S5","r":22,"star":false},{"n":"Școala Centrală","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":9.02,"pos":4832,"pm":9.3,"l":84,"l5":78,"sec":"S2","r":19,"star":false},{"n":"Tudor Vladimirescu","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":9.02,"pos":4857,"pm":9.72,"l":56,"l5":52,"sec":"S6","r":24,"star":false},{"n":"C.A. Rosetti","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":9.02,"pos":4877,"pm":9.42,"l":84,"l5":78,"sec":"S2","r":25,"star":false},{"n":"Jean Monnet","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":9.02,"pos":4942,"pm":9.4,"l":56,"l5":52,"sec":"S1","r":21,"star":false},{"n":"Miguel de Cervantes","t":"Liceul Teoretic Bilingv","p":"Umanist","s":"Filologie","b":null,"m":9.0,"pos":4971,"pm":9.47,"l":28,"l5":26,"sec":"S1","r":20,"star":false},{"n":"George Călinescu","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":9.0,"pos":5023,"pm":9.2,"l":84,"l5":78,"sec":"S1","r":26,"star":false},{"n":"Școala Centrală","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":"Limba franceză(fără examan)","m":9.0,"pos":5055,"pm":9.5,"l":28,"l5":26,"sec":"S2","r":19,"star":false},{"n":"Dante Alighieri","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.97,"pos":5114,"pm":9.17,"l":28,"l5":26,"sec":"S3","r":27,"star":false},{"n":"C.A. Rosetti","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.97,"pos":5133,"pm":9.4,"l":84,"l5":78,"sec":"S2","r":25,"star":false},{"n":"Dante Alighieri","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.97,"pos":5172,"pm":9.72,"l":56,"l5":52,"sec":"S3","r":27,"star":false},{"n":"V. Madgearu","t":"Colegiul Economic","p":"Servicii","s":"Turism și alimentație","b":null,"m":8.97,"pos":5200,"pm":9.52,"l":28,"l5":24,"sec":"S1","r":28,"star":false},{"n":"C.A. Rosetti","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.97,"pos":5204,"pm":9.27,"l":28,"l5":26,"sec":"S2","r":25,"star":false},{"n":"Tudor Vladimirescu","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.95,"pos":5347,"pm":9.4,"l":56,"l5":52,"sec":"S6","r":24,"star":false},{"n":"Emil Racoviță","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":8.95,"pos":5356,"pm":9.15,"l":28,"l5":26,"sec":"S2","r":29,"star":false},{"n":"Ion Barbu","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":8.92,"pos":5495,"pm":9.37,"l":56,"l5":78,"sec":"S5","r":22,"star":false},{"n":"Goethe","t":"Colegiul German","p":"Umanist","s":"Teor.uman.spec.germană","b":null,"m":8.9,"pos":5589,"pm":9.68,"l":28,"l5":25,"sec":"S1","r":23,"star":false},{"n":"Tudor Vladimirescu","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.87,"pos":5707,"pm":9.3,"l":28,"l5":26,"sec":"S6","r":24,"star":false},{"n":"George Călinescu","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.87,"pos":5729,"pm":9.07,"l":84,"l5":78,"sec":"S1","r":26,"star":false},{"n":"Dante Alighieri","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.87,"pos":5755,"pm":9.12,"l":28,"l5":26,"sec":"S3","r":27,"star":false},{"n":"Victor Babeș","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":8.85,"pos":5805,"pm":9.1,"l":28,"l5":26,"sec":"S2","r":30,"star":false},{"n":"Ștefan Odobleja","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.82,"pos":5939,"pm":9.22,"l":28,"l5":26,"sec":"S5","r":31,"star":false},{"n":"Alexandru Vlahuță","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.8,"pos":6071,"pm":9.05,"l":56,"l5":52,"sec":"S1","r":32,"star":false},{"n":"Tudor Vladimirescu","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":8.8,"pos":6076,"pm":9.4,"l":56,"l5":78,"sec":"S6","r":24,"star":false},{"n":"V. Madgearu","t":"Colegiul Economic","p":"Servicii","s":"Economic","b":null,"m":8.8,"pos":6095,"pm":9.65,"l":252,"l5":216,"sec":"S1","r":28,"star":false},{"n":"Nicolae Kretzulescu","t":"Școala Superioară Comercială","p":"Servicii","s":"Comerț","b":null,"m":8.77,"pos":6189,"pm":9.25,"l":28,"l5":24,"sec":"S3","r":33,"star":false},{"n":"Alexandru Vlahuță","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":"Limba germană(fără examen)","m":8.77,"pos":6220,"pm":9.2,"l":14,"l5":13,"sec":"S1","r":32,"star":false},{"n":"Ștefan Demetrescu","t":"Liceul Teologic Adventist","p":"Real","s":"Matematică-Informatică","b":null,"m":8.75,"pos":6269,"pm":9.57,"l":28,"l5":26,"sec":"S4","r":34,"star":false},{"n":"Nicolae Kretzulescu","t":"Școala Superioară Comercială","p":"Servicii","s":"Economic","b":null,"m":8.75,"pos":6365,"pm":9.4,"l":168,"l5":120,"sec":"S3","r":33,"star":false},{"n":"C-tin Brâncoveanu","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.72,"pos":6421,"pm":9.2,"l":56,"l5":52,"sec":"S1","r":35,"star":false},{"n":"Nicolae Kretzulescu","t":"Școala Superioară Comercială","p":"Servicii","s":"Turism și alimentație","b":null,"m":8.72,"pos":6452,"pm":9.37,"l":28,"l5":48,"sec":"S3","r":33,"star":false},{"n":"Aurel Vlaicu","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":8.7,"pos":6541,"pm":9.17,"l":56,"l5":52,"sec":"S1","r":36,"star":false},{"n":"Emil Racoviță","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":8.7,"pos":6621,"pm":9.17,"l":28,"l5":78,"sec":"S2","r":29,"star":false},{"n":"Ștefan Odobleja","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":8.67,"pos":6644,"pm":8.9,"l":28,"l5":26,"sec":"S5","r":31,"star":false},{"n":"Eugen Lovinescu","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.67,"pos":6680,"pm":9.15,"l":84,"l5":78,"sec":"S6","r":37,"star":false},{"n":"Ștefan Odobleja","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.65,"pos":6787,"pm":9.4,"l":84,"l5":78,"sec":"S5","r":31,"star":false},{"n":"Octav Onicescu","t":"Colegiul Național","p":"Real","s":"Matematică-Informatică","b":null,"m":8.65,"pos":6813,"pm":9.32,"l":112,"l5":104,"sec":"S4","r":38,"star":false},{"n":"Aurel Vlaicu","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":8.62,"pos":6875,"pm":9.12,"l":56,"l5":52,"sec":"S1","r":36,"star":false},{"n":"Ștefan Odobleja","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.62,"pos":6881,"pm":9.22,"l":28,"l5":26,"sec":"S5","r":31,"star":false},{"n":"Marin Preda","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.62,"pos":6945,"pm":9.37,"l":28,"l5":26,"sec":"S6","r":39,"star":false},{"n":"C-tin Brâncoveanu","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.6,"pos":7018,"pm":9.7,"l":56,"l5":52,"sec":"S1","r":35,"star":false},{"n":"Sfântul Iosif","t":"Colegiul Romano-Catolic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.6,"pos":7058,"pm":9.5,"l":28,"l5":26,"sec":"S4","r":40,"star":false},{"n":"Octav Onicescu","t":"Colegiul Național","p":"Umanist","s":"Științe Sociale","b":null,"m":8.57,"pos":7118,"pm":9.15,"l":56,"l5":52,"sec":"S4","r":38,"star":false},{"n":"Ștefan Demetrescu","t":"Liceul Teologic Adventist","p":"Real","s":"Științe ale Naturii","b":null,"m":8.57,"pos":7149,"pm":9.55,"l":28,"l5":26,"sec":"S4","r":34,"star":false},{"n":"Aurel Vlaicu","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":8.57,"pos":7167,"pm":8.92,"l":56,"l5":52,"sec":"S1","r":36,"star":false},{"n":"Benjamin Franklin","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.57,"pos":7180,"pm":9.17,"l":56,"l5":52,"sec":"S3","r":41,"star":false},{"n":"Eugen Lovinescu","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.55,"pos":7271,"pm":8.9,"l":56,"l5":78,"sec":"S6","r":37,"star":false},{"n":"Ita Wegman","t":"Liceul Teoretic Bilingv","p":"Real","s":"Științe ale Naturii","b":"Limba germană(fără examen)","m":8.55,"pos":7307,"pm":9.47,"l":28,"l5":26,"sec":"S2","r":42,"star":false},{"n":"Marin Preda","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.52,"pos":7359,"pm":9.1,"l":28,"l5":26,"sec":"S6","r":39,"star":false},{"n":"Octav Onicescu","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":8.52,"pos":7368,"pm":8.95,"l":56,"l5":52,"sec":"S4","r":38,"star":false},{"n":"Victor Babeș","t":"Colegiul Național","p":"Umanist","s":"Filologie","b":null,"m":8.52,"pos":7419,"pm":9.1,"l":28,"l5":26,"sec":"S2","r":30,"star":false},{"n":"Benjamin Franklin","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.5,"pos":7502,"pm":9.12,"l":56,"l5":52,"sec":"S3","r":41,"star":false},{"n":"Eugen Lovinescu","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":"Limba portugheză(fără examen)","m":8.5,"pos":7526,"pm":8.72,"l":28,"l5":26,"sec":"S6","r":37,"star":false},{"n":"Victor Babeș","t":"Colegiul Național","p":"Umanist","s":"Științe Sociale","b":null,"m":8.5,"pos":7579,"pm":8.95,"l":28,"l5":26,"sec":"S2","r":30,"star":false},{"n":"A.D.Xenopol","t":"Colegiul Economic","p":"Servicii","s":"Economic","b":null,"m":8.47,"pos":7613,"pm":9.65,"l":168,"l5":144,"sec":"S2","r":43,"star":false},{"n":"C-tin Brâncoveanu","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.47,"pos":7681,"pm":8.97,"l":56,"l5":52,"sec":"S1","r":35,"star":false},{"n":"Victor Babeș","t":"Colegiul Național","p":"Real","s":"Științe ale Naturii","b":null,"m":8.47,"pos":7682,"pm":9.35,"l":112,"l5":104,"sec":"S2","r":30,"star":false},{"n":"Goethe","t":"Colegiul German","p":"Real","s":"Matematică-Informatică","b":"predare în limba germană","m":8.46,"pos":7716,"pm":9.58,"l":28,"l5":26,"sec":"S1","r":23,"star":false},{"n":"Ștefan Demetrescu","t":"Liceul Teologic Adventist","p":"Umanist","s":"Filologie","b":null,"m":8.45,"pos":7755,"pm":9.5,"l":28,"l5":26,"sec":"S4","r":34,"star":false},{"n":"C-tin Brâncoveanu","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":8.45,"pos":7819,"pm":9.35,"l":56,"l5":52,"sec":"S1","r":35,"star":false},{"n":"A.D.Xenopol","t":"Colegiul Economic","p":"Servicii","s":"Turism și alimentație","b":null,"m":8.42,"pos":7899,"pm":9.02,"l":56,"l5":48,"sec":"S2","r":43,"star":false},{"n":"Ita Wegman","t":"Liceul Teoretic Bilingv","p":"Umanist","s":"Științe Sociale","b":"Limba germană(fără examen)","m":8.42,"pos":7928,"pm":9.3,"l":28,"l5":26,"sec":"S2","r":42,"star":false},{"n":"Marin Preda","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.4,"pos":7984,"pm":9.27,"l":28,"l5":26,"sec":"S6","r":39,"star":false},{"n":"Petru Maior","t":"Colegiul Tehnic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.4,"pos":8012,"pm":8.65,"l":28,"l5":26,"sec":"S6","r":44,"star":false},{"n":"Mihail Sadoveanu","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":8.37,"pos":8088,"pm":8.77,"l":56,"l5":78,"sec":"S2","r":45,"star":false},{"n":"Dimitrie Bolintineanu","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":8.37,"pos":8134,"pm":9.45,"l":28,"l5":26,"sec":"S5","r":46,"star":false},{"n":"Mihail Sadoveanu","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.35,"pos":8180,"pm":8.9,"l":84,"l5":78,"sec":"S2","r":45,"star":false},{"n":"Marin Preda","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":8.35,"pos":8194,"pm":8.77,"l":56,"l5":52,"sec":"S6","r":39,"star":false},{"n":"Benjamin Franklin","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.35,"pos":8240,"pm":8.9,"l":56,"l5":78,"sec":"S3","r":41,"star":false},{"n":"Dimitrie Bolintineanu","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.32,"pos":8303,"pm":8.7,"l":56,"l5":52,"sec":"S5","r":46,"star":false},{"n":"Costin C. Kirițescu","t":"Colegiul Economic","p":"Servicii","s":"Economic","b":null,"m":8.3,"pos":8347,"pm":9.35,"l":140,"l5":120,"sec":"S6","r":47,"star":false},{"n":"Costin C. Kirițescu","t":"Colegiul Economic","p":"Servicii","s":"Comerț","b":null,"m":8.2,"pos":8347,"pm":null,"l":28,"l5":null,"sec":"S6","r":47,"star":false},{"n":"Mihail Sadoveanu","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.3,"pos":8372,"pm":8.62,"l":28,"l5":52,"sec":"S2","r":45,"star":false},{"n":"Ioan N. Socolescu","t":"Colegiul Tehnic de Arhitectură și Lucrări Publice","p":"Real","s":"Matematică-Informatică","b":null,"m":8.3,"pos":8429,"pm":8.95,"l":28,"l5":26,"sec":"S1","r":48,"star":false},{"n":"Dimitrie Bolintineanu","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.25,"pos":8548,"pm":9.05,"l":56,"l5":52,"sec":"S5","r":46,"star":false},{"n":"Dimitrie Bolintineanu","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.22,"pos":8638,"pm":8.6,"l":56,"l5":52,"sec":"S5","r":46,"star":false},{"n":"Petru Maior","t":"Colegiul Tehnic","p":"Umanist","s":"Științe Sociale","b":null,"m":8.22,"pos":8713,"pm":8.7,"l":28,"l5":26,"sec":"S6","r":44,"star":false},{"n":"Petru Maior","t":"Colegiul Tehnic","p":"Umanist","s":"Filologie","b":null,"m":8.22,"pos":8719,"pm":8.82,"l":56,"l5":26,"sec":"S6","r":44,"star":false},{"n":"Decebal","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.2,"pos":8758,"pm":8.5,"l":28,"l5":26,"sec":"S3","r":49,"star":false},{"n":"Costin C. Kirițescu","t":"Colegiul Economic","p":"Servicii","s":"Turism și alimentație","b":null,"m":8.2,"pos":8777,"pm":8.7,"l":84,"l5":72,"sec":"S6","r":47,"star":false},{"n":"Mircea Eliade","t":"Liceul Cu Program Sportiv","p":"Real","s":"Științe ale Naturii","b":null,"m":8.17,"pos":8871,"pm":9.32,"l":28,"l5":26,"sec":"S6","r":50,"star":false},{"n":"Mircea Eliade","t":"Liceul Cu Program Sportiv","p":"Umanist","s":"Științe Sociale","b":null,"m":8.17,"pos":8877,"pm":8.7,"l":28,"l5":26,"sec":"S6","r":50,"star":false},{"n":"Decebal","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.0,"pos":9510,"pm":8.4,"l":84,"l5":52,"sec":"S3","r":49,"star":false},{"n":"Decebal","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":7.92,"pos":9778,"pm":8.9,"l":84,"l5":104,"sec":"S3","r":49,"star":false},{"n":"Petru Maior","t":"Colegiul Tehnic","p":"Resurse naturale si Protecția mediului","s":"Protecția mediului","b":null,"m":7.9,"pos":9808,"pm":8.32,"l":28,"l5":48,"sec":"S6","r":44,"star":false},{"n":"Ioan N. Socolescu","t":"Colegiul Tehnic de Arhitectură și Lucrări Publice","p":"Tehnic","s":"Construcții, instalații și lucrări publice","b":null,"m":7.37,"pos":11298,"pm":8.27,"l":28,"l5":48,"sec":"S1","r":48,"star":false},{"n":"Petru Maior","t":"Colegiul Tehnic","p":"Tehnic","s":"Electric","b":null,"m":7.02,"pos":12099,"pm":7.92,"l":28,"l5":48,"sec":"S6","r":44,"star":false},{"n":"Dante Alighieri","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":"predare în limba italiană","m":6.77,"pos":12618,"pm":9.11,"l":28,"l5":26,"sec":"S3","r":27,"star":false},{"n":"Petru Maior","t":"Colegiul Tehnic","p":"Tehnic","s":"Mecanică","b":null,"m":6.75,"pos":12664,"pm":7.37,"l":28,"l5":24,"sec":"S6","r":44,"star":false},{"n":"Goethe","t":"Colegiul German","p":"Umanist","s":"Filologie","b":"predare în limba germană","m":6.31,"pos":13462,"pm":9.15,"l":28,"l5":52,"sec":"S1","r":23,"star":false},{"n":"George Coșbuc","t":"Colegiul Național Bilingv","p":"Real","s":"Științe ale Naturii","b":"Limba engleză(cu examen)","m":9.57,"pos":1494,"pm":9.82,"l":28,"l5":26,"sec":"S2","r":7,"star":false},{"n":"George Coșbuc","t":"Colegiul Național Bilingv","p":"Real","s":"Matematică-Informatică","b":"Limba engleză(cu examen)","m":9.5,"pos":1932,"pm":9.82,"l":56,"l5":52,"sec":"S2","r":7,"star":false},{"n":"George Coșbuc","t":"Colegiul Național Bilingv","p":"Umanist","s":"Științe Sociale","b":"Limba engleză(cu examen)","m":9.47,"pos":2169,"pm":9.92,"l":28,"l5":26,"sec":"S2","r":7,"star":false},{"n":"George Coșbuc","t":"Colegiul Național Bilingv","p":"Umanist","s":"Filologie","b":"Limba engleză(cu examen)","m":9.3,"pos":3147,"pm":9.57,"l":56,"l5":52,"sec":"S2","r":7,"star":false},{"n":"Traian","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.17,"pos":8903,"pm":8.6,"l":28,"l5":52,"sec":"S2","r":51,"star":false},{"n":"Nichita Stănescu","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.17,"pos":8914,"pm":8.75,"l":56,"l5":52,"sec":"S3","r":52,"star":false},{"n":"Lucian Blaga","t":"Liceul Teoretic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.17,"pos":8922,"pm":8.67,"l":28,"l5":26,"sec":"S2","r":53,"star":false},{"n":"Timotei Cipariu","t":"Liceul Greco-Catolic","p":"Real","s":"Matematică-Informatică","b":null,"m":8.1,"pos":9191,"pm":8.95,"l":56,"l5":52,"sec":"S6","r":54,"star":false},{"n":"Traian","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.07,"pos":9224,"pm":8.9,"l":56,"l5":52,"sec":"S2","r":51,"star":false},{"n":"Lucian Blaga","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.07,"pos":9280,"pm":8.57,"l":56,"l5":52,"sec":"S2","r":53,"star":false},{"n":"Lucian Blaga","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.05,"pos":9347,"pm":8.55,"l":28,"l5":26,"sec":"S2","r":53,"star":false},{"n":"Lucian Blaga","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":8.05,"pos":9366,"pm":8.27,"l":56,"l5":52,"sec":"S2","r":53,"star":false},{"n":"Nichita Stănescu","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":8.02,"pos":9377,"pm":8.7,"l":112,"l5":104,"sec":"S3","r":52,"star":false},{"n":"Traian","t":"Liceul Teoretic","p":"Umanist","s":"Filologie","b":null,"m":8.02,"pos":9385,"pm":8.5,"l":56,"l5":52,"sec":"S2","r":51,"star":false},{"n":"Hermes","t":"Colegiul Economic","p":"Servicii","s":"Economic","b":null,"m":8.02,"pos":9392,"pm":8.6,"l":140,"l5":120,"sec":"S2","r":55,"star":false},{"n":"Gheorghe Asachi","t":"Colegiul Tehnic","p":"Real","s":"Științe ale Naturii","b":null,"m":8.02,"pos":9426,"pm":8.52,"l":28,"l5":26,"sec":"S6","r":56,"star":false},{"n":"Traian","t":"Liceul Teoretic","p":"Umanist","s":"Științe Sociale","b":null,"m":8.0,"pos":9465,"pm":9.2,"l":56,"l5":52,"sec":"S2","r":51,"star":false},{"n":"Henri Coandă","t":"Colegiul Tehnic de Aeronautică","p":"Real","s":"Matematică-Informatică","b":null,"m":8.0,"pos":9500,"pm":8.52,"l":28,"l5":26,"sec":"S1","r":57,"star":false},{"n":"Hermes","t":"Colegiul Economic","p":"Servicii","s":"Turism și alimentație","b":null,"m":7.97,"pos":9618,"pm":8.32,"l":84,"l5":48,"sec":"S2","r":55,"star":false},{"n":"Henri Coandă","t":"Colegiul Tehnic de Aeronautică","p":"Umanist","s":"Filologie","b":null,"m":7.97,"pos":9627,"pm":8.45,"l":28,"l5":26,"sec":"S1","r":57,"star":false},{"n":"Gheorghe Asachi","t":"Colegiul Tehnic","p":"Umanist","s":"Științe Sociale","b":null,"m":7.95,"pos":9688,"pm":8.62,"l":56,"l5":52,"sec":"S6","r":56,"star":false},{"n":"Hermes","t":"Colegiul Economic","p":"Servicii","s":"Comerț","b":null,"m":7.92,"pos":9726,"pm":8.17,"l":56,"l5":24,"sec":"S2","r":55,"star":false},{"n":"Hristo Botev","t":"Liceul Teoretic Bulgar","p":"Umanist","s":"Filologie","b":null,"m":7.9,"pos":9843,"pm":8.15,"l":28,"l5":26,"sec":"S1","r":58,"star":false},{"n":"Mihai Bravu","t":"Colegiul Tehnic","p":"Real","s":"Științe ale Naturii","b":null,"m":7.87,"pos":9885,"pm":8.12,"l":56,"l5":26,"sec":"S3","r":59,"star":false},{"n":"Dimitrie Leonida","t":"Colegiul Tehnic","p":"Real","s":"Matematică-Informatică","b":null,"m":7.82,"pos":10042,"pm":8.97,"l":28,"l5":26,"sec":"S2","r":60,"star":false},{"n":"Costin D. Nenițescu","t":"Colegiul Tehnic","p":"Umanist","s":"Filologie","b":null,"m":7.82,"pos":10105,"pm":8.82,"l":28,"l5":26,"sec":"S3","r":61,"star":false},{"n":"Grigore Cerchez","t":"Colegiul Tehnologic","p":"Umanist","s":"Științe Sociale","b":null,"m":7.8,"pos":10116,"pm":8.42,"l":56,"l5":52,"sec":"S5","r":62,"star":false},{"n":"Grigore Cerchez","t":"Colegiul Tehnologic","p":"Real","s":"Științe ale Naturii","b":null,"m":7.8,"pos":10157,"pm":8.52,"l":28,"l5":26,"sec":"S5","r":62,"star":false},{"n":"Dinicu Golescu","t":"Colegiul Tehnic","p":"Umanist","s":"Filologie","b":null,"m":7.8,"pos":10174,"pm":8.02,"l":28,"l5":26,"sec":"S1","r":63,"star":false},{"n":"Media","t":"Colegiul Tehnic","p":"Umanist","s":"Filologie","b":null,"m":7.77,"pos":10203,"pm":8.27,"l":28,"l5":26,"sec":"S1","r":64,"star":false},{"n":"Costin D. Nenițescu","t":"Colegiul Tehnic","p":"Real","s":"Științe ale Naturii","b":null,"m":7.75,"pos":10269,"pm":8.35,"l":28,"l5":52,"sec":"S3","r":61,"star":false},{"n":"Costin D. Nenițescu","t":"Colegiul Tehnic","p":"Umanist","s":"Științe Sociale","b":null,"m":7.75,"pos":10276,"pm":8.22,"l":28,"l5":52,"sec":"S3","r":61,"star":false},{"n":"Sfântul Pantelimon","t":"Liceul Tehnologic","p":"Umanist","s":"Științe Sociale","b":null,"m":7.72,"pos":10342,"pm":8.2,"l":28,"l5":26,"sec":"S2","r":65,"star":false},{"n":"Mihai I","t":"Colegiul Tehnic Feroviar","p":"Real","s":"Matematică-Informatică","b":null,"m":7.72,"pos":10381,"pm":8.37,"l":28,"l5":26,"sec":"S1","r":66,"star":false},{"n":"Traian Vuia","t":"Liceul Tehnologic de Metrologie","p":"Real","s":"Matematică-Informatică","b":null,"m":7.67,"pos":10495,"pm":9.25,"l":28,"l5":26,"sec":"S4","r":67,"star":false},{"n":"Dimitrie Leonida","t":"Colegiul Tehnic","p":"Real","s":"Științe ale Naturii","b":null,"m":7.67,"pos":10496,"pm":8.17,"l":28,"l5":26,"sec":"S2","r":60,"star":false},{"n":"Sf. Antim Ivireanu","t":"Liceul Tehnologic","p":"Servicii","s":"Turism și alimentație","b":null,"m":7.65,"pos":10556,"pm":8.37,"l":56,"l5":72,"sec":"S6","r":68,"star":false},{"n":"Sfântul Pantelimon","t":"Liceul Tehnologic","p":"Real","s":"Științe ale Naturii","b":null,"m":7.65,"pos":10578,"pm":8.15,"l":28,"l5":26,"sec":"S2","r":65,"star":false},{"n":"Hristo Botev","t":"Liceul Teoretic Bulgar","p":"Umanist","s":"Filologie","b":"Limba neogreacă(fără examen)","m":7.65,"pos":10580,"pm":8.32,"l":14,"l5":13,"sec":"S1","r":58,"star":false},{"n":"Dimitrie Paciurea","t":"Liceul","p":"Umanist","s":"Filologie","b":null,"m":7.65,"pos":10590,"pm":8.27,"l":28,"l5":26,"sec":"S1","r":69,"star":false},{"n":"Traian Vuia","t":"Liceul Tehnologic de Metrologie","p":"Umanist","s":"Filologie","b":null,"m":7.62,"pos":10634,"pm":7.97,"l":56,"l5":26,"sec":"S4","r":67,"star":false},{"n":"Carol I","t":"Colegiul Tehnic","p":"Umanist","s":"Științe Sociale","b":null,"m":7.6,"pos":10698,"pm":8.12,"l":56,"l5":52,"sec":"S6","r":70,"star":false},{"n":"Gheorghe Airinei","t":"Colegiul Tehnic de Poștă și Telecomunicații","p":"Real","s":"Științe ale Naturii","b":null,"m":7.6,"pos":10700,"pm":8.1,"l":56,"l5":52,"sec":"S6","r":71,"star":false},{"n":"Traian Vuia","t":"Liceul Tehnologic de Metrologie","p":"Real","s":"Științe ale Naturii","b":null,"m":7.6,"pos":10735,"pm":8.3,"l":56,"l5":26,"sec":"S4","r":67,"star":false},{"n":"Grigore Cerchez","t":"Colegiul Tehnologic","p":"Servicii","s":"Economic","b":null,"m":7.55,"pos":10833,"pm":7.9,"l":28,"l5":48,"sec":"S5","r":62,"star":false},{"n":"Valter Mărăcineanu","t":"Colegiul Tehnic","p":"Umanist","s":"Filologie","b":null,"m":7.5,"pos":10953,"pm":8.32,"l":28,"l5":26,"sec":"S1","r":72,"star":false},{"n":"Theodor Pallady","t":"Liceul Tehnologic","p":"Umanist","s":"Filologie","b":null,"m":7.47,"pos":11050,"pm":8.22,"l":28,"l5":26,"sec":"S3","r":73,"star":false},{"n":"Carol I","t":"Colegiul Tehnic","p":"Real","s":"Științe ale Naturii","b":null,"m":7.47,"pos":11063,"pm":7.92,"l":28,"l5":26,"sec":"S6","r":70,"star":false},{"n":"Gheorghe Airinei","t":"Colegiul Tehnic de Poștă și Telecomunicații","p":"Umanist","s":"Științe Sociale","b":null,"m":7.45,"pos":11096,"pm":8.07,"l":84,"l5":78,"sec":"S6","r":71,"star":false},{"n":"Energetic","t":"Colegiul Tehnic","p":"Real","s":"Matematică-Informatică","b":null,"m":7.42,"pos":11142,"pm":8.37,"l":28,"l5":26,"sec":"S5","r":74,"star":false},{"n":"Dimitrie Gusti","t":"Liceul Tehnologic","p":"Umanist","s":"Științe Sociale","b":null,"m":7.42,"pos":11154,"pm":8.02,"l":56,"l5":52,"sec":"S5","r":75,"star":false},{"n":"Dimitrie Gusti","t":"Liceul Tehnologic","p":"Real","s":"Științe ale Naturii","b":null,"m":7.4,"pos":11204,"pm":7.85,"l":28,"l5":26,"sec":"S5","r":75,"star":false},{"n":"Constantin Brâncuși","t":"Liceul Tehnologic","p":"Servicii","s":"Economic","b":null,"m":7.37,"pos":11278,"pm":8.07,"l":56,"l5":48,"sec":"S2","r":76,"star":false},{"n":"Mihai Bravu","t":"Colegiul Tehnic","p":"Servicii","s":"Turism și alimentație","b":null,"m":7.37,"pos":11283,"pm":7.92,"l":140,"l5":72,"sec":"S3","r":59,"star":false},{"n":"Hristo Botev","t":"Liceul Teoretic Bulgar","p":"Umanist","s":"Filologie","b":"Limba rusă(fără examen)","m":7.3,"pos":11467,"pm":7.77,"l":14,"l5":13,"sec":"S1","r":58,"star":false},{"n":"Energetic","t":"Colegiul Tehnic","p":"Umanist","s":"Filologie","b":null,"m":7.25,"pos":11612,"pm":8.15,"l":56,"l5":52,"sec":"S5","r":74,"star":false},{"n":"Iuliu Maniu","t":"Colegiul Tehnic","p":"Real","s":"Științe ale Naturii","b":null,"m":7.22,"pos":11637,"pm":8.1,"l":28,"l5":26,"sec":"S6","r":77,"star":false},{"n":"Mihai I","t":"Colegiul Tehnic Feroviar","p":"Real","s":"Științe ale Naturii","b":null,"m":7.22,"pos":11649,"pm":7.85,"l":56,"l5":52,"sec":"S1","r":66,"star":false},{"n":"Dinicu Golescu","t":"Colegiul Tehnic","p":"Servicii","s":"Turism și alimentație","b":null,"m":7.2,"pos":11736,"pm":8.05,"l":56,"l5":48,"sec":"S1","r":63,"star":false},{"n":"Anghel Saligny","t":"Colegiul Tehnic","p":"Servicii","s":"Economic","b":null,"m":7.2,"pos":11738,"pm":8.1,"l":84,"l5":72,"sec":"S3","r":78,"star":false},{"n":"Hristo Botev","t":"Liceul Teoretic Bulgar","p":"Umanist","s":"Filologie","b":"Limba bulgară(fără examen)","m":7.15,"pos":11825,"pm":7.85,"l":14,"l5":13,"sec":"S1","r":58,"star":false},{"n":"Gheorghe Asachi","t":"Colegiul Tehnic","p":"Tehnic","s":"Producție media","b":null,"m":7.12,"pos":11895,"pm":7.92,"l":56,"l5":72,"sec":"S6","r":56,"star":false},{"n":"Constantin Brâncuși","t":"Liceul Tehnologic","p":"Servicii","s":"Turism și alimentație","b":null,"m":7.1,"pos":11930,"pm":8.05,"l":28,"l5":48,"sec":"S2","r":76,"star":false},{"n":"Gheorghe Airinei","t":"Colegiul Tehnic de Poștă și Telecomunicații","p":"Servicii","s":"Economic","b":null,"m":7.1,"pos":11952,"pm":8.62,"l":56,"l5":48,"sec":"S6","r":71,"star":false},{"n":"Iuliu Maniu","t":"Colegiul Tehnic","p":"Umanist","s":"Științe Sociale","b":null,"m":7.07,"pos":11981,"pm":8.02,"l":84,"l5":78,"sec":"S6","r":77,"star":false},{"n":"Dimitrie Leonida","t":"Colegiul Tehnic","p":"Resurse naturale si Protecția mediului","s":"Protecția mediului","b":null,"m":7.07,"pos":11982,"pm":7.75,"l":28,"l5":24,"sec":"S2","r":60,"star":false},{"n":"Anghel Saligny","t":"Colegiul Tehnic","p":"Resurse naturale si Protecția mediului","s":"Protecția mediului","b":null,"m":7.07,"pos":12021,"pm":7.62,"l":28,"l5":24,"sec":"S3","r":78,"star":false},{"n":"Nikola Tesla","t":"Liceul Tehnologic","p":"Servicii","s":"Economic","b":null,"m":6.97,"pos":12210,"pm":7.87,"l":56,"l5":72,"sec":"S2","r":79,"star":false},{"n":"Viilor","t":"Colegiul Economic","p":"Servicii","s":"Economic","b":null,"m":6.97,"pos":12224,"pm":8.02,"l":140,"l5":72,"sec":"S5","r":80,"star":false},{"n":"Gheorghe Airinei","t":"Colegiul Tehnic de Poștă și Telecomunicații","p":"Servicii","s":"Turism și alimentație","b":null,"m":6.92,"pos":12356,"pm":8.72,"l":56,"l5":48,"sec":"S6","r":71,"star":false},{"n":"Constantin Brâncuși","t":"Liceul Tehnologic","p":"Resurse naturale si Protecția mediului","s":"Protecția mediului","b":null,"m":6.87,"pos":12457,"pm":7.35,"l":28,"l5":24,"sec":"S2","r":76,"star":false},{"n":"Grigore Cerchez","t":"Colegiul Tehnologic","p":"Servicii","s":"Turism și alimentație","b":null,"m":6.82,"pos":12549,"pm":8.22,"l":84,"l5":72,"sec":"S5","r":62,"star":false},{"n":"Carol I","t":"Colegiul Tehnic","p":"Resurse naturale si Protecția mediului","s":"Protecția mediului","b":null,"m":6.8,"pos":12556,"pm":8.2,"l":28,"l5":48,"sec":"S6","r":70,"star":false},{"n":"Henri Coandă","t":"Colegiul Tehnic de Aeronautică","p":"Tehnic","s":"Mecanică","b":null,"m":6.75,"pos":12654,"pm":8.0,"l":84,"l5":48,"sec":"S1","r":57,"star":false},{"n":"Viaceslav Harnaj","t":"Colegiul Tehnologic","p":"Servicii","s":"Economic","b":null,"m":6.75,"pos":12665,"pm":8.35,"l":56,"l5":48,"sec":"S1","r":81,"star":false},{"n":"Hristo Botev","t":"Liceul Teoretic Bulgar","p":"Real","s":"Matematică-Informatică","b":"Limba bulgară(fără examen)","m":6.7,"pos":12759,"pm":7.92,"l":28,"l5":26,"sec":"S1","r":58,"star":false},{"n":"Nr. 1","t":"Liceul Economic","p":"Servicii","s":"Economic","b":null,"m":6.7,"pos":12761,"pm":8.35,"l":196,"l5":120,"sec":"S4","r":82,"star":false},{"n":"Traian Vuia","t":"Liceul Tehnologic de Metrologie","p":"Resurse naturale si Protecția mediului","s":"Protecția mediului","b":null,"m":6.67,"pos":12816,"pm":7.42,"l":28,"l5":24,"sec":"S4","r":67,"star":false},{"n":"Valter Mărăcineanu","t":"Colegiul Tehnic","p":"Servicii","s":"Turism și alimentație","b":null,"m":6.62,"pos":12928,"pm":7.65,"l":84,"l5":48,"sec":"S1","r":72,"star":false},{"n":"Nr. 1","t":"Liceul Economic","p":"Servicii","s":"Turism și alimentație","b":null,"m":6.6,"pos":12955,"pm":8.27,"l":56,"l5":48,"sec":"S4","r":82,"star":false},{"n":"Hristo Botev","t":"Liceul Teoretic Bulgar","p":"Umanist","s":"Filologie","b":"Limba rromani(fără examen)","m":6.6,"pos":12959,"pm":7.05,"l":14,"l5":13,"sec":"S1","r":58,"star":false},{"n":"Costin D. Nenițescu","t":"Colegiul Tehnic","p":"Tehnic","s":"Chimie industrială","b":null,"m":6.55,"pos":13079,"pm":8.27,"l":84,"l5":96,"sec":"S3","r":61,"star":false},{"n":"Anghel Saligny","t":"Colegiul Tehnic","p":"Tehnic","s":"Construcții, instalații și lucrări publice","b":null,"m":6.5,"pos":13148,"pm":8.02,"l":84,"l5":24,"sec":"S3","r":78,"star":false},{"n":"Dimitrie Leonida","t":"Colegiul Tehnic","p":"Tehnic","s":"Electronică automatizări","b":null,"m":6.43,"pos":13260,"pm":8.15,"l":0,"l5":24,"sec":"S2","r":60,"star":false},{"n":"Energetic","t":"Colegiul Tehnic","p":"Servicii","s":"Turism și alimentație","b":null,"m":6.4,"pos":13333,"pm":7.62,"l":56,"l5":48,"sec":"S5","r":74,"star":false},{"n":"Ady Endre","t":"Liceul Teoretic","p":"Real","s":"Științe ale Naturii","b":"predare în limba maghiară","m":6.38,"pos":13347,"pm":9.01,"l":28,"l5":26,"sec":"S2","r":83,"star":false},{"n":"Gheorghe Asachi","t":"Colegiul Tehnic","p":"Tehnic","s":"Industrie textilă și pielărie","b":null,"m":6.35,"pos":13427,"pm":7.9,"l":56,"l5":48,"sec":"S6","r":56,"star":false},{"n":"Dragomir Hurmuzescu","t":"Liceul Tehnologic","p":"Servicii","s":"Economic","b":null,"m":6.32,"pos":13449,"pm":7.3,"l":112,"l5":72,"sec":"S3","r":84,"star":false},{"n":"Traian Vuia","t":"Liceul Tehnologic de Metrologie","p":"Tehnic","s":"Electric","b":null,"m":6.27,"pos":13547,"pm":7.57,"l":28,"l5":24,"sec":"S4","r":67,"star":false},{"n":"Gheorghe Airinei","t":"Colegiul Tehnic de Poștă și Telecomunicații","p":"Tehnic","s":"Electronică automatizări","b":null,"m":6.25,"pos":13560,"pm":8.8,"l":56,"l5":48,"sec":"S6","r":71,"star":false},{"n":"Nikola Tesla","t":"Liceul Tehnologic","p":"Resurse naturale si Protecția mediului","s":"Protecția mediului","b":null,"m":6.22,"pos":13611,"pm":8.37,"l":28,"l5":24,"sec":"S2","r":79,"star":false},{"n":"Costin D. Nenițescu","t":"Colegiul Tehnic","p":"Resurse naturale si Protecția mediului","s":"Industrie alimentară","b":null,"m":6.2,"pos":13661,"pm":7.2,"l":28,"l5":48,"sec":"S3","r":61,"star":false},{"n":"Ion I.C. Brătianu","t":"Liceul Tehnologic","p":"Servicii","s":"Turism și alimentație","b":null,"m":6.15,"pos":13741,"pm":7.27,"l":84,"l5":72,"sec":"S2","r":85,"star":false},{"n":"Viilor","t":"Colegiul Economic","p":"Servicii","s":"Comerț","b":null,"m":6.12,"pos":13780,"pm":7.45,"l":56,"l5":48,"sec":"S5","r":80,"star":false},{"n":"Viaceslav Harnaj","t":"Colegiul Tehnologic","p":"Servicii","s":"Turism și alimentație","b":null,"m":6.1,"pos":13798,"pm":8.57,"l":56,"l5":48,"sec":"S1","r":81,"star":false},{"n":"Dragomir Hurmuzescu","t":"Liceul Tehnologic","p":"Servicii","s":"Comerț","b":null,"m":6.02,"pos":13908,"pm":7.05,"l":28,"l5":24,"sec":"S3","r":84,"star":false},{"n":"Costin D. Nenițescu","t":"Colegiul Tehnic","p":"Resurse naturale si Protecția mediului","s":"Protecția mediului","b":null,"m":6.02,"pos":13923,"pm":7.5,"l":28,"l5":96,"sec":"S3","r":61,"star":false},{"n":"Viilor","t":"Colegiul Economic","p":"Servicii","s":"Turism și alimentație","b":null,"m":6.0,"pos":13952,"pm":8.77,"l":252,"l5":192,"sec":"S5","r":80,"star":false},{"n":"Traian Vuia","t":"Liceul Tehnologic de Metrologie","p":"Tehnic","s":"Electronică automatizări","b":null,"m":5.92,"pos":14055,"pm":6.87,"l":28,"l5":24,"sec":"S4","r":67,"star":false},{"n":"Henri Coandă","t":"Colegiul Tehnic de Aeronautică","p":"Tehnic","s":"Electromecanică","b":null,"m":5.85,"pos":14134,"pm":8.05,"l":84,"l5":96,"sec":"S1","r":57,"star":false},{"n":"Grigore Cerchez","t":"Colegiul Tehnologic","p":"Tehnic","s":"Mecanică","b":null,"m":5.82,"pos":14183,"pm":8.07,"l":28,"l5":24,"sec":"S5","r":62,"star":false},{"n":"Iuliu Maniu","t":"Colegiul Tehnic","p":"Servicii","s":"Turism și alimentație","b":null,"m":5.8,"pos":14228,"pm":7.72,"l":56,"l5":48,"sec":"S6","r":77,"star":false},{"n":"Costin D. Nenițescu","t":"Colegiul Tehnic","p":"Tehnic","s":"Electric","b":null,"m":5.7,"pos":14356,"pm":7.07,"l":0,"l5":48,"sec":"S3","r":61,"star":false},{"n":"Carol I","t":"Colegiul Tehnic","p":"Tehnic","s":"Electronică automatizări","b":null,"m":5.67,"pos":14387,"pm":7.6,"l":28,"l5":24,"sec":"S6","r":70,"star":false},{"n":"Sfântul Pantelimon","t":"Liceul Tehnologic","p":"Tehnic","s":"Mecanică","b":null,"m":5.65,"pos":14414,"pm":7.6,"l":28,"l5":48,"sec":"S2","r":65,"star":false},{"n":"Nikola Tesla","t":"Liceul Tehnologic","p":"Tehnic","s":"Electric","b":null,"m":5.62,"pos":14446,"pm":6.95,"l":56,"l5":24,"sec":"S2","r":79,"star":false},{"n":"Mircea cel Bătrân","t":"Colegiul Tehnic","p":"Servicii","s":"Economic","b":null,"m":5.6,"pos":14488,"pm":7.62,"l":112,"l5":120,"sec":"S1","r":86,"star":false},{"n":"Elie Radu","t":"Liceul Tehnologic","p":"Servicii","s":"Economic","b":null,"m":5.4,"pos":14689,"pm":7.32,"l":112,"l5":96,"sec":"S3","r":87,"star":false},{"n":"Dragomir Hurmuzescu","t":"Liceul Tehnologic","p":"Servicii","s":"Estetica și igiena corpului omenesc","b":null,"m":5.4,"pos":14692,"pm":7.15,"l":84,"l5":72,"sec":"S3","r":84,"star":false},{"n":"Dacia","t":"Liceul Tehnologic","p":"Resurse naturale si Protecția mediului","s":"Protecția mediului","b":null,"m":5.32,"pos":14770,"pm":6.42,"l":28,"l5":24,"sec":"S4","r":88,"star":false},{"n":"Iuliu Maniu","t":"Colegiul Tehnic","p":"Tehnic","s":"Electric","b":null,"m":5.3,"pos":14772,"pm":6.9,"l":28,"l5":24,"sec":"S6","r":77,"star":false},{"n":"Nikola Tesla","t":"Liceul Tehnologic","p":"Tehnic","s":"Electronică automatizări","b":null,"m":5.3,"pos":14795,"pm":8.0,"l":28,"l5":24,"sec":"S2","r":79,"star":false},{"n":"Ion I.C. Brătianu","t":"Liceul Tehnologic","p":"Tehnic","s":"Electric","b":null,"m":5.27,"pos":14808,"pm":7.42,"l":28,"l5":24,"sec":"S2","r":85,"star":false},{"n":"Mihai Bravu","t":"Colegiul Tehnic","p":"Tehnic","s":"Construcții, instalații și lucrări publice","b":null,"m":5.12,"pos":14976,"pm":6.9,"l":126,"l5":72,"sec":"S3","r":59,"star":false},{"n":"Mihai Bravu","t":"Colegiul Tehnic","p":"Tehnic","s":"Electric","b":null,"m":5.12,"pos":14980,"pm":6.92,"l":42,"l5":24,"sec":"S3","r":59,"star":false},{"n":"Constantin Brâncuși","t":"Liceul Tehnologic","p":"Tehnic","s":"Fabricarea produselor din lemn","b":null,"m":5.12,"pos":14981,"pm":7.22,"l":56,"l5":72,"sec":"S2","r":76,"star":false},{"n":"Petru Poni","t":"Liceul Tehnologic","p":"Tehnic","s":"Mecanică","b":null,"m":5.1,"pos":15008,"pm":6.65,"l":56,"l5":24,"sec":"S6","r":89,"star":false},{"n":"Energetic","t":"Colegiul Tehnic","p":"Tehnic","s":"Electric","b":null,"m":5.02,"pos":15040,"pm":7.67,"l":56,"l5":48,"sec":"S5","r":74,"star":false},{"n":"Mihai I","t":"Colegiul Tehnic Feroviar","p":"Tehnic","s":"Electric","b":null,"m":5.0,"pos":15070,"pm":7.4,"l":0,"l5":24,"sec":"S1","r":66,"star":false},{"n":"Petru Poni","t":"Liceul Tehnologic","p":"Servicii","s":"Economic","b":null,"m":4.92,"pos":15135,"pm":6.87,"l":84,"l5":72,"sec":"S6","r":89,"star":false},{"n":"Mihai Bravu","t":"Colegiul Tehnic","p":"Tehnic","s":"Mecanică","b":null,"m":4.85,"pos":15179,"pm":5.7,"l":0,"l5":24,"sec":"S3","r":59,"star":false},{"n":"Iuliu Maniu","t":"Colegiul Tehnic","p":"Tehnic","s":"Mecanică","b":null,"m":4.75,"pos":15239,"pm":6.6,"l":56,"l5":24,"sec":"S6","r":77,"star":false},{"n":"Valter Mărăcineanu","t":"Colegiul Tehnic","p":"Tehnic","s":"Mecanică","b":null,"m":4.62,"pos":15312,"pm":7.47,"l":56,"l5":24,"sec":"S1","r":72,"star":false},{"n":"Dimitrie Gusti","t":"Liceul Tehnologic","p":"Tehnic","s":"Mecanică","b":null,"m":4.6,"pos":15330,"pm":7.95,"l":84,"l5":72,"sec":"S5","r":75,"star":false},{"n":"Media","t":"Colegiul Tehnic","p":"Tehnic","s":"Producție media","b":null,"m":4.52,"pos":15357,"pm":8.0,"l":196,"l5":192,"sec":"S1","r":64,"star":false},{"n":"Media","t":"Colegiul Tehnic","p":"Tehnic","s":"Tehnici poligrafice","b":null,"m":4.32,"pos":15468,"pm":6.42,"l":28,"l5":24,"sec":"S1","r":64,"star":false},{"n":"Dragomir Hurmuzescu","t":"Liceul Tehnologic","p":"Tehnic","s":"Electromecanică","b":null,"m":4.27,"pos":15485,"pm":7.25,"l":0,"l5":24,"sec":"S3","r":84,"star":false},{"n":"Dimitrie Leonida","t":"Colegiul Tehnic","p":"Tehnic","s":"Mecanică","b":null,"m":4.27,"pos":15492,"pm":7.42,"l":84,"l5":72,"sec":"S2","r":60,"star":false},{"n":"Dinicu Golescu","t":"Colegiul Tehnic","p":"Tehnic","s":"Mecanică","b":null,"m":4.2,"pos":15517,"pm":8.02,"l":84,"l5":72,"sec":"S1","r":63,"star":false},{"n":"Elie Radu","t":"Liceul Tehnologic","p":"Tehnic","s":"Mecanică","b":null,"m":4.1,"pos":15568,"pm":5.77,"l":84,"l5":48,"sec":"S3","r":87,"star":false},{"n":"Energetic","t":"Colegiul Tehnic","p":"Tehnic","s":"Mecanică","b":null,"m":3.85,"pos":15639,"pm":6.27,"l":28,"l5":48,"sec":"S5","r":74,"star":false},{"n":"Theodor Pallady","t":"Liceul Tehnologic","p":"Tehnic","s":"Electronică automatizări","b":null,"m":3.67,"pos":15679,"pm":7.85,"l":56,"l5":24,"sec":"S3","r":73,"star":false},{"n":"Theodor Pallady","t":"Liceul Tehnologic","p":"Tehnic","s":"Electric","b":null,"m":2.85,"pos":15787,"pm":8.8,"l":28,"l5":24,"sec":"S3","r":73,"star":false},{"n":"Dacia","t":"Liceul Tehnologic","p":"Tehnic","s":"Mecanică","b":null,"m":2.75,"pos":15791,"pm":5.75,"l":56,"l5":96,"sec":"S4","r":88,"star":false},{"n":"Edmond Nicolau","t":"Colegiul Tehnic","p":"Tehnic","s":"Mecanică","b":null,"m":2.75,"pos":15792,"pm":5.85,"l":28,"l5":48,"sec":"S2","r":90,"star":false},{"n":"Edmond Nicolau","t":"Colegiul Tehnic","p":"Tehnic","s":"Electronică automatizări","b":null,"m":2.42,"pos":15805,"pm":7.42,"l":28,"l5":48,"sec":"S2","r":90,"star":false},{"n":"Dumitru Moțoc","t":"Colegiul Tehnic de Industrie Alimentară","p":"Resurse naturale si Protecția mediului","s":"Industrie alimentară","b":null,"m":2.4,"pos":15806,"pm":7.5,"l":196,"l5":192,"sec":"S5","r":91,"star":false},{"n":"Ion I.C. Brătianu","t":"Liceul Tehnologic","p":"Tehnic","s":"Mecanică","b":null,"m":2.4,"pos":15807,"pm":7.3,"l":140,"l5":72,"sec":"S2","r":85,"star":false},{"n":"Mircea cel Bătrân","t":"Colegiul Tehnic","p":"Tehnic","s":"Mecanică","b":null,"m":2.37,"pos":15808,"pm":6.35,"l":84,"l5":72,"sec":"S1","r":86,"star":false},{"n":"Viaceslav Harnaj","t":"Colegiul Tehnologic","p":"Resurse naturale si Protecția mediului","s":"Agricultură","b":null,"m":2.25,"pos":15809,"pm":8.47,"l":112,"l5":96,"sec":"S1","r":81,"star":false},{"n":"Petru Poni","t":"Liceul Tehnologic","p":"Tehnic","s":"Electric","b":null,"m":2.25,"pos":15810,"pm":6.95,"l":56,"l5":72,"sec":"S6","r":89,"star":false},{"n":"Theodor Pallady","t":"Liceul Tehnologic","p":"Tehnic","s":"Mecanică","b":null,"m":2.05,"pos":15811,"pm":6.5,"l":84,"l5":96,"sec":"S3","r":73,"star":false},{"n":"Carol I","t":"Colegiul Tehnic","p":"Tehnic","s":"Mecanică","b":null,"m":1.85,"pos":15812,"pm":6.15,"l":56,"l5":48,"sec":"S6","r":70,"star":false}];
@@ -295,11 +1337,11 @@ const TIP_SHORT = { "Colegiul Național": "CN", "Liceul Teoretic": "LT", "Colegi
 const CLS = {
   sigur:   { lab: "SIGUR",      color: "#147a40", bg: "#dff0e6", bd: "#bfe0cb" },
   probabil:{ lab: "PROBABIL",   color: "#1e9e5a", bg: "#eafaf1", bd: "#cdeada" },
-  incert:  { lab: "INCERT",     color: "#9a6b12", bg: "#FBF3E2", bd: "#E7D29A" },
+  incert:  { lab: "INCERT",     color: "#9a6b12", bg: "var(--gold-soft)", bd: "#E7D29A" },
   improb:  { lab: "IMPROBABIL", color: "#c0392b", bg: "#F3E5E0", bd: "#e8c3b8" },
 };
 
-export default function Simulator2026() {
+function SimulatorDecizie({ onViewDistribution, matchDistribName }) {
   const [mod, setMod] = useState("pozitie");
   const [pozInput, setPozInput] = useState("3500");
   const [mediaInput, setMediaInput] = useState("9.20");
@@ -434,41 +1476,41 @@ td{padding:4px 5px;border-bottom:1px solid #7c8798}
   if (doarUrmarite) shown = shown.filter((r) => urmarite.includes(r.i));
   if (sortDistanta) shown = [...shown].sort((a, b) => (a.distKm ?? 999) - (b.distKm ?? 999));
 
-  const F = "'Inter', system-ui, sans-serif", M = "'IBM Plex Mono', ui-monospace, monospace";
+  const F = "'Inter', system-ui, sans-serif", M = "'JetBrains Mono', ui-monospace, monospace";
   const ACC = mod === "pozitie" ? "#0E6E6E" : "#1a5276";
 
   return (
-    <div style={{ fontFamily: F, background: "#eef0f3", minHeight: "100vh", color: "#16202b" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Spectral:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');.snl-btn{cursor:pointer;transition:.12s}.snl-row:hover{box-shadow:0 2px 8px rgba(0,0,0,.07)}`}</style>
+    <div style={{ fontFamily: F, background: "var(--ink)", minHeight: "100%", color: "var(--text)" }}>
+      <style>{`.snl-btn{cursor:pointer;transition:.12s}.snl-row:hover{box-shadow:0 2px 8px rgba(0,0,0,.07)}`}</style>
 
-      <div style={{ background: "#141a2a", color: "#fff", padding: "22px 24px 16px" }}>
+      <div style={{ background: "var(--panel)", color: "var(--text)", padding: "22px 24px 16px" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-          <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#a8b6d9" }}>București · Admitere 2026 · instrument de decizie</div>
-          <h1 style={{ margin: "6px 0 0", fontSize: 24, fontWeight: 700, fontFamily: "'Spectral',serif", letterSpacing: "-.01em" }}>Simulator decizie 2026 — fără examene de limbă, validat pe 5 ani</h1>
-          <div style={{ fontSize: 12, color: "#a8b6d9", marginTop: 6 }}>Folosește rangul tău din ierarhia ISMB (cunoscut la completarea fișei). <b style={{ color: "#cdd6f4" }}>Citește mai întâi caseta de validare.</b></div>
+          <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "var(--text-dim)" }}>București · Admitere 2026 · instrument de decizie</div>
+          <h1 style={{ margin: "6px 0 0", fontSize: 24, fontWeight: 700, fontFamily: "'Fraunces',serif", letterSpacing: "-.01em" }}>Simulator decizie 2026 — fără examene de limbă, validat pe 5 ani</h1>
+          <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>Folosește rangul tău din ierarhia ISMB (cunoscut la completarea fișei). <b style={{ color: "var(--text)" }}>Citește mai întâi caseta de validare.</b></div>
         </div>
       </div>
 
       {/* CASETA DE VALIDARE — onestă */}
-      <div style={{ background: "#1d2740", color: "#cdd6f4", borderBottom: "1px solid #2a3754" }}>
+      <div style={{ background: "var(--panel-raised)", color: "var(--text)", borderBottom: "1px solid var(--border)" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto", padding: "12px 24px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
             <div style={{ fontSize: 12.5, lineHeight: 1.5, maxWidth: 760 }}>
-              <b style={{ color: "#f1c40f" }}>Cât te poți baza:</b> ordinea liceelor <b>foarte depărtate</b> e stabilă, dar a celor <b>apropiate nu</b> — la specializări la ≤150 locuri distanță, ordinea se inversează în ~42% din cazuri de la un an la altul (verificat pe 2020-25; ~32% cum se credea inițial era subestimat). Deci nu te baza pe ordinea fină între vecini. Verdictul intri/nu intri: în ani tipici eroarea mediană e ~5,7% din poziție (~336 locuri median, 2022-25), dar aproape jumătate din cazuri se mișcă mai mult; în ani atipici (COVID, salt structural) mult mai mult. Banda e proporțională cu poziția. Am exclus cele 24 de specializări cu examen de limbă (la cererea ta); rămân 158 standard.
+              <b style={{ color: "var(--gold)" }}>Cât te poți baza:</b> ordinea liceelor <b>foarte depărtate</b> e stabilă, dar a celor <b>apropiate nu</b> — la specializări la ≤150 locuri distanță, ordinea se inversează în ~42% din cazuri de la un an la altul (verificat pe 2020-25; ~32% cum se credea inițial era subestimat). Deci nu te baza pe ordinea fină între vecini. Verdictul intri/nu intri: în ani tipici eroarea mediană e ~5,7% din poziție (~336 locuri median, 2022-25), dar aproape jumătate din cazuri se mișcă mai mult; în ani atipici (COVID, salt structural) mult mai mult. Banda e proporțională cu poziția. Am exclus cele 24 de specializări cu examen de limbă (la cererea ta); rămân 158 standard.
             </div>
-            <button className="snl-btn" onClick={() => setShowValid(!showValid)} style={{ background: "transparent", color: "#5da9e9", border: "1px solid #2a3754", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600 }}>{showValid ? "ascunde" : "vezi"} backtest 5 ani</button>
+            <button className="snl-btn" onClick={() => setShowValid(!showValid)} style={{ background: "transparent", color: "var(--gold)", border: "1px solid var(--border)", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600 }}>{showValid ? "ascunde" : "vezi"} backtest 5 ani</button>
           </div>
           {showValid && (
-            <div style={{ marginTop: 10, background: "#141a2a", borderRadius: 8, padding: "10px 12px", fontFamily: M, fontSize: 12 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1.1fr .5fr .7fr .7fr .8fr .8fr 1.3fr", gap: 6, color: "#a8b6d9", paddingBottom: 6, borderBottom: "1px solid #2a3754" }}>
+            <div style={{ marginTop: 10, background: "var(--panel)", borderRadius: 8, padding: "10px 12px", fontFamily: M, fontSize: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1.1fr .5fr .7fr .7fr .8fr .8fr 1.3fr", gap: 6, color: "var(--text-dim)", paddingBottom: 6, borderBottom: "1px solid var(--border)" }}>
                 <span>tranziție</span><span>n</span><span>MAE</span><span>median</span><span>bias</span><span>&gt;±250</span><span>observație</span>
               </div>
               {VALID.map((v, k) => (
-                <div key={k} style={{ display: "grid", gridTemplateColumns: "1.1fr .5fr .7fr .7fr .8fr .8fr 1.3fr", gap: 6, padding: "5px 0", borderBottom: "1px solid #232f4a", color: v.nota.startsWith("an tipic") ? "#cdd6f4" : "#e8a87c" }}>
+                <div key={k} style={{ display: "grid", gridTemplateColumns: "1.1fr .5fr .7fr .7fr .8fr .8fr 1.3fr", gap: 6, padding: "5px 0", borderBottom: "1px solid var(--border)", color: v.nota.startsWith("an tipic") ? "var(--text)" : "#e8a87c" }}>
                   <span>{v.t}</span><span>{v.n}</span><span>{v.mae}</span><span>{v.med}</span><span>{v.bias > 0 ? "+" : ""}{v.bias}</span><span>{v.over}%</span><span style={{ fontFamily: F, fontSize: 11 }}>{v.nota}</span>
                 </div>
               ))}
-              <div style={{ color: "#a8b6d9", fontFamily: F, fontSize: 11, marginTop: 8 }}>Unități = locuri în ierarhia București. Panel complet (nu top50) — n variază 212-325 specializări/tranziție (specializări noi/eliminate diferă între ani). MAE variază de la 329 (2024→25) la 920 (2023→24, salt structural); bias alternează semn la fiecare tranziție — niciun an nu e stabil „tipic" din an în an. „&gt;±250" = % specializări cu eroare de poziție peste 250 locuri. Sursă: LiceeB-2026_06.xlsx, poziții „Ultima poziție la ADMITERE".</div>
+              <div style={{ color: "var(--text-dim)", fontFamily: F, fontSize: 11, marginTop: 8 }}>Unități = locuri în ierarhia București. Panel complet (nu top50) — n variază 212-325 specializări/tranziție (specializări noi/eliminate diferă între ani). MAE variază de la 329 (2024→25) la 920 (2023→24, salt structural); bias alternează semn la fiecare tranziție — niciun an nu e stabil „tipic" din an în an. „&gt;±250" = % specializări cu eroare de poziție peste 250 locuri. Sursă: LiceeB-2026_06.xlsx, poziții „Ultima poziție la ADMITERE".</div>
             </div>
           )}
         </div>
@@ -477,25 +1519,25 @@ td{padding:4px 5px;border-bottom:1px solid #7c8798}
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "18px 24px 56px" }}>
         <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
           {[["pozitie", "Pe poziție", "recomandat — rangul tău din ierarhie"], ["medie", "Pe medie", "dacă știi doar media — conversie din poziție"]].map(([k, t, d]) => (
-            <button key={k} className="snl-btn" onClick={() => setMod(k)} style={{ flex: 1, textAlign: "left", padding: "11px 15px", borderRadius: 8, border: "2px solid " + (mod === k ? "#0E6E6E" : "#d7dae0"), background: mod === k ? "#e6f1f1" : "#fff", boxShadow: mod === k ? "0 0 0 3px #0E6E6E22" : "none" }}>
-              <div style={{ fontWeight: 700, fontSize: 14, color: mod === k ? "#0E6E6E" : "#43505e" }}>{t}</div>
-              <div style={{ fontSize: 11.5, color: "#43505e", marginTop: 2 }}>{d}</div>
+            <button key={k} className="snl-btn" onClick={() => setMod(k)} style={{ flex: 1, textAlign: "left", padding: "11px 15px", borderRadius: 8, border: "2px solid " + (mod === k ? "#0E6E6E" : "var(--border)"), background: mod === k ? "#e6f1f1" : "var(--panel-raised)", boxShadow: mod === k ? "0 0 0 3px #0E6E6E22" : "none" }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: mod === k ? "#0E6E6E" : "var(--text-dim)" }}>{t}</div>
+              <div style={{ fontSize: 11.5, color: "var(--text-dim)", marginTop: 2 }}>{d}</div>
             </button>
           ))}
         </div>
 
-        <div style={{ background: "#fff", borderRadius: 10, padding: "18px 22px", marginBottom: 14, boxShadow: "0 1px 4px rgba(0,0,0,.08)" }}>
+        <div style={{ background: "var(--panel-raised)", borderRadius: 10, padding: "18px 22px", marginBottom: 14, boxShadow: "0 1px 4px rgba(0,0,0,.08)" }}>
           {mod === "pozitie" ? (
             <div>
-              <div style={{ fontSize: 11, color: "#43505e", marginBottom: 6, fontWeight: 600, letterSpacing: 1 }}>POZIȚIA TA ÎN IERARHIA BUCUREȘTI 2026</div>
+              <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 6, fontWeight: 600, letterSpacing: 1 }}>POZIȚIA TA ÎN IERARHIA BUCUREȘTI 2026</div>
               <input type="text" inputMode="numeric" value={pozInput} onChange={(e) => setPozInput(e.target.value)} style={{ width: 140, fontFamily: M, fontSize: 30, fontWeight: 600, padding: "6px 12px", border: "2px solid #0E6E6E", borderRadius: 8, textAlign: "center", color: "#0E6E6E", outline: "none" }} />
-              <div style={{ fontSize: 11.5, color: "#43505e", marginTop: 6 }}>numărul din ierarhia oficială ISMB (cu cât mai mic, cu atât mai sus). Pozițiile prag nu sunt ajustate cu numărul de locuri — backtestul a arătat că ajustarea adaugă bias.</div>
+              <div style={{ fontSize: 11.5, color: "var(--text-dim)", marginTop: 6 }}>numărul din ierarhia oficială ISMB (cu cât mai mic, cu atât mai sus). Pozițiile prag nu sunt ajustate cu numărul de locuri — backtestul a arătat că ajustarea adaugă bias.</div>
             </div>
           ) : (
             <div>
-              <div style={{ fontSize: 11, color: "#43505e", marginBottom: 6, fontWeight: 600, letterSpacing: 1 }}>MEDIA TA LA EN 2026</div>
+              <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 6, fontWeight: 600, letterSpacing: 1 }}>MEDIA TA LA EN 2026</div>
               <input type="number" min="1" max="10" step="0.01" value={mediaInput} onChange={(e) => setMediaInput(e.target.value)} style={{ width: 96, fontFamily: M, fontSize: 30, fontWeight: 600, padding: "6px 10px", border: "2px solid " + ACC, borderRadius: 8, textAlign: "center", color: ACC, outline: "none" }} />
-              <div style={{ fontSize: 11.5, color: "#43505e", marginTop: 10, lineHeight: 1.5 }}>Conversia poziție → medie este calculată din distribuția reală EN 2026 (rezultatele disponibile la data curentă). Sunt rezultate <b>inițiale, înainte de contestații</b> — se actualizează după 8 iulie 2026. Banda de incertitudine e <b>calibrată pe adâncimea pragului</b> (backtest pe 5 ani, 1.266 predicții): ±0,03-0,05 la praguri de top, ±0,10 la mijloc, până la ±0,6 la praguri adânci. Metoda pe poziție rămâne mai stabilă decât cea pe medie.</div>
+              <div style={{ fontSize: 11.5, color: "var(--text-dim)", marginTop: 10, lineHeight: 1.5 }}>Conversia poziție → medie este calculată din distribuția reală EN 2026 (rezultatele disponibile la data curentă). Sunt rezultate <b>inițiale, înainte de contestații</b> — se actualizează după 8 iulie 2026. Banda de incertitudine e <b>calibrată pe adâncimea pragului</b> (backtest pe 5 ani, 1.266 predicții): ±0,03-0,05 la praguri de top, ±0,10 la mijloc, până la ±0,6 la praguri adânci. Metoda pe poziție rămâne mai stabilă decât cea pe medie.</div>
             </div>
           )}
         </div>
@@ -507,54 +1549,54 @@ td{padding:4px 5px;border-bottom:1px solid #7c8798}
               ? (k === "sigur" ? "marjă robustă peste prag (~17%)" : k === "probabil" ? "peste prag, marjă mică" : k === "incert" ? "în zona coin-flip (~6%)" : "sub pragul de rang")
               : (k === "sigur" ? "peste prag + banda P90" : k === "probabil" ? "peste prag + banda P50" : k === "incert" ? "în ±banda P50" : "sub prag");
             return (
-              <button key={k} className="snl-btn" onClick={() => setFiltruCls(act ? "toate" : k)} style={{ flex: "1 1 140px", textAlign: "left", border: "1px solid " + (act ? c.color : c.bd), background: act ? c.bg : "#fff", borderRadius: 8, padding: "9px 13px", boxShadow: act ? "inset 3px 0 0 " + c.color : "none" }}>
+              <button key={k} className="snl-btn" onClick={() => setFiltruCls(act ? "toate" : k)} style={{ flex: "1 1 140px", textAlign: "left", border: "1px solid " + (act ? c.color : c.bd), background: act ? c.bg : "var(--panel-raised)", borderRadius: 8, padding: "9px 13px", boxShadow: act ? "inset 3px 0 0 " + c.color : "none" }}>
                 <div style={{ fontFamily: M, fontSize: 22, fontWeight: 600, color: c.color }}>{n}</div>
                 <div style={{ fontSize: 11.5, fontWeight: 700, color: c.color }}>{c.lab}</div>
-                <div style={{ fontSize: 10.5, color: "#43505e", marginTop: 2 }}>{sub}</div>
+                <div style={{ fontSize: 10.5, color: "var(--text-dim)", marginTop: 2 }}>{sub}</div>
               </button>
             );
           })}
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, flexWrap: "wrap", marginBottom: 10 }}>
-          <div style={{ fontFamily: "'Spectral',serif", fontSize: 19, fontWeight: 600 }}>{shown.length} specializări{urmarite.length > 0 ? ` · ${urmarite.length} urmărite` : ""}</div>
+          <div style={{ fontFamily: "'Fraunces',serif", fontSize: 19, fontWeight: 600 }}>{shown.length} specializări{urmarite.length > 0 ? ` · ${urmarite.length} urmărite` : ""}</div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {profiluri.map((p) => (
-              <button key={p} className="snl-btn" onClick={() => setFiltruProfil(p)} style={{ padding: "5px 11px", borderRadius: 18, fontSize: 12, fontWeight: 600, border: "1px solid " + (filtruProfil === p ? "#16202b" : "#7c8798"), background: filtruProfil === p ? "#16202b" : "#fff", color: filtruProfil === p ? "#fff" : "#43505e" }}>{p}</button>
+              <button key={p} className="snl-btn" onClick={() => setFiltruProfil(p)} style={{ padding: "5px 11px", borderRadius: 18, fontSize: 12, fontWeight: 600, border: "1px solid " + (filtruProfil === p ? "#16202b" : "var(--border)"), background: filtruProfil === p ? "#16202b" : "var(--panel-raised)", color: filtruProfil === p ? "#fff" : "var(--text-dim)" }}>{p}</button>
             ))}
           </div>
         </div>
 
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14, alignItems: "center" }}>
-          <span style={{ fontSize: 11, color: "#43505e", fontWeight: 600, marginRight: 2 }}>SECTOARE (selecție multiplă)</span>
+          <span style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, marginRight: 2 }}>SECTOARE (selecție multiplă)</span>
           {sectoare.map((s) => {
             const activ = s === "Toate" ? filtruSectoare.length === 0 : filtruSectoare.includes(s);
             return (
-              <button key={s} className="snl-btn" onClick={() => s === "Toate" ? setFiltruSectoare([]) : toggleSector(s)} style={{ padding: "5px 11px", borderRadius: 18, fontSize: 12, fontWeight: 600, border: "1px solid " + (activ ? "#1a5276" : "#7c8798"), background: activ ? "#eaf1f8" : "#fff", color: activ ? "#1a5276" : "#43505e" }}>{s === "Toate" ? "Toate" : (activ ? "✓ " : "") + s}</button>
+              <button key={s} className="snl-btn" onClick={() => s === "Toate" ? setFiltruSectoare([]) : toggleSector(s)} style={{ padding: "5px 11px", borderRadius: 18, fontSize: 12, fontWeight: 600, border: "1px solid " + (activ ? "#1a5276" : "var(--border)"), background: activ ? "#eaf1f8" : "var(--panel-raised)", color: activ ? "#1a5276" : "var(--text-dim)" }}>{s === "Toate" ? "Toate" : (activ ? "✓ " : "") + s}</button>
             );
           })}
-          {filtruSectoare.length > 0 && <span style={{ fontSize: 10.5, color: "#43505e" }}>{filtruSectoare.length} selectate</span>}
+          {filtruSectoare.length > 0 && <span style={{ fontSize: 10.5, color: "var(--text-dim)" }}>{filtruSectoare.length} selectate</span>}
         </div>
 
-        <div style={{ background: "#fff", border: "1px solid #7c8798", borderRadius: 8, padding: "10px 14px", marginBottom: 14 }}>
+        <div style={{ background: "var(--panel-raised)", border: "1px solid var(--border)", borderRadius: 8, padding: "10px 14px", marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-            <div style={{ fontSize: 11, color: "#43505e" }}>
-              <b style={{ color: "#16202b" }}>Punct de plecare:</b> {homeLabel} <span style={{ fontFamily: M, color: "#9fb0c4" }}>({home.lat.toFixed(5)}, {home.lon.toFixed(5)})</span>
+            <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
+              <b style={{ color: "var(--text)" }}>Punct de plecare:</b> {homeLabel} <span style={{ fontFamily: M, color: "var(--text-faint)" }}>({home.lat.toFixed(5)}, {home.lon.toFixed(5)})</span>
             </div>
-            <button className="snl-btn" onClick={() => setSortDistanta(!sortDistanta)} style={{ border: "1px solid " + (sortDistanta ? "#1a5276" : "#7c8798"), background: sortDistanta ? "#eaf1f8" : "#fff", color: sortDistanta ? "#1a5276" : "#43505e", borderRadius: 6, padding: "5px 11px", fontSize: 11.5, fontWeight: 600 }}>{sortDistanta ? "✓ sortat după distanță" : "sortează după distanță"}</button>
+            <button className="snl-btn" onClick={() => setSortDistanta(!sortDistanta)} style={{ border: "1px solid " + (sortDistanta ? "#1a5276" : "var(--border)"), background: sortDistanta ? "#eaf1f8" : "var(--panel-raised)", color: sortDistanta ? "#1a5276" : "var(--text-dim)", borderRadius: 6, padding: "5px 11px", fontSize: 11.5, fontWeight: 600 }}>{sortDistanta ? "✓ sortat după distanță" : "sortează după distanță"}</button>
           </div>
           <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <input type="number" step="0.0001" value={home.lat} onChange={(e) => { const lat = parseFloat(e.target.value); if (!isNaN(lat)) { setHome((h) => ({ ...h, lat })); setHomeLabel("(coordonate editate manual)"); } }} style={{ width: 100, fontFamily: M, fontSize: 12, padding: "5px 8px", border: "1px solid #7c8798", borderRadius: 6 }} />
-            <input type="number" step="0.0001" value={home.lon} onChange={(e) => { const lon = parseFloat(e.target.value); if (!isNaN(lon)) { setHome((h) => ({ ...h, lon })); setHomeLabel("(coordonate editate manual)"); } }} style={{ width: 100, fontFamily: M, fontSize: 12, padding: "5px 8px", border: "1px solid #7c8798", borderRadius: 6 }} />
-            <span style={{ fontSize: 10.5, color: "#9fb0c4" }}>lat, lon — schimbă doar dacă vrei alt punct de plecare decât cel implicit</span>
+            <input type="number" step="0.0001" value={home.lat} onChange={(e) => { const lat = parseFloat(e.target.value); if (!isNaN(lat)) { setHome((h) => ({ ...h, lat })); setHomeLabel("(coordonate editate manual)"); } }} style={{ width: 100, fontFamily: M, fontSize: 12, padding: "5px 8px", border: "1px solid var(--border)", borderRadius: 6 }} />
+            <input type="number" step="0.0001" value={home.lon} onChange={(e) => { const lon = parseFloat(e.target.value); if (!isNaN(lon)) { setHome((h) => ({ ...h, lon })); setHomeLabel("(coordonate editate manual)"); } }} style={{ width: 100, fontFamily: M, fontSize: 12, padding: "5px 8px", border: "1px solid var(--border)", borderRadius: 6 }} />
+            <span style={{ fontSize: 10.5, color: "var(--text-faint)" }}>lat, lon — schimbă doar dacă vrei alt punct de plecare decât cel implicit</span>
           </div>
-          <div style={{ fontSize: 10.5, color: "#43505e", marginTop: 6, lineHeight: 1.4 }}>Distanța de mai jos e în linie dreaptă, cu o estimare de timp pe jos (viteză ~4,5 km/h × 1,3 pentru rețeaua stradală) — NU e o rută reală. Nu există echivalent pentru mijloace de transport în comun fără date reale de linii/orare.</div>
+          <div style={{ fontSize: 10.5, color: "var(--text-dim)", marginTop: 6, lineHeight: 1.4 }}>Distanța de mai jos e în linie dreaptă, cu o estimare de timp pe jos (viteză ~4,5 km/h × 1,3 pentru rețeaua stradală) — NU e o rută reală. Nu există echivalent pentru mijloace de transport în comun fără date reale de linii/orare.</div>
         </div>
 
-        <div style={{ background: "#fff", border: "1px solid #7c8798", borderRadius: 8, padding: "10px 14px", marginBottom: 14 }}>
+        <div style={{ background: "var(--panel-raised)", border: "1px solid var(--border)", borderRadius: 8, padding: "10px 14px", marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, cursor: "pointer" }} onClick={() => setShowIstoricPoz(!showIstoricPoz)}>
-            <div style={{ fontFamily: "'Spectral',serif", fontSize: 15, fontWeight: 600 }}>📊 Ce medie a fost la o poziție, pe ani (2020-2026) — informativ</div>
-            <span style={{ fontSize: 12, color: "#43505e" }}>{showIstoricPoz ? "▲ ascunde" : "▼ arată"}</span>
+            <div style={{ fontFamily: "'Fraunces',serif", fontSize: 15, fontWeight: 600 }}>📊 Ce medie a fost la o poziție, pe ani (2020-2026) — informativ</div>
+            <span style={{ fontSize: 12, color: "var(--text-dim)" }}>{showIstoricPoz ? "▲ ascunde" : "▼ arată"}</span>
           </div>
           {showIstoricPoz && (() => {
             const pInfo = parseInt(String(pozInfoInput).replace(/\D/g, "")) || 0;
@@ -563,19 +1605,19 @@ td{padding:4px 5px;border-bottom:1px solid #7c8798}
             return (
               <div style={{ marginTop: 10 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10, flexWrap: "wrap" }}>
-                  <label style={{ fontSize: 12, color: "#43505e", fontWeight: 600 }}>Poziția în ierarhie:</label>
-                  <input type="text" inputMode="numeric" value={pozInfoInput} onChange={(e) => setPozInfoInput(e.target.value)} style={{ width: 90, fontFamily: M, fontSize: 13, padding: "6px 9px", border: "1px solid #7c8798", borderRadius: 6 }} />
-                  <button className="snl-btn" onClick={() => setPozInfoInput(String(poz))} style={{ border: "1px solid #7c8798", background: "#fff", borderRadius: 6, padding: "6px 10px", fontSize: 11.5, color: "#43505e" }}>← preia poziția mea ({fi(poz)})</button>
+                  <label style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600 }}>Poziția în ierarhie:</label>
+                  <input type="text" inputMode="numeric" value={pozInfoInput} onChange={(e) => setPozInfoInput(e.target.value)} style={{ width: 90, fontFamily: M, fontSize: 13, padding: "6px 9px", border: "1px solid var(--border)", borderRadius: 6 }} />
+                  <button className="snl-btn" onClick={() => setPozInfoInput(String(poz))} style={{ border: "1px solid var(--border)", background: "var(--panel-raised)", borderRadius: 6, padding: "6px 10px", fontSize: 11.5, color: "var(--text-dim)" }}>← preia poziția mea ({fi(poz)})</button>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, marginBottom: 6 }}>
                   {medii.map(({ an, m }) => (
-                    <div key={an} style={{ textAlign: "center", background: an === 2026 ? "#eef3f8" : "#f6f7f4", border: "1px solid " + (an === 2026 ? "#bccde0" : "#e3e5e0"), borderRadius: 6, padding: "7px 4px" }}>
-                      <div style={{ fontSize: 10.5, color: "#43505e" }}>{ANI_ETICHETE[an]}</div>
+                    <div key={an} style={{ textAlign: "center", background: an === 2026 ? "#eef3f8" : "var(--panel)", border: "1px solid " + (an === 2026 ? "#bccde0" : "var(--border)"), borderRadius: 6, padding: "7px 4px" }}>
+                      <div style={{ fontSize: 10.5, color: "var(--text-dim)" }}>{ANI_ETICHETE[an]}</div>
                       <div style={{ fontFamily: M, fontSize: 15, fontWeight: 700 }}>{m == null ? "—" : fmt(m)}</div>
                     </div>
                   ))}
                 </div>
-                <div style={{ fontSize: 10, color: "#43505e", lineHeight: 1.5, marginBottom: 12 }}>
+                <div style={{ fontSize: 10, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 12 }}>
                   Media candidatului aflat pe poziția {fi(pInfo)} în ierarhia București a fiecărui an. ᴬ 2020 = ierarhia de admitere (reconstruită din pragurile specializărilor — altă bază de numărare). 2021-2025 = ierarhia EN după contestații. ᴵ 2026 = EN înainte de contestații (finale pe 8 iulie). „—" = poziția depășește datele disponibile ale acelui an. Se vede clar deflația 2026: la aceeași poziție, medie mai mică decât în orice an din 2021 încoace.
                 </div>
                 {(() => {
@@ -586,20 +1628,20 @@ td{padding:4px 5px;border-bottom:1px solid #7c8798}
                   });
                   return (
                     <div>
-                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase", color: "#43505e", marginBottom: 5 }}>Câți candidați au avut media ≥ media acelei poziții — București / Ilfov / restul țării</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 5 }}>Câți candidați au avut media ≥ media acelei poziții — București / Ilfov / restul țării</div>
                       <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 1fr 1fr", gap: "4px 12px", fontFamily: M, fontSize: 12.5, alignItems: "center" }}>
-                        <span style={{ fontFamily: F, fontSize: 10.5, color: "#43505e" }}></span>
-                        <span style={{ fontFamily: F, fontSize: 10.5, color: "#43505e", fontWeight: 700 }}>București</span>
-                        <span style={{ fontFamily: F, fontSize: 10.5, color: "#43505e", fontWeight: 700 }}>Ilfov</span>
-                        <span style={{ fontFamily: F, fontSize: 10.5, color: "#43505e", fontWeight: 700 }}>Restul țării</span>
+                        <span style={{ fontFamily: F, fontSize: 10.5, color: "var(--text-dim)" }}></span>
+                        <span style={{ fontFamily: F, fontSize: 10.5, color: "var(--text-dim)", fontWeight: 700 }}>București</span>
+                        <span style={{ fontFamily: F, fontSize: 10.5, color: "var(--text-dim)", fontWeight: 700 }}>Ilfov</span>
+                        <span style={{ fontFamily: F, fontSize: 10.5, color: "var(--text-dim)", fontWeight: 700 }}>Restul țării</span>
                         {blocks.map(({ an, m, c }) => (
                           [<span key={an + "l"} style={{ fontFamily: F, fontSize: 11.5, fontWeight: 600 }}>{an} {m != null ? `(≥ ${fmt(m)})` : ""}</span>,
-                           <span key={an + "b"}>{c ? fi(c.B) : "—"} <span style={{ color: "#9fb0c4", fontSize: 10 }}>din {fi(REG_TOTALURI[an].B)}</span></span>,
-                           <span key={an + "i"}>{c ? fi(c.IF) : "—"} <span style={{ color: "#9fb0c4", fontSize: 10 }}>din {fi(REG_TOTALURI[an].IF)}</span></span>,
-                           <span key={an + "r"}>{c ? fi(c.REST) : "—"} <span style={{ color: "#9fb0c4", fontSize: 10 }}>din {fi(REG_TOTALURI[an].REST)}</span></span>]
+                           <span key={an + "b"}>{c ? fi(c.B) : "—"} <span style={{ color: "var(--text-faint)", fontSize: 10 }}>din {fi(REG_TOTALURI[an].B)}</span></span>,
+                           <span key={an + "i"}>{c ? fi(c.IF) : "—"} <span style={{ color: "var(--text-faint)", fontSize: 10 }}>din {fi(REG_TOTALURI[an].IF)}</span></span>,
+                           <span key={an + "r"}>{c ? fi(c.REST) : "—"} <span style={{ color: "var(--text-faint)", fontSize: 10 }}>din {fi(REG_TOTALURI[an].REST)}</span></span>]
                         ))}
                       </div>
-                      <div style={{ fontSize: 10, color: "#43505e", marginTop: 7, lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 10, color: "var(--text-dim)", marginTop: 7, lineHeight: 1.5 }}>
                         Numai 2022 și 2025: în sursa de date (SIIIR), județul candidatului există doar pentru acești doi ani — pentru restul nu afișăm cifre pe care nu le putem verifica. Cumulat interpolat în benzi de 0,5 puncte (aproximativ la sutime). Verificare: totalul București 2022 (15.428) coincide exact cu numărul oficial de candidați prezenți. Relevanța pentru admiterea B: candidații din Ilfov cu medii mari sunt principala sursă de concurență din afara orașului (~2.500 de înscriși din alte județe la admiterea B în fiecare an).
                       </div>
                     </div>
@@ -611,70 +1653,73 @@ td{padding:4px 5px;border-bottom:1px solid #7c8798}
         </div>
 
         <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>
-          <input type="text" placeholder="Caută liceu sau specializare (ex: Lazăr, Mate-Info)…" value={interesQuery} onChange={(e) => setInteresQuery(e.target.value)} style={{ flex: "1 1 260px", fontSize: 13, padding: "8px 12px", border: "1px solid #7c8798", borderRadius: 8, outline: "none", fontFamily: F }} />
-          {interesQuery && <button className="snl-btn" onClick={() => setInteresQuery("")} style={{ border: "1px solid #7c8798", background: "#fff", borderRadius: 8, padding: "8px 10px", fontSize: 12, color: "#43505e" }}>✕ șterge</button>}
-          <button className="snl-btn" onClick={() => setDoarUrmarite(!doarUrmarite)} disabled={urmarite.length === 0} style={{ border: "1px solid " + (doarUrmarite ? "#B8801A" : "#7c8798"), background: doarUrmarite ? "#FBF3E2" : "#fff", color: doarUrmarite ? "#9a6b12" : urmarite.length === 0 ? "#9fb0c4" : "#43505e", borderRadius: 8, padding: "8px 12px", fontSize: 12.5, fontWeight: 600 }}>★ {doarUrmarite ? "arată toate" : `arată doar urmărite (${urmarite.length})`}</button>
+          <input type="text" placeholder="Caută liceu sau specializare (ex: Lazăr, Mate-Info)…" value={interesQuery} onChange={(e) => setInteresQuery(e.target.value)} style={{ flex: "1 1 260px", fontSize: 13, padding: "8px 12px", border: "1px solid var(--border)", borderRadius: 8, outline: "none", fontFamily: F }} />
+          {interesQuery && <button className="snl-btn" onClick={() => setInteresQuery("")} style={{ border: "1px solid var(--border)", background: "var(--panel-raised)", borderRadius: 8, padding: "8px 10px", fontSize: 12, color: "var(--text-dim)" }}>✕ șterge</button>}
+          <button className="snl-btn" onClick={() => setDoarUrmarite(!doarUrmarite)} disabled={urmarite.length === 0} style={{ border: "1px solid " + (doarUrmarite ? "var(--gold)" : "var(--border)"), background: doarUrmarite ? "var(--gold-soft)" : "var(--panel-raised)", color: doarUrmarite ? "#9a6b12" : urmarite.length === 0 ? "var(--text-faint)" : "var(--text-dim)", borderRadius: 8, padding: "8px 12px", fontSize: 12.5, fontWeight: 600 }}>★ {doarUrmarite ? "arată toate" : `arată doar urmărite (${urmarite.length})`}</button>
         </div>
 
         <div>
           {shown.map((r) => {
-            const isOpen = open === r.i, c = CLS[r.cls], pc = PROFIL_COLORS[r.p] || "#43505e";
+            const isOpen = open === r.i, c = CLS[r.cls], pc = PROFIL_COLORS[r.p] || "var(--text-dim)";
             return (
-              <div key={r.i} className="snl-row" style={{ background: "#fff", border: "1px solid #7c8798", borderLeft: "3px solid " + c.color, boxShadow: r.star ? "0 0 0 1px #B8801A inset, 0 0 0 1px #B8801A" : "none", borderRadius: 5, marginBottom: 7, overflow: "hidden" }}>
+              <div key={r.i} className="snl-row" style={{ background: "var(--panel-raised)", border: "1px solid var(--border)", borderLeft: "3px solid " + c.color, boxShadow: r.star ? "0 0 0 1px var(--gold) inset, 0 0 0 1px var(--gold)" : "none", borderRadius: 5, marginBottom: 7, overflow: "hidden" }}>
                 <div className="snl-btn" onClick={() => setOpen(isOpen ? null : r.i)} style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 14, alignItems: "center", padding: "11px 14px" }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 14.5, display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>{r.star && <span style={{ color: "#B8801A" }}>★</span>}{r.n}<span style={{ fontWeight: 500, color: "#43505e", fontSize: 11.5 }}>{TIP_SHORT[r.t] || r.t}</span></div>
-                    <div style={{ fontSize: 13, color: "#43505e", marginTop: 2 }}><span style={{ color: pc, fontWeight: 600 }}>{r.p}</span> — {r.s}{r.b ? " · " + r.b : ""}</div>
-                    <div style={{ fontSize: 11.5, color: "#43505e", marginTop: 3, display: "flex", gap: 12, flexWrap: "wrap" }}><span>{r.sec}</span><span>{r.l} locuri 2026</span><span>rang #{r.r}</span>{r.distKm != null && <span>🚶 ~{r.walkMin} min · {r.distKm.toFixed(1)} km*</span>}</div>
+                    <div style={{ fontWeight: 700, fontSize: 14.5, display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>{r.star && <span style={{ color: "var(--gold)" }}>★</span>}{r.n}<span style={{ fontWeight: 500, color: "var(--text-dim)", fontSize: 11.5 }}>{TIP_SHORT[r.t] || r.t}</span></div>
+                    <div style={{ fontSize: 13, color: "var(--text-dim)", marginTop: 2 }}><span style={{ color: pc, fontWeight: 600 }}>{r.p}</span> — {r.s}{r.b ? " · " + r.b : ""}</div>
+                    <div style={{ fontSize: 11.5, color: "var(--text-dim)", marginTop: 3, display: "flex", gap: 12, flexWrap: "wrap" }}><span>{r.sec}</span><span>{r.l} locuri 2026</span><span>rang #{r.r}</span>{r.distKm != null && <span>🚶 ~{r.walkMin} min · {r.distKm.toFixed(1)} km*</span>}</div>
                   </div>
                   <div style={{ textAlign: "right", minWidth: 120 }}>
                     {mod === "pozitie" ? (<>
                       <div style={{ fontFamily: M, fontSize: 17, fontWeight: 600 }}>poz ≤ {fi(r.cutoff)}</div>
-                      <div style={{ fontSize: 9.5, letterSpacing: ".06em", textTransform: "uppercase", color: "#43505e" }}>prag rang (real 2025)</div>
-                      <div style={{ fontFamily: M, fontSize: 11, color: "#43505e", marginTop: 2 }}>marja ta: {r.margin >= 0 ? "+" : ""}{fi(r.margin)}</div>
+                      <div style={{ fontSize: 9.5, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--text-dim)" }}>prag rang (real 2025)</div>
+                      <div style={{ fontFamily: M, fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>marja ta: {r.margin >= 0 ? "+" : ""}{fi(r.margin)}</div>
                     </>) : (<>
                       <div style={{ fontFamily: M, fontSize: 17, fontWeight: 600, color: ACC }}>{esteCoada(r) ? "<5,00" : fmt(r.cutoff)}</div>
-                      <div style={{ fontSize: 9.5, letterSpacing: ".06em", textTransform: "uppercase", color: "#43505e" }}>{esteCoada(r) ? "intrare liberă (istoric)" : "prag medie est. 2026"}</div>
-                      <div style={{ fontFamily: M, fontSize: 11, color: "#43505e", marginTop: 2 }}>real 2025: {fmt(r.m)}</div>
+                      <div style={{ fontSize: 9.5, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--text-dim)" }}>{esteCoada(r) ? "intrare liberă (istoric)" : "prag medie est. 2026"}</div>
+                      <div style={{ fontFamily: M, fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>real 2025: {fmt(r.m)}</div>
                     </>)}
                   </div>
                   <div style={{ minWidth: 96, textAlign: "right" }}>
                     <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 3, background: c.bg, color: c.color, border: "1px solid " + c.bd }}>{c.lab}</span>
-                    <div style={{ fontSize: 10, color: "#43505e", marginTop: 3, fontFamily: M }}>istoric ~{r.ist.pooled}%*</div>
+                    <div style={{ fontSize: 10, color: "var(--text-dim)", marginTop: 3, fontFamily: M }}>istoric ~{r.ist.pooled}%*</div>
                     <div style={{ display: "flex", gap: 4, justifyContent: "flex-end", marginTop: 5 }}>
-                      <button className="snl-btn" onClick={(e) => { e.stopPropagation(); toggleUrmarit(r.i); }} title="urmărește (independent de fișă)" style={{ fontSize: 13, padding: "3px 6px", borderRadius: 4, border: "1px solid " + (urmarite.includes(r.i) ? "#B8801A" : "#7c8798"), background: urmarite.includes(r.i) ? "#FBF3E2" : "#fff", color: urmarite.includes(r.i) ? "#B8801A" : "#9fb0c4" }}>★</button>
+                      <button className="snl-btn" onClick={(e) => { e.stopPropagation(); toggleUrmarit(r.i); }} title="urmărește (independent de fișă)" style={{ fontSize: 13, padding: "3px 6px", borderRadius: 4, border: "1px solid " + (urmarite.includes(r.i) ? "var(--gold)" : "var(--border)"), background: urmarite.includes(r.i) ? "var(--gold-soft)" : "var(--panel-raised)", color: urmarite.includes(r.i) ? "var(--gold)" : "var(--text-faint)" }}>★</button>
+                      {matchDistribName(r.n) && (
+                        <button className="snl-btn" onClick={(e) => { e.stopPropagation(); onViewDistribution(r.n); }} title="vezi distribuția istorică 2024/2025 pentru acest liceu" style={{ fontSize: 10, fontWeight: 600, padding: "3px 7px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--panel-raised)", color: "var(--text-dim)" }}>📊 distribuție</button>
+                      )}
                       {r.l === 0
                         ? <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 4, background: "#FDECEA", color: "#8f2f21", border: "1px solid #E5B5AF" }}>0 locuri 2026</span>
-                        : <button className="snl-btn" onClick={(e) => { e.stopPropagation(); toggleSelect(r.i); }} style={{ fontSize: 10.5, fontWeight: 600, padding: "3px 8px", borderRadius: 4, border: "1px solid " + (selectate.includes(r.i) ? "#0E6E6E" : "#7c8798"), background: selectate.includes(r.i) ? "#0E6E6E" : "#fff", color: selectate.includes(r.i) ? "#fff" : "#43505e" }}>{selectate.includes(r.i) ? "✓ în fișă" : "+ fișă"}</button>}
+                        : <button className="snl-btn" onClick={(e) => { e.stopPropagation(); toggleSelect(r.i); }} style={{ fontSize: 10.5, fontWeight: 600, padding: "3px 8px", borderRadius: 4, border: "1px solid " + (selectate.includes(r.i) ? "#0E6E6E" : "var(--border)"), background: selectate.includes(r.i) ? "#0E6E6E" : "var(--panel-raised)", color: selectate.includes(r.i) ? "#fff" : "var(--text-dim)" }}>{selectate.includes(r.i) ? "✓ în fișă" : "+ fișă"}</button>}
                     </div>
                   </div>
                 </div>
                 {isOpen && (
-                  <div style={{ borderTop: "1px dashed #7c8798", padding: "12px 14px", background: "#f6f7f4", fontSize: 12.5, color: "#43505e" }}>
-                    <div style={{ fontFamily: M, fontSize: 12.5, background: "#fff", border: "1px solid #7c8798", borderRadius: 3, padding: "9px 11px", lineHeight: 1.7 }}>
+                  <div style={{ borderTop: "1px dashed var(--border)", padding: "12px 14px", background: "var(--panel)", fontSize: 12.5, color: "var(--text-dim)" }}>
+                    <div style={{ fontFamily: M, fontSize: 12.5, background: "var(--panel-raised)", border: "1px solid var(--border)", borderRadius: 3, padding: "9px 11px", lineHeight: 1.7 }}>
                       {mod === "pozitie"
                         ? <span>prag rang 2026 ≈ ultima poziție 2025 = <b>{fi(r.cutoff)}</b> · bandă ±{fi(coreBand(r.cutoff, r.p))}/±{fi(safeBand(r.cutoff, r.p))}<br />poziția ta {fi(poz)} → marjă {r.margin >= 0 ? "+" : ""}{fi(r.margin)} locuri → {r.cls === "sigur" ? <span style={{ color: CLS.sigur.color, fontWeight: 600 }}>peste prag cu marjă robustă → cel mai sigur</span> : r.cls === "probabil" ? <span style={{ color: CLS.probabil.color, fontWeight: 600 }}>peste prag, marjă mică → probabil intri</span> : r.cls === "incert" ? <span style={{ color: CLS.incert.color, fontWeight: 600 }}>în zona coin-flip → incert</span> : <span style={{ color: CLS.improb.color, fontWeight: 600 }}>sub pragul de rang → improbabil</span>}</span>
                         : esteCoada(r)
                         ? <span>specializare <b>istoric neumplută</b>: pragul 2025 ({fmt(r.m)}) e sub 5,00 — ultimul admis a fost ultimul care a ales-o, nu o barieră de competiție. Nu afișăm un „prag estimat 2026" cu zecimale pentru că poziția prag ({fi(r.pos)}) cade în/dincolo de zona fără date valide a ierarhiei 2026 (absenți la 15.423-15.643, total 15.643). Practic: orice medie a intrat istoric. Verifică în schimb dacă profilul chiar corespunde intereselor — la aceste licee criteriul de decizie nu e pragul.</span>
-                        : <span>prag medie 2026 = interpolare din distribuția reală EN2026 la percentila poziției prag ({(r.pos/TOTAL_EN2026_B*100).toFixed(1)}%, poz. {fi(r.pos)}) = <b>{fmt(r.cutoff)}</b> · bandă ±{medieBands(r.pos, r.p).b50.toFixed(2).replace(".",",")}/±{medieBands(r.pos, r.p).b90.toFixed(2).replace(".",",")} (calibrată pe adâncime și track)<br />media ta {fmt(media)} → {r.cls === "sigur" || r.cls === "probabil" ? <span style={{ color: CLS[r.cls].color, fontWeight: 600 }}>peste prag</span> : r.cls === "incert" ? <span style={{ color: CLS.incert.color, fontWeight: 600 }}>în banda de incertitudine</span> : <span style={{ color: CLS.improb.color, fontWeight: 600 }}>sub prag</span>}<br /><span style={{ color: "#43505e", fontWeight: 400 }}>scenariu ierarhie de admitere (corecție istorică 2024, un singur an de date): prag ≈ {fmt(r.cutoff + corectieV1V3(r.pos))} — pragul real tinde să fie mai mic; estimarea principală e cea conservatoare</span></span>}
+                        : <span>prag medie 2026 = interpolare din distribuția reală EN2026 la percentila poziției prag ({(r.pos/TOTAL_EN2026_B*100).toFixed(1)}%, poz. {fi(r.pos)}) = <b>{fmt(r.cutoff)}</b> · bandă ±{medieBands(r.pos, r.p).b50.toFixed(2).replace(".",",")}/±{medieBands(r.pos, r.p).b90.toFixed(2).replace(".",",")} (calibrată pe adâncime și track)<br />media ta {fmt(media)} → {r.cls === "sigur" || r.cls === "probabil" ? <span style={{ color: CLS[r.cls].color, fontWeight: 600 }}>peste prag</span> : r.cls === "incert" ? <span style={{ color: CLS.incert.color, fontWeight: 600 }}>în banda de incertitudine</span> : <span style={{ color: CLS.improb.color, fontWeight: 600 }}>sub prag</span>}<br /><span style={{ color: "var(--text-dim)", fontWeight: 400 }}>scenariu ierarhie de admitere (corecție istorică 2024, un singur an de date): prag ≈ {fmt(r.cutoff + corectieV1V3(r.pos))} — pragul real tinde să fie mai mic; estimarea principală e cea conservatoare</span></span>}
                     </div>
-                    <div style={{ marginTop: 8, color: "#43505e", fontSize: 12 }}>Reper real 2025: ultima medie {fmt(r.m)} · ultima poziție {fi(r.pos)} · prima medie {fmt(r.pm)} · {r.l5} locuri.</div>
-                    {r.distKm != null && <div style={{ marginTop: 4, color: "#43505e", fontSize: 11 }}>* {r.distKm.toFixed(2)} km în linie dreaptă de la {homeLabel} · ~{r.walkMin} min pe jos (estimare, nu rută reală) — pentru mijloace de transport în comun, verifică pe Google Maps/Moovit sau cere-mi ruta exactă pentru acest liceu.</div>}
-                    <div style={{ marginTop: 10, background: "#fff", border: "1px solid #e3e5e0", borderRadius: 4, padding: "8px 10px" }}>
-                      <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase", color: "#43505e", marginBottom: 5 }}>Istoric — marjă echivalentă ~{(r.marjaProc*100).toFixed(1)}% · nu e o probabilitate calibrată</div>
+                    <div style={{ marginTop: 8, color: "var(--text-dim)", fontSize: 12 }}>Reper real 2025: ultima medie {fmt(r.m)} · ultima poziție {fi(r.pos)} · prima medie {fmt(r.pm)} · {r.l5} locuri.</div>
+                    {r.distKm != null && <div style={{ marginTop: 4, color: "var(--text-dim)", fontSize: 11 }}>* {r.distKm.toFixed(2)} km în linie dreaptă de la {homeLabel} · ~{r.walkMin} min pe jos (estimare, nu rută reală) — pentru mijloace de transport în comun, verifică pe Google Maps/Moovit sau cere-mi ruta exactă pentru acest liceu.</div>}
+                    <div style={{ marginTop: 10, background: "var(--panel-raised)", border: "1px solid var(--border)", borderRadius: 4, padding: "8px 10px" }}>
+                      <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 5 }}>Istoric — marjă echivalentă ~{(r.marjaProc*100).toFixed(1)}% · nu e o probabilitate calibrată</div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr) auto", gap: 6, fontFamily: M, fontSize: 11.5 }}>
                         {HIST_YEARS.map((y, k) => (
                           <div key={y} style={{ textAlign: "center" }}>
-                            <div style={{ color: "#9fb0c4", fontSize: 9.5 }}>{y}</div>
+                            <div style={{ color: "var(--text-faint)", fontSize: 9.5 }}>{y}</div>
                             <div style={{ fontWeight: 700, color: r.ist.ani[k] < 50 ? "#c0392b" : r.ist.ani[k] < 80 ? "#9a6b12" : "#147a40" }}>{r.ist.ani[k]}%</div>
                           </div>
                         ))}
-                        <div style={{ textAlign: "center", borderLeft: "1px solid #e3e5e0", paddingLeft: 8 }}>
-                          <div style={{ color: "#9fb0c4", fontSize: 9.5 }}>medie 5 ani</div>
+                        <div style={{ textAlign: "center", borderLeft: "1px solid var(--border)", paddingLeft: 8 }}>
+                          <div style={{ color: "var(--text-faint)", fontSize: 9.5 }}>medie 5 ani</div>
                           <div style={{ fontWeight: 700 }}>{r.ist.pooled}%</div>
                         </div>
                       </div>
-                      <div style={{ fontSize: 10.5, color: "#43505e", marginTop: 6, lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 10.5, color: "var(--text-dim)", marginTop: 6, lineHeight: 1.5 }}>
                         Din 5 tranziții reale (2020-2025), la o marjă similară, câte specializări au rămas efectiv sub prag anul următor — pe fiecare an separat. Variază enorm (ex. {Math.min(...r.ist.ani)}%-{Math.max(...r.ist.ani)}% la marja ta) pentru că anii nu sunt echivalenți: unul are salt structural, doi sunt afectați de COVID. Media pe 5 ani nu e o șansă reală — e un rezumat care ascunde exact această instabilitate.
                       </div>
                     </div>
@@ -683,15 +1728,15 @@ td{padding:4px 5px;border-bottom:1px solid #7c8798}
               </div>
             );
           })}
-          {shown.length === 0 && <div style={{ padding: 24, textAlign: "center", color: "#43505e" }}>Nicio specializare în acest filtru.</div>}
+          {shown.length === 0 && <div style={{ padding: 24, textAlign: "center", color: "var(--text-dim)" }}>Nicio specializare în acest filtru.</div>}
         </div>
 
-        <div style={{ marginTop: 22, background: "#fff", borderRadius: 10, padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,.08)" }}>
+        <div style={{ marginTop: 22, background: "var(--panel-raised)", borderRadius: 10, padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,.08)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: selectate.length ? 10 : 0 }}>
-            <div style={{ fontFamily: "'Spectral',serif", fontSize: 16, fontWeight: 600 }}>📋 Fișa mea de înscriere ({selectate.length})</div>
+            <div style={{ fontFamily: "'Fraunces',serif", fontSize: 16, fontWeight: 600 }}>📋 Fișa mea de înscriere ({selectate.length})</div>
             {selectate.length > 0 && <button className="snl-btn" onClick={handleExport} style={{ background: "#0E6E6E", color: "#fff", border: "none", borderRadius: 6, padding: "8px 14px", fontSize: 12.5, fontWeight: 700 }}>⬇ Exportă fișa</button>}
           </div>
-          {selectate.length === 0 && <div style={{ fontSize: 12.5, color: "#43505e" }}>Apasă „+ fișă" la specializările care te interesează, în ordinea reală a preferinței.</div>}
+          {selectate.length === 0 && <div style={{ fontSize: 12.5, color: "var(--text-dim)" }}>Apasă „+ fișă" la specializările care te interesează, în ordinea reală a preferinței.</div>}
           {selectate.length > 0 && (() => {
             const nSigur = selectate.filter((idx) => classifyPos(DATA[idx].pos, poz, DATA[idx].p) === "sigur").length;
             const nOptiuni = selectate.length;
@@ -703,14 +1748,14 @@ td{padding:4px 5px;border-bottom:1px solid #7c8798}
                 </div>
               )}
               {nOptiuni > 0 && nOptiuni < 5 && nSigur > 0 && (
-                <div style={{ background: "#FBF3E2", border: "1px solid #E0C88F", borderRadius: 6, padding: "9px 12px", fontSize: 12, color: "#7a5c10", marginBottom: 10, lineHeight: 1.5 }}>
+                <div style={{ background: "var(--gold-soft)", border: "1px solid #E0C88F", borderRadius: 6, padding: "9px 12px", fontSize: 12, color: "#7a5c10", marginBottom: 10, lineHeight: 1.5 }}>
                   <b>Fișă scurtă ({nOptiuni} opțiuni).</b> Pe fișa reală nu există un cost pentru opțiuni suplimentare — o listă mai lungă doar reduce riscul de nerepartizare.
                 </div>
               )}
               <div style={{ background: "#eef3f8", border: "1px solid #bccde0", borderRadius: 6, padding: "9px 12px", fontSize: 11.5, color: "#2b4a68", marginBottom: 10, lineHeight: 1.5 }}>
                 <b>Ordinea corectă = strict preferința reală.</b> Algoritmul de repartizare (serial dictatorship, cf. ghid ISMB) îți dă prima opțiune de pe fișă la care poziția ta se califică — a pune o opțiune „sigură" deasupra uneia preferate NU crește nicio șansă, doar te poate plasa mai jos decât ai fi putut. Pune întâi ce îți dorești (chiar INCERT), apoi plasa de siguranță.
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "26px 1.4fr .5fr .7fr .7fr .7fr .7fr .55fr auto", gap: 6, fontSize: 10.5, color: "#43505e", padding: "4px 0", borderBottom: "1px solid #e3e5e0", textTransform: "uppercase", letterSpacing: ".04em" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "26px 1.4fr .5fr .7fr .7fr .7fr .7fr .55fr auto", gap: 6, fontSize: 10.5, color: "var(--text-dim)", padding: "4px 0", borderBottom: "1px solid var(--border)", textTransform: "uppercase", letterSpacing: ".04em" }}>
                 <span>#</span><span>Liceu / specializare</span><span>Cod</span><span>Medie 2025→est.2026</span><span>Poz. 2025→est.2026</span><span>Clasif. poziție</span><span>Clasif. medie</span><span title="medie pe 5 tranziții istorice, nu probabilitate">Istoric*</span><span></span>
               </div>
               {selectate.map((idx, pos) => {
@@ -719,24 +1764,24 @@ td{padding:4px 5px;border-bottom:1px solid #7c8798}
                 const marjaProc = r.pos > 0 ? (r.pos - pozEchivalent) / r.pos : 0;
                 const ist = istoricLaMarja(marjaProc);
                 return (
-                  <div key={idx} style={{ display: "grid", gridTemplateColumns: "26px 1.4fr .5fr .7fr .7fr .7fr .7fr .55fr auto", gap: 6, alignItems: "center", padding: "7px 0", borderBottom: "1px solid #f0f1ee", fontSize: 12 }}>
-                    <span style={{ fontFamily: M, color: "#43505e" }}>{pos + 1}</span>
-                    <span><b>{r.n}</b> <span style={{ color: "#43505e" }}>— {r.s}{r.b ? " · " + r.b : ""}</span></span>
-                    <span style={{ fontFamily: M, color: cod === "—" ? "#c0392b" : "#43505e" }}>{cod}</span>
-                    <span style={{ fontFamily: M }}>{esteCoada(r) ? <span>{fmt(r.m)} → liber</span> : <span>{fmt(r.m)} → {fmt(pragMedie)} <span style={{ color: "#9fb0c4" }}>±{medieBands(r.pos, r.p).b50.toFixed(2).replace(".", ",")}</span></span>}</span>
+                  <div key={idx} style={{ display: "grid", gridTemplateColumns: "26px 1.4fr .5fr .7fr .7fr .7fr .7fr .55fr auto", gap: 6, alignItems: "center", padding: "7px 0", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
+                    <span style={{ fontFamily: M, color: "var(--text-dim)" }}>{pos + 1}</span>
+                    <span><b>{r.n}</b> <span style={{ color: "var(--text-dim)" }}>— {r.s}{r.b ? " · " + r.b : ""}</span></span>
+                    <span style={{ fontFamily: M, color: cod === "—" ? "#c0392b" : "var(--text-dim)" }}>{cod}</span>
+                    <span style={{ fontFamily: M }}>{esteCoada(r) ? <span>{fmt(r.m)} → liber</span> : <span>{fmt(r.m)} → {fmt(pragMedie)} <span style={{ color: "var(--text-faint)" }}>±{medieBands(r.pos, r.p).b50.toFixed(2).replace(".", ",")}</span></span>}</span>
                     <span style={{ fontFamily: M }}>{fi(r.pos)} → {fi(r.pos)}</span>
                     <span style={{ fontWeight: 700, color: CLS[clsPoz].color }}>{CLS[clsPoz].lab}</span>
                     <span style={{ fontWeight: 700, color: CLS[clsMedie].color }}>{CLS[clsMedie].lab}</span>
-                    <span style={{ fontFamily: M, color: "#43505e" }}>~{ist.pooled}%</span>
+                    <span style={{ fontFamily: M, color: "var(--text-dim)" }}>~{ist.pooled}%</span>
                     <span style={{ display: "flex", gap: 3, justifyContent: "flex-end" }}>
-                      <button className="snl-btn" onClick={() => moveSel(pos, -1)} disabled={pos === 0} style={{ border: "none", background: "none", color: pos === 0 ? "#9fb0c4" : "#0E6E6E", fontSize: 13 }}>↑</button>
-                      <button className="snl-btn" onClick={() => moveSel(pos, 1)} disabled={pos === selectate.length - 1} style={{ border: "none", background: "none", color: pos === selectate.length - 1 ? "#9fb0c4" : "#0E6E6E", fontSize: 13 }}>↓</button>
+                      <button className="snl-btn" onClick={() => moveSel(pos, -1)} disabled={pos === 0} style={{ border: "none", background: "none", color: pos === 0 ? "var(--text-faint)" : "#0E6E6E", fontSize: 13 }}>↑</button>
+                      <button className="snl-btn" onClick={() => moveSel(pos, 1)} disabled={pos === selectate.length - 1} style={{ border: "none", background: "none", color: pos === selectate.length - 1 ? "var(--text-faint)" : "#0E6E6E", fontSize: 13 }}>↓</button>
                       <button className="snl-btn" onClick={() => removeSel(idx)} style={{ border: "none", background: "none", color: "#c0392b", fontSize: 13 }}>✕</button>
                     </span>
                   </div>
                 );
               })}
-              <div style={{ fontSize: 11, color: "#43505e", marginTop: 8, lineHeight: 1.5 }}>
+              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 8, lineHeight: 1.5 }}>
                 „Poz. 2025→est.2026" arată aceeași cifră de ambele părți — metoda actuală presupune poziția neschimbată (persistență), nu e o predicție independentă. Clasificarea de bază rămâne categorică (SIGUR/PROBABIL/INCERT/IMPROBABIL) — nu există un model de probabilitate calibrat pe date suficiente. Coloana „Istoric*" e o medie pe 5 tranziții reale (2020-2025), NU o probabilitate: acoperirea reală a variat între 17% și 97% pentru aceeași marjă, în funcție de an (vezi „★" pe fiecare specializare pentru detaliul pe an). Codurile marcate „—" ({DATA.length - Object.keys(CODMAP).length} din {DATA.length}) n-au fost găsite în lista de coduri disponibilă — verifică-le pe broșura oficială ISMB înainte de completarea fișei reale. Notă: lista de coduri sursă (Coduri_licee) acoperă doar filiera Teoretică (Real/Umanist) — pentru Tehnic/Servicii/Resurse naturale nu există niciun cod în sursele disponibile, nu doar o potrivire ratată.
               </div>
             </div>
@@ -746,27 +1791,27 @@ td{padding:4px 5px;border-bottom:1px solid #7c8798}
 
         {showExport && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(11,18,32,.55)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={() => setShowExport(false)}>
-            <div style={{ background: "#fff", borderRadius: 10, maxWidth: 760, width: "100%", maxHeight: "86vh", overflow: "auto", padding: "18px 20px", boxShadow: "0 8px 40px rgba(0,0,0,.35)" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ background: "var(--panel-raised)", borderRadius: 10, maxWidth: 760, width: "100%", maxHeight: "86vh", overflow: "auto", padding: "18px 20px", boxShadow: "0 8px 40px rgba(0,0,0,.35)" }} onClick={(e) => e.stopPropagation()}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <div style={{ fontFamily: "'Spectral',serif", fontSize: 17, fontWeight: 600 }}>Export fișă ({selectate.length} opțiuni)</div>
-                <button className="snl-btn" onClick={() => setShowExport(false)} style={{ border: "1px solid #7c8798", background: "#fff", borderRadius: 6, padding: "4px 10px", fontSize: 13, color: "#43505e" }}>✕</button>
+                <div style={{ fontFamily: "'Fraunces',serif", fontSize: 17, fontWeight: 600 }}>Export fișă ({selectate.length} opțiuni)</div>
+                <button className="snl-btn" onClick={() => setShowExport(false)} style={{ border: "1px solid var(--border)", background: "var(--panel-raised)", borderRadius: 6, padding: "4px 10px", fontSize: 13, color: "var(--text-dim)" }}>✕</button>
               </div>
-              <div style={{ fontSize: 11.5, color: "#43505e", lineHeight: 1.5, marginBottom: 10 }}>
+              <div style={{ fontSize: 11.5, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 10 }}>
                 În această previzualizare (sandbox), descărcarea directă de fișiere e blocată de browser — folosește <b>copierea</b>: lipești direct în Excel/Word. Butonul de descărcare rămâne funcțional când rulezi simulatorul în afara acestei ferestre.
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
                 <button className="snl-btn" onClick={copyTsv} style={{ background: "#0E6E6E", color: "#fff", border: "none", borderRadius: 6, padding: "8px 14px", fontSize: 12.5, fontWeight: 700 }}>📋 Copiază tabelul (Excel/Word)</button>
-                <button className="snl-btn" onClick={copyHtml} style={{ border: "1px solid #0E6E6E", background: "#fff", color: "#0E6E6E", borderRadius: 6, padding: "8px 14px", fontSize: 12.5, fontWeight: 700 }}>📄 Copiază HTML (document tipăribil)</button>
-                <button className="snl-btn" onClick={tryDownload} style={{ border: "1px solid #7c8798", background: "#fff", color: "#43505e", borderRadius: 6, padding: "8px 14px", fontSize: 12.5 }}>⬇ Încearcă descărcarea</button>
+                <button className="snl-btn" onClick={copyHtml} style={{ border: "1px solid #0E6E6E", background: "var(--panel-raised)", color: "#0E6E6E", borderRadius: 6, padding: "8px 14px", fontSize: 12.5, fontWeight: 700 }}>📄 Copiază HTML (document tipăribil)</button>
+                <button className="snl-btn" onClick={tryDownload} style={{ border: "1px solid var(--border)", background: "var(--panel-raised)", color: "var(--text-dim)", borderRadius: 6, padding: "8px 14px", fontSize: 12.5 }}>⬇ Încearcă descărcarea</button>
               </div>
-              <div style={{ fontSize: 10.5, color: "#43505e", marginBottom: 4, textTransform: "uppercase", letterSpacing: ".04em" }}>Sau selectează manual din caseta de mai jos (Ctrl+A, Ctrl+C):</div>
-              <textarea readOnly value={buildExport().tsv} onFocus={(e) => e.target.select()} style={{ width: "100%", height: 180, fontFamily: M, fontSize: 10.5, border: "1px solid #7c8798", borderRadius: 6, padding: 8, whiteSpace: "pre", boxSizing: "border-box" }} />
+              <div style={{ fontSize: 10.5, color: "var(--text-dim)", marginBottom: 4, textTransform: "uppercase", letterSpacing: ".04em" }}>Sau selectează manual din caseta de mai jos (Ctrl+A, Ctrl+C):</div>
+              <textarea readOnly value={buildExport().tsv} onFocus={(e) => e.target.select()} style={{ width: "100%", height: 180, fontFamily: M, fontSize: 10.5, border: "1px solid var(--border)", borderRadius: 6, padding: 8, whiteSpace: "pre", boxSizing: "border-box" }} />
             </div>
           </div>
         )}
 
-        <div style={{ marginTop: 26, borderTop: "1px solid #7c8798", paddingTop: 16, fontSize: 12.5, color: "#43505e", lineHeight: 1.6 }}>
-          <div style={{ fontFamily: "'Spectral',serif", fontSize: 15, fontWeight: 600, color: "#16202b", marginBottom: 6 }}>Ce arată validarea pe 5 ani (citește)</div>
+        <div style={{ marginTop: 26, borderTop: "1px solid var(--border)", paddingTop: 16, fontSize: 12.5, color: "var(--text-dim)", lineHeight: 1.6 }}>
+          <div style={{ fontFamily: "'Fraunces',serif", fontSize: 15, fontWeight: 600, color: "var(--text)", marginBottom: 6 }}>Ce arată validarea pe 5 ani (citește)</div>
           <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>
             <li><b>Ordonare — nuanțat:</b> corelația globală de rang e ~0,99 pe ani tipici (scade la ~0,97 în ani COVID), dar e o iluzie: o produc perechile foarte depărtate. La vecini apropiați (≤150 locuri) ordinea se inversează în ~42% din cazuri (≤400 locuri: ~32%) — verificat direct pe date, mai instabil decât arăta versiunea anterioară (32%/22%). Folosește instrumentul pentru grupe mari (vârf / mijloc / jos), nu pentru a ordona fin licee aproape egale — acolo tratează-le ca la egalitate.</li>
             <li><b>Verdictul exact e mai puțin sigur:</b> metoda nimerește bine în ani tipici (eroare mediană ~336 locuri, ~5,7%), dar în 2 din 5 transiții (COVID 2020–2021) și 1 cu salt structural (2023→2024, bias +892, pe panel complet) a greșit mult. Nu trata pragul de rang ca pe o linie fixă.</li>
@@ -777,6 +1822,191 @@ td{padding:4px 5px;border-bottom:1px solid #7c8798}
             <li><b>Regula pentru fișă:</b> pune întâi opțiunile dorite (chiar INCERT), apoi destule SIGUR mai jos. Tratează drept asigurate doar specializările SIGUR cu marjă mare. Confruntă cu broșura oficială ISMB.</li>
           </ul>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== PUNTE ÎNTRE CELE DOUĂ SETURI DE DATE =====
+// Simulatorul foloseşte nume scurte ("Tudor Vianu"). Distribuţia foloseşte
+// numele oficial complet, cu numele scurt între ghilimele
+// ("Colegiul Naţional de Informatică „Tudor Vianu""). Egalitate exactă nu
+// funcţionează — verificăm dacă numele scurt normalizat apare în numele lung
+// normalizat. Verificat pe date reale: 31/91 licee din Simulator au corespondent
+// în top-30 (2024 şi/sau 2025); 0 fals-pozitive la verificare manuală.
+const DISTRIB_LONG_NAMES = (() => {
+  const set = new Set();
+  Object.values(DATA_BY_YEAR).forEach((yearObj) => {
+    yearObj.licee.forEach((l) => set.add(l.nume));
+  });
+  return [...set];
+})();
+
+function matchDistribName(simulatorSchoolName) {
+  const ns = normalizeName(simulatorSchoolName);
+  return DISTRIB_LONG_NAMES.find((long) => normalizeName(long).includes(ns)) || null;
+}
+
+export default function App() {
+  const [theme, setTheme] = useState("light");
+  const [activeTab, setActiveTab] = useState("decizie");
+  const [focusLiceu, setFocusLiceu] = useState(null);
+
+  function goToDistributie(simulatorSchoolName) {
+    const canonical = matchDistribName(simulatorSchoolName);
+    if (!canonical) return;
+    setFocusLiceu(canonical);
+    setActiveTab("distributie");
+  }
+
+  return (
+    <div className={"appShell " + theme}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+
+        * { box-sizing: border-box; }
+
+        .appShell {
+          --ink: #14161C;
+          --panel: #1B1E27;
+          --panel-raised: #21242F;
+          --border: #2C3040;
+          --text: #EDEAE1;
+          --text-dim: #93908A;
+          --text-faint: #5C5A56;
+          --accent: #C1352E;
+          --accent-soft: rgba(193, 53, 46, 0.16);
+          --gold: #C9A24B;
+          --gold-soft: rgba(201, 162, 75, 0.14);
+
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+          min-height: 640px;
+          background: var(--ink);
+          color: var(--text);
+          font-family: 'Inter', system-ui, sans-serif;
+          transition: background 0.2s, color 0.2s;
+        }
+
+        .appShell.light {
+          --ink: #E8E5DC;
+          --panel: #FBFAF6;
+          --panel-raised: #FFFFFF;
+          --border: #D9D5C8;
+          --text: #1D1B17;
+          --text-dim: #6B675E;
+          --text-faint: #A6A192;
+          --accent: #B3312C;
+          --accent-soft: rgba(179, 49, 44, 0.09);
+          --gold: #9C7A22;
+          --gold-soft: rgba(156, 122, 34, 0.12);
+        }
+
+        .topNav {
+          flex: 0 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          padding: 12px 20px;
+          background: var(--panel);
+          border-bottom: 1px solid var(--border);
+          flex-wrap: wrap;
+        }
+        .topNavLeft { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+        .topNavTitle {
+          font-family: 'Fraunces', serif;
+          font-size: 15px;
+          font-weight: 600;
+          color: var(--gold);
+          letter-spacing: -.01em;
+          white-space: nowrap;
+        }
+        .tabRow { display: flex; gap: 6px; }
+        .tabBtn {
+          font-family: 'Inter', sans-serif;
+          font-size: 12.5px;
+          font-weight: 600;
+          padding: 7px 14px;
+          border-radius: 7px;
+          border: 1px solid var(--border);
+          background: var(--panel-raised);
+          color: var(--text-dim);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          transition: .12s;
+        }
+        .tabBtn svg { width: 13px; height: 13px; }
+        .tabBtn:hover { border-color: var(--gold); color: var(--text); }
+        .tabBtn.active {
+          background: var(--gold);
+          border-color: var(--gold);
+          color: var(--ink);
+        }
+        .themeToggleShared {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: var(--panel-raised);
+          border: 1px solid var(--border);
+          border-radius: 7px;
+          padding: 6px 11px;
+          font-size: 11.5px;
+          color: var(--text-dim);
+          cursor: pointer;
+          font-family: 'Inter', sans-serif;
+        }
+        .themeToggleShared:hover { border-color: var(--gold); color: var(--text); }
+        .themeToggleShared svg { width: 13px; height: 13px; }
+
+        .tabBody {
+          flex: 1 1 auto;
+          min-height: 0;
+          overflow: auto;
+        }
+      `}</style>
+
+      <div className="topNav">
+        <div className="topNavLeft">
+          <div className="topNavTitle">Admitere București</div>
+          <div className="tabRow">
+            <button
+              className={"tabBtn" + (activeTab === "decizie" ? " active" : "")}
+              onClick={() => setActiveTab("decizie")}
+            >
+              <ListChecks /> Decizie 2026
+            </button>
+            <button
+              className={"tabBtn" + (activeTab === "distributie" ? " active" : "")}
+              onClick={() => setActiveTab("distributie")}
+            >
+              <LayoutDashboard /> Distribuție istorică
+            </button>
+          </div>
+        </div>
+        <button
+          className="themeToggleShared"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          title="Schimbă tema"
+        >
+          {theme === "dark" ? <Sun /> : <Moon />}
+          {theme === "dark" ? "Light" : "Dark"}
+        </button>
+      </div>
+
+      <div className="tabBody">
+        {activeTab === "decizie" ? (
+          <SimulatorDecizie onViewDistribution={goToDistributie} matchDistribName={matchDistribName} />
+        ) : (
+          <DistributieIstorica
+            theme={theme}
+            focusLiceu={focusLiceu}
+            onFocusHandled={() => setFocusLiceu(null)}
+          />
+        )}
       </div>
     </div>
   );
